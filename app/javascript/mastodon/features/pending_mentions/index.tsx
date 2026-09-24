@@ -13,7 +13,7 @@ import {
 } from 'mastodon/actions/pending_mentions';
 import { Icon } from 'mastodon/components/icon';
 import { NotSignedInIndicator } from 'mastodon/components/not_signed_in_indicator';
-import { StatusQuoteManager } from 'mastodon/components/status_quoted';
+import { StatusQuoteManager } from 'mastodon/components/status/legacy/quoted';
 import { useIdentity } from 'mastodon/identity_context';
 import { useAppDispatch, useAppSelector } from 'mastodon/store';
 

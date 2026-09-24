@@ -5,7 +5,7 @@ import { defineMessages, FormattedMessage, useIntl } from 'react-intl';
 
 import classNames from 'classnames';
 
-import { LockSimpleOpenIcon, PepperIcon } from '@phosphor-icons/react';
+import { FlagIcon, LockSimpleOpenIcon } from '@phosphor-icons/react';
 
 import {
   changeComposeSpoilerness,
@@ -14,10 +14,12 @@ import {
 } from '@/mastodon/actions/compose';
 import { ToggleButton } from '@/mastodon/components/button/redesign';
 import { TextInputField } from '@/mastodon/components/form_fields/redesign';
-import { Icon } from '@/mastodon/components/icon';
+import { normalizeKey } from '@/mastodon/components/hotkeys/utils';
+import { Icon, useIconWeight } from '@/mastodon/components/icon';
 import {
-  focusComposerTextarea,
+  closeComposer,
   getComposerTextarea,
+  requestComposerFocus,
   submitComposer,
 } from '@/mastodon/reducers/slices/composer';
 import { useAppDispatch, useAppSelector } from '@/mastodon/store';
@@ -64,6 +66,8 @@ export const RedesignComposeForm: React.FC<
   const intl = useIntl();
   const titleId = useId();
 
+  const sensitiveIcon = useIconWeight(FlagIcon, sensitive && 'fill');
+
   return (
     <form
       {...props}
@@ -89,7 +93,7 @@ export const RedesignComposeForm: React.FC<
           size='sm'
           active={sensitive}
           onClick={onSensitiveChange}
-          leadingIcon={PepperIcon}
+          leadingIcon={sensitiveIcon}
         >
           <FormattedMessage id='compose.sensitive' defaultMessage='Sensitive' />
         </ToggleButton>
@@ -139,13 +143,32 @@ function useComposeHandlers(redirectOnSuccess?: boolean) {
 
   const dispatch = useAppDispatch();
 
+  const isModalOpen = useAppSelector((state) => state.modal.stack.size > 0);
+  useEffect(() => {
+    function escapeComposer(event: KeyboardEvent) {
+      const key = normalizeKey(event.key);
+      if (key !== 'escape' || isModalOpen) {
+        return;
+      }
+
+      if (!event.defaultPrevented) {
+        dispatch(closeComposer());
+      }
+    }
+
+    document.addEventListener('keydown', escapeComposer);
+    return () => {
+      document.removeEventListener('keydown', escapeComposer);
+    };
+  }, [dispatch, isModalOpen]);
+
   // Sensitive handling
   const isSensitive = useAppSelector((state) => !!state.compose.get('spoiler'));
   useEffect(() => {
     if (!isSensitive) {
-      focusComposerTextarea();
+      dispatch(requestComposerFocus());
     }
-  }, [isSensitive]);
+  }, [isSensitive, dispatch]);
 
   const onSensitiveChange = useCallback(() => {
     dispatch(changeComposeSpoilerness());

@@ -25,6 +25,7 @@ import {
   STATUS_REVEAL,
   STATUS_HIDE,
   STATUS_COLLAPSE,
+  STATUS_TRANSLATE_REQUEST,
   STATUS_TRANSLATE_SUCCESS,
   STATUS_TRANSLATE_UNDO,
   STATUS_FETCH_REQUEST,
@@ -53,7 +54,7 @@ const deleteStatus = (state, id, references) => {
 
 const statusTranslateSuccess = (state, id, translation) => {
   return state.withMutations(map => {
-    map.setIn([id, 'translation'], fromJS(normalizeStatusTranslation(translation, map.get(id))));
+    map.setIn([id, 'translation'], fromJS(normalizeStatusTranslation(translation, map.get(id))).set('isLoading', false));
 
     const list = map.getIn([id, 'media_attachments']);
     if (translation.media_attachments && list) {
@@ -153,6 +154,8 @@ export default function statuses(state = initialState, action) {
     return state.setIn([action.id, 'collapsed'], action.isCollapsed);
   case timelineDelete.type:
     return deleteStatus(state, action.payload.statusId, action.payload.references);
+  case STATUS_TRANSLATE_REQUEST:
+    return state.setIn([action.id, 'translation', 'isLoading'], true);
   case STATUS_TRANSLATE_SUCCESS:
     return statusTranslateSuccess(state, action.id, action.translation);
   case STATUS_TRANSLATE_UNDO:

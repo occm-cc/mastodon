@@ -37,6 +37,7 @@ vi.mock('react-intl', () => ({
 
 // Mock initial_state
 vi.mock('mastodon/initial_state', () => ({
+  initialState: { features: [] },
   me: 'user-1',
   autoPlayGif: false,
   localLiveFeedAccess: 0,
