@@ -17,12 +17,7 @@ const messages = defineMessages({
     defaultMessage: 'Private mentions',
   },
   blocks: { id: 'navigation_bar.blocks', defaultMessage: 'Blocked users' },
-  domainBlocks: {
-    id: 'navigation_bar.domain_blocks',
-    defaultMessage: 'Blocked domains',
-  },
   mutes: { id: 'navigation_bar.mutes', defaultMessage: 'Muted users' },
-  filters: { id: 'navigation_bar.filters', defaultMessage: 'Muted words' },
   administration: {
     id: 'navigation_bar.administration',
     defaultMessage: 'Administration',
@@ -60,20 +55,12 @@ export const MoreLink: React.FC = () => {
       },
       null,
       {
-        href: '/filters',
-        text: intl.formatMessage(messages.filters),
-      },
-      {
         to: '/mutes',
         text: intl.formatMessage(messages.mutes),
       },
       {
         to: '/blocks',
         text: intl.formatMessage(messages.blocks),
-      },
-      {
-        to: '/domain_blocks',
-        text: intl.formatMessage(messages.domainBlocks),
       },
       null,
       {
@@ -122,10 +109,15 @@ export const MoreLink: React.FC = () => {
 
   return (
     <Dropdown items={menu} placement='bottom-start'>
-      <button className='column-link column-link--transparent' type='button'>
+      <button
+        className='column-link column-link--transparent navigation-panel__more-button'
+        type='button'
+      >
         <Icon id='' icon={MoreHorizIcon} className='column-link__icon' />
 
-        <FormattedMessage id='navigation_bar.more' defaultMessage='More' />
+        <span>
+          <FormattedMessage id='navigation_bar.more' defaultMessage='More' />
+        </span>
       </button>
     </Dropdown>
   );
