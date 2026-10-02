@@ -185,13 +185,13 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_25_094651) do
     t.datetime "background_image_updated_at"
     t.string "collections_url"
     t.datetime "created_at", precision: nil, null: false
+    t.bigint "custom_branding_source_account_id"
     t.string "custom_logo_content_type"
     t.string "custom_logo_description", default: "", null: false
     t.boolean "custom_logo_enabled", default: false, null: false
     t.string "custom_logo_file_name"
     t.integer "custom_logo_file_size"
     t.datetime "custom_logo_updated_at"
-    t.bigint "custom_branding_source_account_id"
     t.boolean "discoverable"
     t.string "display_name", default: "", null: false
     t.string "domain"
@@ -509,6 +509,58 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_25_094651) do
     t.text "phrase", default: "", null: false
     t.datetime "updated_at", precision: nil, null: false
     t.index ["account_id"], name: "index_custom_filters_on_account_id"
+  end
+
+  create_table "dm_chat_room_accounts", force: :cascade do |t|
+    t.boolean "accepted", default: false, null: false
+    t.bigint "account_id", null: false
+    t.datetime "created_at", null: false
+    t.bigint "dm_chat_room_id", null: false
+    t.datetime "joined_at"
+    t.bigint "last_read_message_id"
+    t.datetime "left_at"
+    t.boolean "unread", default: false, null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id", "unread"], name: "index_dm_chat_room_accounts_on_account_id_and_unread"
+    t.index ["dm_chat_room_id", "account_id"], name: "index_dm_room_accounts_unique", unique: true
+  end
+
+  create_table "dm_chat_rooms", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.datetime "last_message_at"
+    t.bigint "owner_account_id", null: false
+    t.integer "room_type", default: 0, null: false
+    t.string "title", default: ""
+    t.datetime "updated_at", null: false
+    t.string "uuid", null: false
+    t.index ["last_message_at"], name: "index_dm_chat_rooms_on_last_message_at"
+    t.index ["owner_account_id"], name: "index_dm_chat_rooms_on_owner_account_id"
+    t.index ["uuid"], name: "index_dm_chat_rooms_on_uuid", unique: true
+  end
+
+  create_table "dm_message_attachments", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.bigint "dm_message_id", null: false
+    t.bigint "media_attachment_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["dm_message_id"], name: "index_dm_message_attachments_on_dm_message_id"
+    t.index ["media_attachment_id"], name: "index_dm_message_attachments_on_media_attachment_id"
+  end
+
+  create_table "dm_messages", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.text "content", default: "", null: false
+    t.text "content_plain", default: ""
+    t.datetime "created_at", null: false
+    t.bigint "dm_chat_room_id", null: false
+    t.boolean "hidden", default: false, null: false
+    t.bigint "in_reply_to_id"
+    t.string "language"
+    t.bigint "status_id"
+    t.datetime "updated_at", null: false
+    t.index ["account_id"], name: "index_dm_messages_on_account_id"
+    t.index ["dm_chat_room_id", "created_at"], name: "index_dm_messages_on_dm_chat_room_id_and_created_at"
+    t.index ["status_id"], name: "index_dm_messages_on_status_id", where: "(status_id IS NOT NULL)"
   end
 
   create_table "domain_allows", force: :cascade do |t|
@@ -940,7 +992,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_25_094651) do
     t.string "scopes"
     t.string "token", null: false
     t.index ["multi_account", "long_lived"], name: "index_oauth_access_tokens_on_multi_account_and_long_lived"
-    t.index ["multi_account"], name: "index_oauth_access_tokens_on_multi_account"
     t.index ["purpose"], name: "index_oauth_access_tokens_on_purpose"
     t.index ["refresh_token"], name: "index_oauth_access_tokens_on_refresh_token", unique: true, opclass: :text_pattern_ops, where: "(refresh_token IS NOT NULL)"
     t.index ["resource_owner_id"], name: "index_oauth_access_tokens_on_resource_owner_id", where: "(resource_owner_id IS NOT NULL)"
@@ -963,6 +1014,14 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_25_094651) do
     t.index ["owner_id", "owner_type"], name: "index_oauth_applications_on_owner_id_and_owner_type"
     t.index ["superapp"], name: "index_oauth_applications_on_superapp", where: "(superapp = true)"
     t.index ["uid"], name: "index_oauth_applications_on_uid", unique: true
+  end
+
+  create_table "pending_mention_dismissals", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.datetime "created_at", null: false
+    t.bigint "notification_id", null: false
+    t.index ["account_id", "notification_id"], name: "index_pending_mention_dismissals_on_account_and_notification", unique: true
+    t.index ["notification_id"], name: "index_pending_mention_dismissals_on_notification_id"
   end
 
   create_table "pghero_space_stats", force: :cascade do |t|
@@ -1706,9 +1765,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_25_094651) do
   add_index "instances", ["domain"], name: "index_instances_on_domain", unique: true
 
   create_view "user_ips", sql_definition: <<-SQL
-      SELECT t0.user_id,
-      t0.ip,
-      max(t0.used_at) AS used_at
+      SELECT user_id,
+      ip,
+      max(used_at) AS used_at
      FROM ( SELECT users.id AS user_id,
               users.sign_up_ip AS ip,
               users.created_at AS used_at
@@ -1725,6 +1784,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_25_094651) do
               login_activities.created_at
              FROM login_activities
             WHERE (login_activities.success = true)) t0
-    GROUP BY t0.user_id, t0.ip;
+    GROUP BY user_id, ip;
   SQL
 end
