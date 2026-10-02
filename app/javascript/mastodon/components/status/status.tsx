@@ -149,6 +149,7 @@ export const StatusRedesign: React.FC<StatusRedesignProps> = ({
         onClick={onOpenClick}
         className={classNames(
           classes.root,
+          variant === 'feed' && classes.variantFeed,
           variant === 'thread' && classes.variantThread,
           variant === 'page' && classes.variantPage,
           isQuotedPost && classes.isQuote,
@@ -187,7 +188,8 @@ export const StatusRedesign: React.FC<StatusRedesignProps> = ({
         <div
           className={classNames(
             classes.contentWrapper,
-            isHidden && classes.isFiltered,
+            isHidden && classes.hasContentWarning,
+            !showDespiteFilter && isFiltered && classes.isFiltered,
           )}
           id={contentWrapperId}
           inert={isHidden}
@@ -197,7 +199,7 @@ export const StatusRedesign: React.FC<StatusRedesignProps> = ({
             statusContent={statusContent}
             onReadMore={onOpenCallback}
             onTranslate={onTranslate}
-            collapsible
+            collapsible={variant !== 'page'}
           >
             {!!status.poll && (
               <Poll
@@ -294,11 +296,11 @@ function contextToVariant(contextType?: StatusContextType): StatusVariant {
   switch (contextType) {
     case 'composer':
     case 'detailed':
-    case 'notifications':
     case undefined:
       return 'page';
     case 'thread':
       return 'thread';
+    case 'notifications':
     default:
       return 'feed';
   }

@@ -5,8 +5,6 @@ import { defineMessages, FormattedMessage, useIntl } from 'react-intl';
 
 import { DotsThreeIcon } from '@phosphor-icons/react';
 
-import { useHistory } from 'react-router-dom';
-
 import {
   followAccount,
   pinAccount,
@@ -18,7 +16,6 @@ import { removeAccountFromFollowers } from '@/mastodon/actions/accounts_typed';
 import { showAlert } from '@/mastodon/actions/alerts';
 import { initBlockModal } from '@/mastodon/actions/blocks';
 import { directCompose, mentionCompose } from '@/mastodon/actions/compose';
-import { createChatRoom } from '@/mastodon/actions/dm';
 import {
   initDomainBlockModal,
   unblockDomain,
@@ -38,6 +35,7 @@ import {
   canAccountBeAddedByFollowers,
 } from '@/mastodon/features/collections/utils';
 import { useAccount } from '@/mastodon/hooks/useAccount';
+import { useDirectMessage } from '@/mastodon/hooks/useDirectMessage';
 import { useIdentity } from '@/mastodon/identity_context';
 import type { Account } from '@/mastodon/models/account';
 import type { MenuItem as DropdownMenuItem } from '@/mastodon/models/dropdown_menu';
@@ -63,9 +61,9 @@ import classes from './styles.module.scss';
 export const AccountMenu: FC<{ accountId: string }> = ({ accountId }) => {
   const intl = useIntl();
   const { signedIn, permissions } = useIdentity();
-  const history = useHistory();
 
   const account = useAccount(accountId);
+  const sendDirectMessage = useDirectMessage(account);
   const relationship = useAppSelector((state) =>
     state.relationships.get(accountId),
   );
@@ -87,7 +85,7 @@ export const AccountMenu: FC<{ accountId: string }> = ({ accountId }) => {
       intl,
       relationship,
       dispatch,
-      history,
+      sendDirectMessage,
     });
   }, [
     account,
@@ -97,7 +95,7 @@ export const AccountMenu: FC<{ accountId: string }> = ({ accountId }) => {
     intl,
     relationship,
     dispatch,
-    history,
+    sendDirectMessage,
   ]);
 
   if (isRedesignEnabled()) {
@@ -139,7 +137,7 @@ interface MenuItemsParams {
   intl: ReturnType<typeof useIntl>;
   relationship?: Relationship;
   dispatch: AppDispatch;
-  history: ReturnType<typeof useHistory>;
+  sendDirectMessage: () => void;
 }
 
 const messages = defineMessages({
@@ -236,6 +234,14 @@ const messages = defineMessages({
     id: 'status.admin_domain',
     defaultMessage: 'Open moderation interface for {domain}',
   },
+  enableNotifications: {
+    id: 'account.notify_me',
+    defaultMessage: 'Notify me about new posts',
+  },
+  disableNotifications: {
+    id: 'account.stop_notifying_me',
+    defaultMessage: 'Stop notifying me about new posts',
+  },
   languages: {
     id: 'account.languages',
     defaultMessage: 'Change subscribed languages',
@@ -262,7 +268,7 @@ function getMenuItems({
   intl,
   relationship,
   dispatch,
-  history,
+  sendDirectMessage,
 }: MenuItemsParams): DropdownMenuItem[] {
   const items: DropdownMenuItem[] = [];
   const isRemote = account.acct !== account.username;
@@ -305,32 +311,17 @@ function getMenuItems({
 
   // Mention and direct message options
   if (signedIn && !account.suspended) {
-    items.push(null);
     if (!account.invalid_handle) {
       if (isRedesignEnabled()) {
-        items.push({
-          text: intl.formatMessage(messages.redesignMessage),
-          action: () => {
-            const isLocal = account.acct === account.username;
-            if (isLocal) {
-              void (
-                dispatch(
-                  createChatRoom({ account_ids: [account.id] }),
-                ) as unknown as Promise<{ id: string; uuid: string }>
-              )
-                .then((data) => {
-                  history.push(`/direct_message/${data.uuid}`);
-                })
-                .catch(() => {
-                  dispatch(directCompose(account));
-                });
-            } else {
-              dispatch(directCompose(account));
-            }
-          },
-        });
+        if (!relationship?.following) {
+          items.push(null, {
+            text: intl.formatMessage(messages.redesignMessage),
+            action: sendDirectMessage,
+          });
+        }
       } else {
         items.push(
+          null,
           {
             text: intl.formatMessage(messages.mention),
             action: () => {
@@ -431,6 +422,21 @@ function getMenuItems({
 
   // Timeline options
   if (relationship?.following && !relationship.muting) {
+    if (isRedesignEnabled()) {
+      items.push({
+        text: intl.formatMessage(
+          relationship.notifying
+            ? messages.disableNotifications
+            : messages.enableNotifications,
+          { name: account.username },
+        ),
+        action: () => {
+          dispatch(
+            followAccount(account.id, { notify: !relationship.notifying }),
+          );
+        },
+      });
+    }
     items.push(
       {
         text: intl.formatMessage(
