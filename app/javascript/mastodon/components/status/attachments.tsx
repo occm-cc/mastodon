@@ -55,7 +55,7 @@ export const StatusAttachments: React.FC<{
       <MediaAttachments
         statusId={statusId}
         accountId={status.account.id}
-        sensitive={status.sensitive && !status.spoiler_text}
+        sensitive={status.sensitive}
         language={status.translation?.language ?? status.language}
         attachment={attachment}
         restAttachments={status.media_attachments.slice(1)}
@@ -128,6 +128,7 @@ const MediaAttachments: React.FC<{
   language,
   attachment,
   defaultPosterUrl,
+  restAttachments,
 }) => {
   const description =
     attachment.translation?.description ?? attachment.description;
@@ -222,7 +223,8 @@ const MediaAttachments: React.FC<{
 
   let aspectRatio = '3 / 2';
   if (
-    isMediaAttachmentOfType(attachment, 'image') ||
+    (isMediaAttachmentOfType(attachment, 'image') &&
+      restAttachments.length === 0) ||
     isMediaAttachmentOfType(attachment, 'video') ||
     isMediaAttachmentOfType(attachment, 'gifv')
   ) {
@@ -263,6 +265,7 @@ const MediaAttachments: React.FC<{
           deployPictureInPicture={handleDeployPictureInPicture}
           blurhash={attachment.blurhash}
           onToggleVisibility={handleToggleMediaVisibility}
+          visible={showMedia}
         />
       </MediaAttachmentWrapper>
     );
@@ -283,19 +286,21 @@ const MediaAttachments: React.FC<{
           onOpenVideo={handleOpenVideo}
           deployPictureInPicture={handleDeployPictureInPicture}
           onToggleVisibility={handleToggleMediaVisibility}
+          visible={showMedia}
         />
       </MediaAttachmentWrapper>
     );
   }
 
   return (
-    <MediaAttachmentWrapper {...wrapperProps} type='media'>
+    <MediaAttachmentWrapper {...wrapperProps} type='gallery'>
       <MediaGallery
         media={immutableAttachments}
         lang={language}
         height={110}
         onOpenMedia={handleOpenMedia}
         onToggleVisibility={handleToggleMediaVisibility}
+        visible={showMedia}
       />
     </MediaAttachmentWrapper>
   );
@@ -305,7 +310,7 @@ const MediaAttachmentWrapper: React.FC<{
   sensitive: boolean;
   visible: boolean;
   onToggle: () => void;
-  type?: 'media' | 'video' | 'audio';
+  type?: 'gallery' | 'video' | 'audio';
   children: React.ReactNode;
   aspectRatio: string;
   mediaFilters: string[];
@@ -313,7 +318,7 @@ const MediaAttachmentWrapper: React.FC<{
 }> = ({
   sensitive,
   visible,
-  type = 'media',
+  type = 'gallery',
   onToggle,
   children,
   aspectRatio,
@@ -349,7 +354,7 @@ const MediaAttachmentWrapper: React.FC<{
     <div className={classes.galleryWrapper} ref={wrapperRef}>
       {showSpoiler && (
         <Callout
-          className={classes.gallerySpoilerWrapper}
+          className={classes.gallerySpoiler}
           icon={WarningIcon}
           actionClick={onToggle}
           actionText={
@@ -373,8 +378,10 @@ const MediaAttachmentWrapper: React.FC<{
         data-color-scheme='dark'
         className={classNames(
           mainClasses.contentWrapper,
+          classes.galleryContent,
           !visible && mainClasses.hasContentWarning,
           !visible && classes.galleryHideButtons,
+          showSpoiler && classes.galleryHideActions,
         )}
       >
         <Suspense

@@ -75,39 +75,44 @@ export const ImageUploadModal: FC<
   );
 
   // State for individual steps.
-  const [step, setStep] = useState<'select' | 'crop' | 'alt' | 'save'>('select');
+  const [step, setStep] = useState<'select' | 'crop' | 'alt' | 'save'>(
+    'select',
+  );
   const [imageSrc, setImageSrc] = useState<string | null>(null);
   const [imageBlob, setImageBlob] = useState<Blob | null>(null);
 
-  const handleFile = useCallback((file: File) => {
-    try {
-      // If the image is animated, skip cropping and go straight to alt text
-      // (or directly to save for locations without alt text).
-      if (file.type === 'image/gif') {
-        setImageBlob(file);
-        if (location === 'background_image') {
-          setStep('save');
-        } else {
-          setStep('alt');
+  const handleFile = useCallback(
+    (file: File) => {
+      try {
+        // If the image is animated, skip cropping and go straight to alt text
+        // (or directly to save for locations without alt text).
+        if (file.type === 'image/gif') {
+          setImageBlob(file);
+          if (location === 'background_image') {
+            setStep('save');
+          } else {
+            setStep('alt');
+          }
+          return;
         }
-        return;
-      }
 
-      const reader = new FileReader();
-      reader.onload = () => {
-        const dataUri = reader.result;
-        if (typeof dataUri !== 'string') {
-          throw new Error('Expected a string');
-        }
-        setImageSrc(dataUri);
-        setStep('crop');
-      };
-      reader.readAsDataURL(file);
-    } catch (error) {
-      console.warn('Error with image parsing:', error);
-      setStep('select');
-    }
-  }, [location]);
+        const reader = new FileReader();
+        reader.onload = () => {
+          const dataUri = reader.result;
+          if (typeof dataUri !== 'string') {
+            throw new Error('Expected a string');
+          }
+          setImageSrc(dataUri);
+          setStep('crop');
+        };
+        reader.readAsDataURL(file);
+      } catch (error) {
+        console.warn('Error with image parsing:', error);
+        setStep('select');
+      }
+    },
+    [location],
+  );
 
   const handleCrop = useCallback(
     (crop: Area) => {
@@ -205,7 +210,10 @@ const ALLOWED_MIME_TYPES = [
   'image/webp',
 ];
 
-const UPLOAD_SIZE_HINT: Record<ImageLocation, { width: number; height: number }> = {
+const UPLOAD_SIZE_HINT: Record<
+  ImageLocation,
+  { width: number; height: number }
+> = {
   avatar: { width: 400, height: 400 },
   header: { width: 1500, height: 500 },
   custom_logo: { width: 1044, height: 696 },
@@ -324,11 +332,7 @@ const StepUpload: FC<{
         }}
         tagName='p'
       />
-      <Button
-        onClick={handleUploadClick}
-        // eslint-disable-next-line jsx-a11y/no-autofocus -- This is the main input, so auto-focus on it.
-        autoFocus
-      >
+      <Button onClick={handleUploadClick} autoFocus>
         <FormattedMessage
           id='account_edit.upload_modal.step_upload.button'
           defaultMessage='Browse files'
