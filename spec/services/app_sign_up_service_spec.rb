@@ -107,13 +107,63 @@ RSpec.describe AppSignUpService do
 
     it_behaves_like 'successful registration'
 
+    context 'when open registrations retain the invite text requirement' do
+      before do
+        Setting.registrations_mode = 'open'
+        Setting.require_invite_text = true
+      end
+
+      it_behaves_like 'successful registration'
+
+      context 'when the reason contains only whitespace' do
+        let(:params) { good_params.merge(reason: " \t\n") }
+
+        it_behaves_like 'successful registration'
+      end
+    end
+
     context 'when given an invite request text' do
+      before do
+        Setting.registrations_mode = 'approved'
+      end
+
       it 'creates an account with invite request text' do
         access_token = subject.call(app, remote_ip, good_params.merge(reason: 'Foo bar'))
         expect(access_token).to_not be_nil
         user = User.find_by(id: access_token.resource_owner_id)
         expect(user).to_not be_nil
         expect(user.invite_request&.text).to eq 'Foo bar'
+        expect(user.approved?).to be false
+      end
+    end
+
+    context 'when open registrations receive an invite request text' do
+      before do
+        Setting.registrations_mode = 'open'
+      end
+
+      it 'rejects the registration without creating a user, account, or token', :aggregate_failures do
+        app
+
+        expect { subject.call(app, remote_ip, good_params.merge(reason: 'Any nonempty reason')) }
+          .to raise_error(ActiveRecord::RecordInvalid) { |error| expect(error.record.errors.of_kind?(:'invite_request.text', :invalid)).to be true }
+          .and not_change(User, :count)
+          .and not_change(Account, :count)
+          .and not_change(Doorkeeper::AccessToken, :count)
+      end
+
+      context 'when the email address requires approval' do
+        before do
+          Fabricate(:email_domain_block, allow_with_approval: true, domain: 'email.com')
+        end
+
+        it 'preserves the reason and creates an unapproved user', :aggregate_failures do
+          access_token = subject.call(app, remote_ip, good_params.merge(reason: 'Please review my registration'))
+          user = User.find(access_token.resource_owner_id)
+
+          expect(user.approved?).to be false
+          expect(user.invite_request.text).to eq 'Please review my registration'
+        end
       end
     end
   end

@@ -82,8 +82,9 @@ class User < ApplicationRecord
   has_many :ips, class_name: 'UserIp', inverse_of: :user, dependent: nil
 
   has_one :invite_request, class_name: 'UserInviteRequest', inverse_of: :user, dependent: :destroy
-  accepts_nested_attributes_for :invite_request, reject_if: ->(attributes) { attributes['text'].blank? && !Setting.require_invite_text }
+  accepts_nested_attributes_for :invite_request, reject_if: ->(attributes) { attributes['text'].blank? && (Setting.registrations_mode == 'open' || !Setting.require_invite_text) }
   validates :invite_request, presence: true, on: :create, if: :invite_text_required?
+  validate :validate_registration_reason, on: :create
 
   validates :email, presence: true, email_address: true, length: { maximum: 320 }
   validates :email, email_mx: { attempt_ip: :sign_up_ip }, if: :validate_email_dns?
@@ -517,6 +518,13 @@ class User < ApplicationRecord
 
   def invite_text_required?
     Setting.require_invite_text && !open_registrations? && !invite&.bypass_approval? && !external? && !bypass_registration_checks?
+  end
+
+  def validate_registration_reason
+    return unless open_registrations? && invite_request&.text.present?
+    return if requires_approval?
+
+    errors.import(ActiveModel::Error.new(invite_request, :text, :invalid), attribute: :'invite_request.text')
   end
 
   def trigger_webhooks
