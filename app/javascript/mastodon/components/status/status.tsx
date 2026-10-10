@@ -87,6 +87,7 @@ export const StatusRedesign: React.FC<StatusRedesignProps> = ({
   children,
   withCounters = true,
   withDismiss,
+  onDismissPendingMention,
   onOpen,
   showThread,
   shouldHighlightOnMount,
@@ -257,6 +258,7 @@ export const StatusRedesign: React.FC<StatusRedesignProps> = ({
               <StatusActionBar
                 statusId={status.id}
                 withDismiss={withDismiss}
+                onDismissPendingMention={onDismissPendingMention}
                 withCounters={withCounters}
                 onlyResponses={variant === 'page'}
               />

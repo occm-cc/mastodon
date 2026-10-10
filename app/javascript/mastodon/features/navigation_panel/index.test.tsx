@@ -136,6 +136,7 @@ vi.mock('mastodon/components/account', () => ({
 
 vi.mock('mastodon/components/icon', () => ({
   Icon: () => null,
+  iconWeight: (icon: unknown) => icon,
 }));
 
 vi.mock('mastodon/components/icon_with_badge', () => ({

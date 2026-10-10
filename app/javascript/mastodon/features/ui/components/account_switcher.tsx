@@ -881,11 +881,11 @@ export const AccountSwitcher: FC<AccountSwitcherProps> = ({
 
   return (
     <>
-      <div className='account-switcher navigation-panel__account-switcher'>
-        <div className='account-switcher__trigger-wrapper'>
-          {renderTrigger ? (
-            renderTrigger({ openManage: handleOpenManageFromTrigger })
-          ) : (
+      {renderTrigger ? (
+        renderTrigger({ openManage: handleOpenManageFromTrigger })
+      ) : (
+        <div className='account-switcher navigation-panel__account-switcher'>
+          <div className='account-switcher__trigger-wrapper'>
             <button
               type='button'
               className='account-switcher__trigger'
@@ -895,9 +895,9 @@ export const AccountSwitcher: FC<AccountSwitcherProps> = ({
             >
               {intl.formatMessage(messages.switchAccount)}
             </button>
-          )}
+          </div>
         </div>
-      </div>
+      )}
 
       {renderManageModal()}
     </>

@@ -497,6 +497,10 @@ export const onStatusLinksDisabled: OnElementHandler<AccountStatusShape> = (
 };
 
 const menuMessages = defineMessages({
+  dismissPendingMention: {
+    id: 'pending_mentions.dismiss',
+    defaultMessage: 'Dismiss',
+  },
   delete: { id: 'status.delete', defaultMessage: 'Delete' },
   redraft: { id: 'status.redraft', defaultMessage: 'Delete & re-draft' },
   edit: { id: 'status.edit', defaultMessage: 'Edit' },
@@ -569,9 +573,11 @@ export function useStatusMenuActions({
   status,
   contextType,
   withDismiss = false,
+  onDismissPendingMention,
 }: {
   status: Omit<AccountStatusShape, 'reblog'>;
   withDismiss?: boolean;
+  onDismissPendingMention?: () => void;
   contextType?: StatusContextType;
 }) {
   const account = status.account;
@@ -599,6 +605,7 @@ export function useStatusMenuActions({
         interactions,
         onStatusInteraction: statusInteractionFactory,
         withDismiss,
+        onDismissPendingMention,
         permissions,
         intl,
         relationship,
@@ -611,6 +618,7 @@ export function useStatusMenuActions({
       interactions,
       statusInteractionFactory,
       withDismiss,
+      onDismissPendingMention,
       permissions,
       intl,
       relationship,
@@ -626,6 +634,7 @@ interface MenuItemsParams {
   interactions: StatusInteractionsAllowed;
   onStatusInteraction: (intent: StatusInteractionIntent) => () => void;
   withDismiss?: boolean;
+  onDismissPendingMention?: () => void;
   permissions: number;
   intl: ReturnType<typeof useIntl>;
   relationship?: Relationship | null;
@@ -639,6 +648,7 @@ function getMenuItems({
   interactions,
   onStatusInteraction,
   withDismiss,
+  onDismissPendingMention,
   permissions,
   intl,
   relationship,
@@ -691,6 +701,13 @@ function getMenuItems({
 
   if (!isLoggedIn) {
     return menu;
+  }
+
+  if (contextType === 'pending-mentions' && onDismissPendingMention) {
+    menu.push({
+      text: intl.formatMessage(menuMessages.dismissPendingMention),
+      action: onDismissPendingMention,
+    });
   }
 
   if (quickBoosting) {

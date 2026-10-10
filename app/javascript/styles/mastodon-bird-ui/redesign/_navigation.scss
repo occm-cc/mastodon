@@ -1,0 +1,186 @@
+html:root[data-redesign='true'] {
+  ._navigation_panel_redesign__root {
+    --navigation-background-color: var(--color-bg);
+    --header-height: 64px;
+    --footer-height: 0px;
+
+    padding-inline: 8px;
+    box-sizing: border-box;
+    overflow-x: hidden;
+  }
+
+  ._navigation_panel_redesign_header__root {
+    padding: 14px 12px;
+    margin-bottom: 0;
+  }
+
+  ._navigation_panel_redesign_header__serverName {
+    font-family: var(--font-body);
+    font-size: var(--font-size-heading);
+    font-weight: 800;
+  }
+
+  ._navigation_panel_redesign_header__poweredBy {
+    font-size: 11px;
+  }
+
+  ._navigation_panel_redesign__list {
+    margin: 0;
+  }
+
+  ._navigation_panel_redesign__newPostButton {
+    width: 100%;
+    min-height: 48px;
+    font-size: var(--font-size-bigger);
+    font-weight: 700;
+    margin-bottom: 8px;
+    box-shadow: none;
+  }
+
+  ._navigation_panel_redesign_navigation_link__link:not(
+    ._navigation_panel_redesign_navigation_link__linkMobile
+  ) {
+    --icon-size: 26px;
+    --border-radius: 9999px;
+
+    width: fit-content;
+    max-width: 100%;
+    min-height: 48px;
+    padding: 10px 16px;
+    gap: 16px;
+    font-family: var(--font-body);
+    font-size: max(20px, var(--font-size));
+    line-height: 1.3;
+
+    &[aria-current='page'] {
+      background: transparent;
+      font-weight: 700;
+    }
+
+    &:hover,
+    &:focus-visible {
+      background: var(--color-column-link-hover);
+    }
+  }
+
+  ._navigation_panel_redesign__footer {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    position: static;
+    margin-top: 8px;
+    padding: 0;
+
+    &::before {
+      display: none;
+    }
+  }
+
+  ._navigation_panel_redesign__footerNav {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    margin-bottom: 16px;
+  }
+
+  ._navigation_panel_redesign_navigation_link__linkStacked {
+    flex-direction: row;
+
+    ._navigation_panel_redesign_navigation_link__label {
+      text-align: start;
+    }
+
+    ._navigation_panel_redesign_navigation_link__badge {
+      position: static;
+    }
+  }
+
+  ._navigation_panel_redesign_navigation_link__badge {
+    min-width: 18px;
+    border-radius: 9999px;
+    padding: 0 5px;
+    font-size: 11px;
+    line-height: 18px;
+    color: #fff;
+    background: var(--color-accent);
+  }
+
+  ._navigation_panel_redesign_list_section__root {
+    padding-top: 8px;
+
+    ._navigation_panel_redesign_navigation_link__link {
+      --icon-size: 20px;
+
+      font-size: var(--font-size);
+      padding-block: 6px;
+      min-height: 36px;
+    }
+  }
+
+  ._navigation_panel_redesign_list_section__title {
+    color: var(--color-dim);
+    font-size: var(--font-size-smaller);
+    padding-block: 8px;
+  }
+
+  ._navigation_panel_redesign_account_card_and_menu__root {
+    border: 0;
+    border-radius: 9999px;
+    padding: 4px;
+    background: transparent;
+    font-size: var(--font-size);
+    margin-top: auto;
+    margin-bottom: 12px;
+  }
+
+  ._navigation_panel_redesign_footer_links__root {
+    margin-block: 12px;
+    font-size: var(--font-size-smaller);
+  }
+
+  ._navigation_panel_redesign_mobile_nav__root {
+    inset-inline: 0;
+    padding: 0;
+    gap: 16px;
+  }
+
+  ._navigation_panel_redesign_mobile_nav__floatingCard {
+    background: rgb(from var(--color-bg) r g b / 95%);
+    backdrop-filter: blur(12px);
+    border: 0;
+    border-top: 1px solid var(--color-border);
+    border-radius: 0;
+  }
+
+  ._navigation_panel_redesign_mobile_nav__list {
+    padding: 0 4px;
+    min-height: var(--mobile-bottom-nav-height);
+  }
+
+  ._navigation_panel_redesign_navigation_link__linkMobile {
+    min-height: 52px;
+    padding-block: 12px;
+
+    &[aria-current='page'] {
+      background: transparent;
+    }
+  }
+
+  ._navigation_panel_redesign_mobile_nav__root
+    ._compose_redesign_trigger__buttonWrapperInline {
+    margin-inline-end: 20px;
+  }
+
+  ._compose_redesign_trigger__buttonWrapper > button {
+    min-width: 56px;
+    min-height: 56px;
+    box-shadow: 0 2px 8px rgb(0 0 0 / 20%);
+  }
+
+  @media (width >= 1200px) {
+    ._navigation_panel_redesign__footer
+      > ._navigation_panel_redesign_footer_links__root {
+      display: none;
+    }
+  }
+}

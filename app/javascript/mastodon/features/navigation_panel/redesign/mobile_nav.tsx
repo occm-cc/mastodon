@@ -21,6 +21,7 @@ import { Button, IconButton } from '@/mastodon/components/button/redesign';
 import { Menu, MenuList, MenuTrigger } from '@/mastodon/components/menu';
 import { FOCUS_TARGET } from '@/mastodon/components/navigation_focus_target';
 import { ComposeRedesignButton } from '@/mastodon/features/compose/redesign/trigger';
+import { AccountSwitcher } from '@/mastodon/features/ui/components/account_switcher';
 import { useAccount } from '@/mastodon/hooks/useAccount';
 import { useIdentity } from '@/mastodon/identity_context';
 import { trendsEnabled } from '@/mastodon/initial_state';
@@ -29,6 +30,7 @@ import { useAppDispatch, useAppSelector } from '@/mastodon/store';
 import {
   RedesignNavigationPanel,
   useNotificationsCount,
+  useDmUnreadCount,
   handleSearchLinkClick,
 } from '.';
 import { AccountMenuItems } from './account_card_and_menu';
@@ -42,6 +44,29 @@ export const RedesignMobileNavigation: React.FC = () => {
   const account = useAccount(accountId);
 
   const notificationsCount = useNotificationsCount();
+  const dmUnreadCount = useDmUnreadCount();
+
+  const renderAccountMenu = useCallback(
+    ({ openManage }: { openManage: () => void }) => (
+      <Menu>
+        <MenuTrigger
+          as={MobileNavProfileButton}
+          avatar={
+            <Avatar size={24} account={account} className={classes.avatar} />
+          }
+        >
+          <FormattedMessage
+            id='tabs_bar.account_settings'
+            defaultMessage='Account settings'
+          />
+        </MenuTrigger>
+        <MenuList placement='top-end' offset={8}>
+          <AccountMenuItems context='mobile' onSwitchAccounts={openManage} />
+        </MenuList>
+      </Menu>
+    ),
+    [account],
+  );
 
   const openMobileNav = useCallback(() => {
     dispatch(openNavigation());
@@ -66,14 +91,11 @@ export const RedesignMobileNavigation: React.FC = () => {
               <FormattedMessage id='tabs_bar.search' defaultMessage='Search' />
             </MobileNavLink>
             <MobileNavLink
-              to='/conversations'
+              to='/direct_message'
               iconComponent={ChatCircleDotsIcon}
+              withDot={dmUnreadCount > 0}
             >
-              <FormattedMessage
-                id='tabs_bar.messages'
-                defaultMessage='Messages'
-                description='Message refers to a direct message. For languages where this is confusing, "chat" or "direct message" can be used.'
-              />
+              <FormattedMessage id='navigation_bar.dm' defaultMessage='DM' />
             </MobileNavLink>
             <MobileNavLink
               to='/notifications'
@@ -85,26 +107,7 @@ export const RedesignMobileNavigation: React.FC = () => {
                 defaultMessage='Notifications'
               />
             </MobileNavLink>
-            <Menu>
-              <MenuTrigger
-                as={MobileNavProfileButton}
-                avatar={
-                  <Avatar
-                    size={24}
-                    account={account}
-                    className={classes.avatar}
-                  />
-                }
-              >
-                <FormattedMessage
-                  id='tabs_bar.account_settings'
-                  defaultMessage='Account settings'
-                />
-              </MenuTrigger>
-              <MenuList placement='top-end' offset={8}>
-                <AccountMenuItems context='mobile' />
-              </MenuList>
-            </Menu>
+            <AccountSwitcher renderTrigger={renderAccountMenu} />
           </ul>
           <ComposeRedesignButton inline />
         </nav>

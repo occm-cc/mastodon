@@ -3,7 +3,7 @@ import { lazy, Suspense, useCallback, useEffect, useState } from 'react';
 import { FormattedMessage } from 'react-intl';
 
 import classNames from 'classnames';
-import { useRouteMatch } from 'react-router';
+import { useHistory, useRouteMatch } from 'react-router';
 
 import { PenNibIcon, ReadCvLogoIcon } from '@phosphor-icons/react';
 
@@ -16,9 +16,11 @@ import {
   openNewComposer,
 } from '@/mastodon/reducers/slices/composer';
 import { useAppDispatch, useAppSelector } from '@/mastodon/store';
+import { isBirdUiEnabled } from '@/mastodon/utils/bird_ui';
 import { isRedesignEnabled } from '@/mastodon/utils/environment';
 
 import { useBreakpoint } from '../../ui/hooks/useBreakpoint';
+import { useColumnsContext } from '../../ui/util/columns_context';
 
 import { ComposeFormHeader } from './header';
 import classes from './trigger.module.scss';
@@ -36,7 +38,44 @@ export const ComposeRedesignButton: React.FC<{
   inline?: boolean;
 }> = ({ inline = false }) => {
   const displayState = useAppSelector((state) => state.composer.displayState);
+  const pendingFocus = useAppSelector((state) => state.composer.pendingFocus);
   const isMobile = useBreakpoint('openable');
+  const { multiColumn } = useColumnsContext();
+  const history = useHistory();
+  const isHome = !!useRouteMatch({
+    path: ['/home', '/timelines/home'],
+    exact: true,
+  });
+  const isPublishPage = !!useRouteMatch({
+    path: ['/publish', '/statuses/new'],
+    exact: true,
+  });
+  const useEmbeddedForm = isBirdUiEnabled() && !isMobile && !multiColumn;
+  const { signedIn } = useIdentity();
+
+  useEffect(() => {
+    // An open draft may survive browsing; navigate only for a new focus request.
+    if (
+      signedIn &&
+      useEmbeddedForm &&
+      displayState === 'showing' &&
+      pendingFocus &&
+      !isHome &&
+      !isPublishPage
+    ) {
+      // Reuse the existing compose page away from Home rather than mounting
+      // a second form or creating another compose route.
+      history.push('/publish');
+    }
+  }, [
+    signedIn,
+    useEmbeddedForm,
+    displayState,
+    pendingFocus,
+    isHome,
+    isPublishPage,
+    history,
+  ]);
 
   const hasMobileFloatingActionButton = useHasMobileFloatingActionButton({
     isMobile,
@@ -46,13 +85,13 @@ export const ComposeRedesignButton: React.FC<{
   const [viewportHeight, setViewportHeight] = useState<null | number>(null);
   useEffect(() => {
     const updateHeight = () => {
-      setViewportHeight(visualViewport?.height ?? null);
+      setViewportHeight(window.visualViewport?.height ?? null);
     };
 
-    visualViewport?.addEventListener('resize', updateHeight);
+    window.visualViewport?.addEventListener('resize', updateHeight);
 
     return () => {
-      visualViewport?.removeEventListener('resize', updateHeight);
+      window.visualViewport?.removeEventListener('resize', updateHeight);
     };
   }, []);
 
@@ -66,11 +105,11 @@ export const ComposeRedesignButton: React.FC<{
     dispatch(minimizeComposerToggle());
   }, [dispatch]);
 
-  const { signedIn } = useIdentity();
-
   if (!isRedesignEnabled() || !signedIn) {
     return null;
   }
+
+  if (useEmbeddedForm) return null;
 
   const floatingButtonProps = {
     inline,

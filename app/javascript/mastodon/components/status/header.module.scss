@@ -39,6 +39,14 @@
   gap: var(--space-1);
 }
 
+.author {
+  min-width: 0;
+}
+
+.separator {
+  flex-shrink: 0;
+}
+
 // Overrides .header a
 a.nameLink {
   @include mixins.type-body-strong;

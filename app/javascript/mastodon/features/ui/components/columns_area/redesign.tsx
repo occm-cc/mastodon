@@ -3,10 +3,12 @@ import classNames from 'classnames';
 import { ComposeRedesignButton } from '@/mastodon/features/compose/redesign/trigger';
 import { RedesignNavigationPanel } from '@/mastodon/features/navigation_panel/redesign';
 import { RedesignMobileNavigation } from '@/mastodon/features/navigation_panel/redesign/mobile_nav';
+import { isBirdUiEnabled } from '@/mastodon/utils/bird_ui';
 import { Footer } from 'mastodon/features/custom_homepage/components/footer';
 
 import { useBreakpoint } from '../../hooks/useBreakpoint';
 
+import { BirdUiSidebar } from './bird_ui_sidebar';
 import { MultiColumnContent } from './multi_column_content';
 import classes from './redesign.module.scss';
 import multiColClasses from './redesign_multicol.module.scss';
@@ -41,6 +43,7 @@ export const ColumnsAreaRedesign: React.FC<{
         {isMobile ? <RedesignMobileNavigation /> : <ComposeRedesignButton />}
 
         <main className={classes.main}>{children}</main>
+        {isBirdUiEnabled() && <BirdUiSidebar />}
       </div>
     );
   }

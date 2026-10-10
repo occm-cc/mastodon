@@ -2,6 +2,8 @@ import { useCallback, useEffect } from 'react';
 
 import { defineMessages, FormattedMessage, useIntl } from 'react-intl';
 
+import { useRouteMatch } from 'react-router';
+
 import type { Map as ImmutableMap } from 'immutable';
 
 import {
@@ -14,16 +16,21 @@ import {
   BookmarkSimpleIcon,
   PlusIcon,
   InfoIcon,
+  ChatCircleIcon,
+  ArrowsLeftRightIcon,
 } from '@phosphor-icons/react';
 
 import FediIcon from '@/images/icons/icon_fediverse.svg?react';
 import { fetchFollowRequests } from '@/mastodon/actions/accounts';
+import { fetchUnreadCount } from '@/mastodon/actions/dm';
 import { fetchLists } from '@/mastodon/actions/lists';
 import { closeNavigation } from '@/mastodon/actions/navigation';
 import { fetchFollowedHashtags } from '@/mastodon/actions/tags_typed';
 import { Button } from '@/mastodon/components/button/redesign';
 import { Callout } from '@/mastodon/components/callout/redesign';
 import { FOCUS_TARGET } from '@/mastodon/components/navigation_focus_target';
+import { selectComposeType } from '@/mastodon/features/compose/redesign/selectors';
+import { useBreakpoint } from '@/mastodon/features/ui/hooks/useBreakpoint';
 import { useScrollSensor } from '@/mastodon/hooks/useScrollSensor';
 import { useIdentity } from '@/mastodon/identity_context';
 import {
@@ -34,13 +41,18 @@ import {
 } from '@/mastodon/initial_state';
 import { transientSingleColumn } from '@/mastodon/is_mobile';
 import { canViewFeed } from '@/mastodon/permissions';
-import { openNewComposer } from '@/mastodon/reducers/slices/composer';
+import {
+  openNewComposer,
+  requestComposerFocus,
+} from '@/mastodon/reducers/slices/composer';
 import { getOrderedLists } from '@/mastodon/selectors/lists';
 import { selectUnreadNotificationGroupsCount } from '@/mastodon/selectors/notifications';
 import { useAppDispatch, useAppSelector } from '@/mastodon/store';
+import { isBirdUiEnabled } from '@/mastodon/utils/bird_ui';
 import { invokeVirtualIosKeyboard } from '@/mastodon/utils/invoke_virtual_ios_keyboard';
 
 import { useHasAnnouncements } from '../../announcements/hooks';
+import { AccountSwitcher } from '../../ui/components/account_switcher';
 
 import { NavigationAccountCardAndMenu } from './account_card_and_menu';
 import { NavigationFooterLinks } from './footer_links';
@@ -125,6 +137,38 @@ export function useNotificationsCount() {
   );
 }
 
+export function useDmUnreadCount() {
+  const dispatch = useAppDispatch();
+  const { signedIn } = useIdentity();
+  const count = useAppSelector((state) => state.dm.unreadCount);
+
+  useEffect(() => {
+    if (signedIn) {
+      dispatch(fetchUnreadCount());
+    }
+  }, [dispatch, signedIn]);
+
+  return count;
+}
+
+const renderAccountSwitchLink = ({
+  openManage,
+}: {
+  openManage: () => void;
+}) => (
+  <NavigationLink
+    as='button'
+    iconComponent={ArrowsLeftRightIcon}
+    onClick={openManage}
+    aria-haspopup='dialog'
+  >
+    <FormattedMessage
+      id='navigation_panel.account_switch'
+      defaultMessage='Switch accounts'
+    />
+  </NavigationLink>
+);
+
 const isFediverseFeedsLinkActive = (
   match: unknown,
   { pathname }: { pathname: string },
@@ -147,14 +191,49 @@ export const RedesignNavigationPanel: React.FC<{
   const dispatch = useAppDispatch();
   const { signedIn } = useIdentity();
   const notificationsCount = useNotificationsCount();
+  const dmUnreadCount = useDmUnreadCount();
+  const birdUi = isBirdUiEnabled();
+  const isMobile = useBreakpoint('openable');
+  const isHome = !!useRouteMatch({
+    path: ['/home', '/timelines/home'],
+    exact: true,
+  });
+  const composeType = useAppSelector(selectComposeType);
+  const isEditing = useAppSelector((state) => !!state.compose.get('id'));
 
   const openComposer = useCallback(() => {
     dispatch(closeNavigation());
-    dispatch(openNewComposer({ type: 'post' }));
-  }, [dispatch]);
+    if (
+      birdUi &&
+      !isMobile &&
+      !multiColumn &&
+      isHome &&
+      composeType === 'post' &&
+      !isEditing
+    ) {
+      dispatch(requestComposerFocus());
+    } else {
+      dispatch(openNewComposer({ type: 'post' }));
+    }
+  }, [dispatch, birdUi, isMobile, multiColumn, isHome, composeType, isEditing]);
 
   const { customFeeds } = useCustomFeeds();
   const { followedHashtags } = useFollowedHashtags();
+
+  const newPostButton = (
+    <li>
+      <Button
+        leadingIcon={PenNibIcon}
+        onClick={openComposer}
+        variant='solid'
+        color='accent'
+        size='md'
+        className={classes.newPostButton}
+      >
+        <FormattedMessage id='tabs_bar.publish' defaultMessage='New Post' />
+      </Button>
+    </li>
+  );
 
   const { sensor: topSensor, isInViewport: isScrolledToTop } = useScrollSensor({
     placement: 'top',
@@ -179,26 +258,31 @@ export const RedesignNavigationPanel: React.FC<{
         <>
           {transientSingleColumn && <TransientSingleColumnCallout />}
           <ul className={classes.list}>
-            <li>
-              <Button
-                leadingIcon={PenNibIcon}
-                onClick={openComposer}
-                variant='solid'
-                color='accent'
-                size='md'
-                className={classes.newPostButton}
-              >
-                <FormattedMessage
-                  id='tabs_bar.publish'
-                  defaultMessage='New Post'
-                />
-              </Button>
-            </li>
+            {!birdUi && newPostButton}
             <NavigationLink to='/home' iconComponent={HouseIcon}>
               <FormattedMessage id='tabs_bar.home' defaultMessage='Home' />
             </NavigationLink>
-            <ExploreLink />
-            <PublicFeedsLink />
+            <ExploreLink birdUi={birdUi} />
+            {birdUi ? (
+              <NavigationActions
+                birdUi
+                notificationsCount={notificationsCount}
+                dmUnreadCount={dmUnreadCount}
+              />
+            ) : (
+              <PublicFeedsLink />
+            )}
+            <NavigationLink
+              to='/pending-mentions'
+              iconComponent={ChatCircleIcon}
+            >
+              <FormattedMessage
+                id='navigation_bar.pending_mentions'
+                defaultMessage='Awaiting reply'
+              />
+            </NavigationLink>
+            <AccountSwitcher renderTrigger={renderAccountSwitchLink} />
+            {birdUi && newPostButton}
             <ListSection
               id='custom-feeds'
               title={
@@ -258,40 +342,15 @@ export const RedesignNavigationPanel: React.FC<{
           <footer className={classes.footer} data-stuck={!isScrolledToBottom}>
             {mode !== 'slide-out' && (
               <>
-                <ul className={classes.footerNav}>
-                  <NavigationLink
-                    stacked
-                    to='/notifications'
-                    iconComponent={BellIcon}
-                    badgeCount={notificationsCount}
-                  >
-                    <FormattedMessage
-                      id='tabs_bar.notifications'
-                      defaultMessage='Notifications'
+                {!birdUi && (
+                  <ul className={classes.footerNav}>
+                    <NavigationActions
+                      stacked
+                      notificationsCount={notificationsCount}
+                      dmUnreadCount={dmUnreadCount}
                     />
-                  </NavigationLink>
-                  <NavigationLink
-                    stacked
-                    to='/conversations'
-                    iconComponent={ChatCircleDotsIcon}
-                  >
-                    <FormattedMessage
-                      id='tabs_bar.messages'
-                      defaultMessage='Messages'
-                      description='Message refers to a direct message. For languages where this is confusing, "chat" or "direct message" can be used.'
-                    />
-                  </NavigationLink>
-                  <NavigationLink
-                    stacked
-                    to='/bookmarks'
-                    iconComponent={BookmarkSimpleIcon}
-                  >
-                    <FormattedMessage
-                      id='tabs_bar.saved'
-                      defaultMessage='Saved'
-                    />
-                  </NavigationLink>
-                </ul>
+                  </ul>
+                )}
                 <NavigationAccountCardAndMenu />
               </>
             )}
@@ -308,8 +367,8 @@ export const RedesignNavigationPanel: React.FC<{
                 defaultMessage='About'
               />
             </NavigationLink>
-            <ExploreLink />
-            <PublicFeedsLink />
+            <ExploreLink birdUi={birdUi} />
+            {!birdUi && <PublicFeedsLink />}
           </ul>
           <footer className={classes.footer} data-stuck={!isScrolledToBottom}>
             {disabledAccountId ? <DisabledAccountBanner /> : <LoggedOutInfo />}
@@ -322,7 +381,54 @@ export const RedesignNavigationPanel: React.FC<{
   );
 };
 
-const ExploreLink: React.FC = () => {
+const NavigationActions: React.FC<{
+  stacked?: boolean;
+  birdUi?: boolean;
+  notificationsCount: number;
+  dmUnreadCount: number;
+}> = ({ stacked, birdUi, notificationsCount, dmUnreadCount }) => (
+  <>
+    <NavigationLink
+      stacked={stacked}
+      to='/notifications'
+      iconComponent={BellIcon}
+      badgeCount={notificationsCount}
+    >
+      <FormattedMessage
+        id='tabs_bar.notifications'
+        defaultMessage='Notifications'
+      />
+    </NavigationLink>
+    <NavigationLink
+      stacked={stacked}
+      to='/direct_message'
+      iconComponent={ChatCircleDotsIcon}
+      badgeCount={dmUnreadCount}
+    >
+      {birdUi ? (
+        <FormattedMessage id='bird_ui.navigation.chat' defaultMessage='Chat' />
+      ) : (
+        <FormattedMessage id='navigation_bar.dm' defaultMessage='DM' />
+      )}
+    </NavigationLink>
+    <NavigationLink
+      stacked={stacked}
+      to='/bookmarks'
+      iconComponent={BookmarkSimpleIcon}
+    >
+      {birdUi ? (
+        <FormattedMessage
+          id='navigation_bar.bookmarks'
+          defaultMessage='Bookmarks'
+        />
+      ) : (
+        <FormattedMessage id='tabs_bar.saved' defaultMessage='Saved' />
+      )}
+    </NavigationLink>
+  </>
+);
+
+const ExploreLink: React.FC<{ birdUi?: boolean }> = ({ birdUi }) => {
   return (
     <NavigationLink
       to={{
@@ -332,7 +438,12 @@ const ExploreLink: React.FC = () => {
       iconComponent={MagnifyingGlassIcon}
       onClick={handleSearchLinkClick}
     >
-      {trendsEnabled ? (
+      {birdUi ? (
+        <FormattedMessage
+          id='bird_ui.navigation.explore'
+          defaultMessage='Explore'
+        />
+      ) : trendsEnabled ? (
         <FormattedMessage id='tabs_bar.explore' defaultMessage='Explore' />
       ) : (
         <FormattedMessage id='navigation_bar.search' defaultMessage='Search' />

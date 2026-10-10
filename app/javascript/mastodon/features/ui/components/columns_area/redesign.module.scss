@@ -33,6 +33,10 @@
   --navigation-width: 0;
 }
 
+.birdUiSidebar {
+  display: none;
+}
+
 .multiColumnRoot {
   --multi-column-navigation-width: 320px;
   --multi-column-gap: var(--space-2);

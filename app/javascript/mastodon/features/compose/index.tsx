@@ -13,6 +13,8 @@ import { Column } from '@/mastodon/components/column';
 import { ColumnHeader as LegacyColumnHeader } from '@/mastodon/components/column/header';
 import { ColumnHeader } from '@/mastodon/components/column_header';
 import { LoadingIndicator } from '@/mastodon/components/loading_indicator';
+import { useBreakpoint } from '@/mastodon/features/ui/hooks/useBreakpoint';
+import { isBirdUiEnabled } from '@/mastodon/utils/bird_ui';
 import { isRedesignEnabled } from '@/mastodon/utils/environment';
 import EditIcon from '@/material-icons/400-24px/edit_square.svg?react';
 import PeopleIcon from '@/material-icons/400-24px/group.svg?react';
@@ -58,6 +60,7 @@ type ColumnMap = ImmutableMap<'id' | 'uuid' | 'params', string>;
 const Compose: React.FC<{ multiColumn: boolean }> = ({ multiColumn }) => {
   const intl = useIntl();
   const dispatch = useAppDispatch();
+  const isMobile = useBreakpoint('openable');
   const columns = useAppSelector(
     (state) => state.settings.get('columns') as ImmutableList<ColumnMap>,
   );
@@ -210,7 +213,15 @@ const Compose: React.FC<{ multiColumn: boolean }> = ({ multiColumn }) => {
       <div className='scrollable scrollable--flex'>
         {isRedesignEnabled() ? (
           <Suspense fallback={<LoadingIndicator />}>
-            <ComposeLazyForm autoFocus headless />
+            <ComposeLazyForm
+              autoFocus
+              headless
+              inline={isBirdUiEnabled() && !isMobile}
+              aria-label={intl.formatMessage({
+                id: 'tabs_bar.publish',
+                defaultMessage: 'New Post',
+              })}
+            />
           </Suspense>
         ) : (
           <ComposeFormContainer autoFocus />

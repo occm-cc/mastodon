@@ -1,0 +1,99 @@
+// Keep the legacy variables as the source of truth: the accessible variants
+// and the automatic light theme override them after this module is loaded.
+:root:where([data-redesign='true']) {
+  --color-bg: #15202b;
+  --color-fg: #f7f9f9;
+  --color-dim: #8b98a5;
+  --color-border: #38444d;
+  --color-dark: #1e2732;
+  --color-column-link-hover: rgb(239 243 244 / 10%);
+  --color-focusable-toot: rgb(239 243 244 / 3%);
+  --color-accent: #1d9bf0;
+  --color-accent-dark: #1d9bf0;
+  --color-link: var(--color-accent);
+  --color-hashtag: var(--color-accent);
+  --color-mention: var(--color-accent);
+  --color-green: #00ba7c;
+  --color-red: #f91880;
+  --color-thread-line: var(--color-border);
+}
+
+@mixin light {
+  --color-bg: #fff;
+  --color-fg: #0f1419;
+  --color-dim: #536471;
+  --color-border: #eff3f4;
+  --color-dark: #f7f9f9;
+  --color-column-link-hover: rgb(15 20 25 / 10%);
+  --color-focusable-toot: rgb(15 20 25 / 3%);
+  --color-thread-line: #cfd9de;
+}
+
+html:root[data-redesign='true'] {
+  --bird-ui-redesign: 1;
+  --font-body:
+    -apple-system, blinkmacsystemfont, 'Segoe UI', Roboto, 'Noto Sans KR',
+    sans-serif;
+  --font-heading: var(--font-body);
+  --avatar-border-radius: 50%;
+  --column-header-height: 54px;
+  --mobile-bottom-nav-height: 56px;
+  --color-bg-desktop: var(--color-bg);
+  --color-bg-primary: var(--color-bg);
+  --color-bg-secondary: var(--color-dark);
+  --color-bg-secondary-solid: var(--color-dark);
+  --color-bg-tertiary: var(--color-column-link-hover);
+  --color-bg-elevated: var(--color-bg);
+  --color-bg-highlight: var(--color-column-link-hover);
+  --color-bg-inverted: var(--color-fg);
+  --color-bg-overlay: var(--color-fg);
+  --color-bg-overlay-base: rgb(0 0 0 / 40%);
+  --color-bg-brand-base: var(--color-accent);
+  --color-bg-brand-base-hover: color-mix(
+    in srgb,
+    var(--color-accent) 90%,
+    #000
+  );
+  --color-bg-brand-soft: color-mix(
+    in srgb,
+    var(--color-accent) 15%,
+    transparent
+  );
+  --color-bg-brand-softer: color-mix(
+    in srgb,
+    var(--color-accent) 10%,
+    transparent
+  );
+  --color-bg-brand-softest: color-mix(
+    in srgb,
+    var(--color-accent) 5%,
+    transparent
+  );
+  --color-text-primary: var(--color-fg);
+  --color-text-secondary: var(--color-dim);
+  --color-text-tertiary: var(--color-dim);
+  --color-text-inverted: var(--color-bg);
+  --color-text-on-inverted: var(--color-bg);
+  --color-text-brand: var(--color-accent);
+  --color-text-brand-soft: var(--color-accent);
+  --color-text-on-brand-base: #fff;
+  --color-text-status-links: var(--color-accent);
+  --color-border-primary: var(--color-border);
+  --color-border-brand: var(--color-accent);
+  --color-border-on-bg-secondary: var(--color-border);
+  --color-border-on-bg-brand-softer: var(--color-border);
+  --color-text-bookmark-highlight: var(--color-accent);
+  --color-text-favourite-highlight: var(--color-red);
+  --color-text-success: var(--color-green);
+  --outline-focus-default: 2px solid var(--color-accent);
+  --dropdown-shadow: 0 2px 12px rgb(0 0 0 / 20%);
+  --color-shadow-primary: rgb(0 0 0 / 20%);
+
+  // Redesign components read these size tokens; preserve the larger type of
+  // Accessible and Accessible Plus instead of hard-coding tweet typography.
+  --fs-15: var(--font-size);
+  --fs-14: var(--font-size-mid);
+  --fs-13: var(--font-size-smaller);
+  --fs-12: var(--font-size-12);
+  --fs-11: var(--font-size-11);
+}

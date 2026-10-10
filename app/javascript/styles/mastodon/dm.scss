@@ -7,7 +7,9 @@
   overflow: hidden;
 
   @media screen and (width <= 759px) {
-    height: calc(100dvh - 50px - env(safe-area-inset-bottom, 0px));
+    height: calc(
+      100dvh - var(--mobile-bottom-nav-height) - env(safe-area-inset-bottom)
+    );
   }
 }
 

@@ -32,6 +32,7 @@ interface RedesignComposeFormProps {
   className?: string;
   noMinimize?: boolean;
   redirectOnSuccess?: boolean;
+  inline?: boolean;
 }
 
 export const RedesignComposeForm: React.FC<
@@ -42,20 +43,25 @@ export const RedesignComposeForm: React.FC<
   className,
   noMinimize,
   redirectOnSuccess,
+  inline = false,
   ...props
 }) => {
   const type = useAppSelector(selectComposeType);
 
-  const { onEmojiPick, onSubmit } = useComposeHandlers(redirectOnSuccess);
+  const { onEmojiPick, onSubmit } = useComposeHandlers(
+    redirectOnSuccess,
+    inline,
+  );
 
   const titleId = useId();
 
   return (
     <form
       {...props}
-      role='dialog'
+      role={inline ? undefined : 'dialog'}
+      data-inline={inline || undefined}
       onSubmit={onSubmit}
-      aria-labelledby={titleId}
+      aria-labelledby={headless ? undefined : titleId}
       className={classNames(
         className,
         classes.root,
@@ -99,13 +105,14 @@ export const RedesignComposeForm: React.FC<
 const allowedAroundShortCode =
   '><\u0085\u0020\u00a0\u1680\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u202f\u205f\u3000\u2028\u2029\u0009\u000a\u000b\u000c\u000d';
 
-function useComposeHandlers(redirectOnSuccess?: boolean) {
+function useComposeHandlers(redirectOnSuccess?: boolean, inline = false) {
   const text = useAppSelector((state) => state.compose.get('text') as string);
 
   const dispatch = useAppDispatch();
 
   const isModalOpen = useAppSelector((state) => state.modal.stack.size > 0);
   useEffect(() => {
+    if (inline) return;
     function escapeComposer(event: KeyboardEvent) {
       const key = normalizeKey(event.key);
       if (key !== 'escape' || isModalOpen) {
@@ -121,7 +128,7 @@ function useComposeHandlers(redirectOnSuccess?: boolean) {
     return () => {
       document.removeEventListener('keydown', escapeComposer);
     };
-  }, [dispatch, isModalOpen]);
+  }, [dispatch, isModalOpen, inline]);
 
   const onEmojiPick: OnEmojiPick = useCallback(
     (emoji) => {

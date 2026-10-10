@@ -1,0 +1,19 @@
+@use '@/styles/mastodon/variables';
+
+.root {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr);
+  gap: 8px 12px;
+  padding: 16px;
+  border-bottom: 1px solid var(--color-border-primary);
+  background: var(--color-bg-primary);
+  scroll-margin-top: var(--column-header-height);
+
+  @media (width < variables.$mobile-menu-breakpoint) {
+    display: none;
+  }
+}
+
+.form {
+  min-width: 0;
+}

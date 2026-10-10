@@ -16,6 +16,9 @@ import {
   SignOutIcon,
   MastodonLogoIcon,
   GithubLogoIcon,
+  AtIcon,
+  ChatCircleIcon,
+  ArrowsLeftRightIcon,
 } from '@phosphor-icons/react';
 
 import { openModal } from '@/mastodon/actions/modal';
@@ -89,7 +92,8 @@ export const NavigationAccountCardAndMenu: React.FC = () => {
 
 export const AccountMenuItems: React.FC<{
   context?: 'default' | 'mobile';
-}> = ({ context = 'default' }) => {
+  onSwitchAccounts?: () => void;
+}> = ({ context = 'default', onSwitchAccounts }) => {
   const dispatch = useAppDispatch();
   const { accountId, permissions } = useIdentity();
   const account = useAccount(accountId);
@@ -121,6 +125,33 @@ export const AccountMenuItems: React.FC<{
       <MenuItemLink as='a' href='/settings/preferences' icon={GearIcon}>
         <FormattedMessage id='tabs_bar.settings' defaultMessage='Settings' />
       </MenuItemLink>
+
+      <MenuItemDivider />
+
+      <MenuItemLink to='/conversations' icon={AtIcon}>
+        <FormattedMessage
+          id='navigation_bar.direct'
+          defaultMessage='Private mentions'
+        />
+      </MenuItemLink>
+
+      {context === 'mobile' && (
+        <MenuItemLink to='/pending-mentions' icon={ChatCircleIcon}>
+          <FormattedMessage
+            id='navigation_bar.pending_mentions'
+            defaultMessage='Awaiting reply'
+          />
+        </MenuItemLink>
+      )}
+
+      {onSwitchAccounts && (
+        <MenuItem onClick={onSwitchAccounts} icon={ArrowsLeftRightIcon}>
+          <FormattedMessage
+            id='navigation_panel.account_switch'
+            defaultMessage='Switch accounts'
+          />
+        </MenuItem>
+      )}
 
       <MenuItemDivider />
 

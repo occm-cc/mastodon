@@ -112,10 +112,12 @@ export const StatusRedesignHeader: React.FC<StatusRedesignHeaderProps> = ({
         <Avatar account={account} size={null} />
       </Link>
 
-      <div>
+      <div className={classes.author}>
         <p className={classes.name}>
           {displayName}
-          &bull;
+          <span className={classes.separator} aria-hidden='true'>
+            &bull;
+          </span>
           <Link
             to={{
               pathname: statusLink(status),

@@ -39,6 +39,7 @@ import classes from './styles.module.scss';
 interface StatusActionBarProps {
   statusId: string;
   withDismiss?: boolean;
+  onDismissPendingMention?: () => void;
   withCounters?: boolean;
   /** Only show methods to respond (reply, boost, like) and not sharing, bookmarking, and the overflow menu. */
   onlyResponses?: boolean;
@@ -47,6 +48,7 @@ interface StatusActionBarProps {
 export const StatusActionBar: React.FC<StatusActionBarProps> = ({
   statusId,
   withDismiss,
+  onDismissPendingMention,
   withCounters,
   onlyResponses,
 }) => {
@@ -94,6 +96,7 @@ export const StatusActionBar: React.FC<StatusActionBarProps> = ({
   const responseButtons = (
     <>
       <Button
+        data-status-action='reply'
         size='sm'
         clipPadding
         variant='ghost'
@@ -109,6 +112,7 @@ export const StatusActionBar: React.FC<StatusActionBarProps> = ({
       </StatusReblogButton>
 
       <ToggleButton
+        data-status-action='favourite'
         size='sm'
         variant='ghost'
         active={like.active}
@@ -132,6 +136,7 @@ export const StatusActionBar: React.FC<StatusActionBarProps> = ({
 
       {isPublic && (
         <IconButton
+          data-status-action='share'
           size='sm'
           variant='ghost'
           icon={ShareFatIcon}
@@ -142,6 +147,7 @@ export const StatusActionBar: React.FC<StatusActionBarProps> = ({
       )}
 
       <ToggleIconButton
+        data-status-action='bookmark'
         size='sm'
         variant='ghost'
         active={bookmark.active}
@@ -160,6 +166,7 @@ export const StatusActionBar: React.FC<StatusActionBarProps> = ({
             dismissQuoteHint={dismissQuoteHint}
             status={status}
             withDismiss={withDismiss}
+            onDismissPendingMention={onDismissPendingMention}
           />
         )}
       </RemoveQuoteHint>
@@ -176,6 +183,7 @@ const StatusReblogButton: React.FC<{
   if (quickBoosting) {
     return (
       <ToggleButton
+        data-status-action='boost'
         size='sm'
         variant='ghost'
         active={boost.active}
@@ -196,6 +204,7 @@ const StatusReblogButton: React.FC<{
     <Menu>
       <MenuTrigger
         as={ToggleButton}
+        data-status-action='boost'
         size='sm'
         variant='ghost'
         active={boost.active}
@@ -239,11 +248,17 @@ const StatusActionMenu: React.FC<{
   dismissQuoteHint: () => void;
   status: AccountStatusShape;
   withDismiss?: boolean;
-}> = ({ status, dismissQuoteHint, withDismiss }) => {
+  onDismissPendingMention?: () => void;
+}> = ({ status, dismissQuoteHint, withDismiss, onDismissPendingMention }) => {
   const { contextType } = useStatusContext();
   const dispatch = useAppDispatch();
 
-  const menu = useStatusMenuActions({ status, contextType, withDismiss });
+  const menu = useStatusMenuActions({
+    status,
+    contextType,
+    withDismiss,
+    onDismissPendingMention,
+  });
 
   const onOpen = useCallback(() => {
     // Replicates needsStatusRefresh of the Dropdown component.
@@ -260,6 +275,7 @@ const StatusActionMenu: React.FC<{
     <Menu onOpen={onOpen}>
       <MenuTrigger
         as={IconButton}
+        data-status-action='menu'
         size='sm'
         variant='ghost'
         icon={DotsThreeIcon}

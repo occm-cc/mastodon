@@ -1,0 +1,216 @@
+html:root[data-redesign='true'] {
+  ._comp_status__root {
+    --avatar-size: 48px;
+    --col-gap: 12px;
+
+    position: relative;
+    row-gap: 4px;
+    padding: 12px 16px;
+    font-size: var(--font-size);
+    line-height: var(--line-height);
+    background: var(--color-bg);
+    transition: background-color 150ms;
+  }
+
+  ._comp_status__variantFeed {
+    border-bottom: 1px solid var(--color-border);
+
+    &:hover {
+      background: var(--color-focusable-toot);
+    }
+  }
+
+  ._comp_status__variantThread {
+    --avatar-size: 40px;
+
+    padding: 8px 0;
+  }
+
+  ._comp_status__isQuote {
+    --avatar-size: 24px;
+
+    padding: 12px;
+    border: 1px solid var(--color-border);
+    border-radius: 16px;
+  }
+
+  ._comp_status__root:not(._comp_status__variantPage, ._comp_status__isQuote) {
+    ._comp_status_header__root {
+      position: relative;
+      align-items: start;
+      min-height: 22px;
+    }
+
+    ._comp_status_header__avatar {
+      position: absolute;
+      top: 0;
+      inset-inline-start: 0;
+    }
+
+    ._comp_status_header__author {
+      grid-column: 2;
+      display: flex;
+      align-items: baseline;
+      flex-wrap: wrap;
+      gap: 0 4px;
+      min-width: 0;
+      padding-inline-end: 28px;
+      font-size: var(--font-size);
+      line-height: var(--line-height);
+    }
+
+    ._comp_status_header__name {
+      display: contents;
+    }
+
+    ._comp_status_header__handle {
+      order: 1;
+      min-width: 0;
+      max-width: 100%;
+      font-size: inherit;
+      line-height: inherit;
+    }
+
+    ._comp_status_header__separator {
+      order: 2;
+    }
+
+    ._comp_status_header__date {
+      order: 3;
+      font-size: inherit;
+      line-height: inherit;
+    }
+
+    [data-status-action='menu'] {
+      position: absolute;
+      top: 4px;
+      inset-inline-end: 8px;
+      color: var(--color-dim);
+    }
+  }
+
+  ._comp_status_header__nameLink {
+    min-width: 0;
+    max-width: 100%;
+    font-size: var(--font-size);
+    font-weight: 700;
+    line-height: var(--line-height);
+  }
+
+  ._comp_status_header__handle,
+  ._comp_status_header__date {
+    color: var(--color-dim);
+  }
+
+  ._comp_status_content__content {
+    font-size: var(--font-size);
+    line-height: var(--line-height);
+    gap: 8px;
+  }
+
+  ._comp_status_content__contentText p:not(:last-child) {
+    margin-bottom: 12px;
+  }
+
+  ._comp_status__variantPage ._comp_status_content__content {
+    font-size: max(20px, var(--font-size));
+    line-height: 1.4;
+  }
+
+  ._comp_status__contentWrapper {
+    border-radius: 0;
+  }
+
+  ._comp_status__root {
+    // Legacy Bird UI indented attachments by the avatar width. The redesign
+    // already places them in the content column, so that margin would indent
+    // every image twice and crop its right edge.
+    .media-gallery,
+    .video-player,
+    .audio-player,
+    .media-gallery__gifv {
+      margin-inline: 0;
+      max-width: 100%;
+      border-radius: 16px;
+    }
+  }
+
+  ._comp_status__actions {
+    justify-content: space-between;
+    flex-wrap: wrap;
+    align-items: center;
+    margin-inline: -8px;
+    min-height: 32px;
+    gap: 2px;
+
+    > button {
+      --fg: var(--color-dim);
+
+      font-size: var(--font-size-smaller);
+      font-weight: 400;
+      min-height: 32px;
+      padding-inline: 8px;
+      opacity: 1;
+
+      &:hover {
+        --fg: var(--color-accent);
+        --bg-hover: color-mix(in srgb, var(--color-accent) 10%, transparent);
+      }
+    }
+
+    > button:not(
+        :hover,
+        :active,
+        [aria-pressed='true'],
+        [aria-expanded='true']
+      ) {
+      opacity: 1;
+    }
+  }
+
+  ._comp_status__actionsButtonGap {
+    margin-inline-end: 0;
+  }
+
+  ._comp_status__actions [data-status-action='favourite'] {
+    &:hover,
+    &[aria-pressed='true'] {
+      --fg: var(--color-red);
+      --bg-hover: color-mix(in srgb, var(--color-red) 10%, transparent);
+    }
+  }
+
+  ._comp_status__actions [data-status-action='boost'] {
+    &:hover,
+    &[aria-pressed='true'] {
+      --fg: var(--color-green);
+      --bg-hover: color-mix(in srgb, var(--color-green) 10%, transparent);
+    }
+  }
+
+  ._comp_status__actions [data-status-action='bookmark'][aria-pressed='true'] {
+    --fg: var(--color-accent);
+  }
+
+  ._comp_status__variantFeed .status__action-bar__button-wrapper {
+    // The menu trigger is placed at the top right of the post. Keep this
+    // empty wrapper out of the action row's space distribution.
+    position: absolute;
+    top: 0;
+    inset-inline-end: 0;
+  }
+
+  ._comp_status__meta {
+    font-size: var(--font-size-smaller);
+    line-height: var(--line-height);
+  }
+
+  @media (width < 400px) {
+    ._comp_status__root:not(._comp_status__isQuote) {
+      --avatar-size: 40px;
+      --col-gap: 10px;
+
+      padding-inline: 12px;
+    }
+  }
+}
