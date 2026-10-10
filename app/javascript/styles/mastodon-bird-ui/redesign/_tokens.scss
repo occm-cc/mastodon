@@ -1,6 +1,6 @@
 // Keep the legacy variables as the source of truth: the accessible variants
 // and the automatic light theme override them after this module is loaded.
-:root:where([data-redesign='true']) {
+:root {
   --color-bg: #15202b;
   --color-fg: #f7f9f9;
   --color-dim: #8b98a5;
@@ -29,7 +29,7 @@
   --color-thread-line: #cfd9de;
 }
 
-html:root[data-redesign='true'] {
+html:root {
   --bird-ui-redesign: 1;
   --font-body:
     -apple-system, blinkmacsystemfont, 'Segoe UI', Roboto, 'Noto Sans KR',

@@ -150,6 +150,7 @@ export const StatusRedesign: React.FC<StatusRedesignProps> = ({
     muted,
     unfocusable,
     'data-id': id,
+    'data-variant': variant,
     handlers: hotkeyHandlers,
   };
 
@@ -230,7 +231,6 @@ export const StatusRedesign: React.FC<StatusRedesignProps> = ({
             onReadMore={onOpenCallback}
             onTranslate={onTranslate}
             collapsible={variant !== 'page'}
-            className={classNames(variant === 'page' && classes.content)}
           >
             {!!status.poll && (
               <Poll

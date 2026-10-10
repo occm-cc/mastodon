@@ -27,6 +27,31 @@ RSpec.describe 'OAuth Authorizations' do
           .to eq authorize_path_for(application)
       end
 
+      context 'when reauthentication is requested' do
+        let(:params) { super().merge(prompt: 'login', state: 'oauth-login') }
+
+        it 'shows the upstream reauthentication prompt' do
+          subject
+
+          expect(response).to have_http_status(:success)
+          expect(response.parsed_body.title).to match(I18n.t('doorkeeper.authorizations.require_reauth.title'))
+        end
+
+        context 'when adding another account' do
+          before do
+            allow(MultiAccounts::StateStore).to receive(:fetch).with('oauth-login').and_return({ user_id: user.id, force_login_performed: false })
+            allow(MultiAccounts::StateStore).to receive(:mark_force_login!).with('oauth-login')
+          end
+
+          it 'signs out the initiating user before handling reauthentication' do
+            subject
+
+            expect(response).to redirect_to(new_user_session_path)
+            expect(MultiAccounts::StateStore).to have_received(:mark_force_login!).with('oauth-login')
+          end
+        end
+      end
+
       context 'when app is already authorized' do
         before do
           Doorkeeper::AccessToken.find_or_create_for(

@@ -1,4 +1,4 @@
-html:root[data-redesign='true'] {
+html:root {
   ._comp_button_redesign__base {
     font-family: var(--font-body);
     font-size: var(--font-size);
@@ -112,7 +112,7 @@ html:root[data-redesign='true'] {
     margin-top: 0;
   }
 
-  ._comp_columns_area_redesign__birdUiSidebar {
+  ._comp_columns_area__birdUiSidebar {
     .search {
       margin: 0;
     }
