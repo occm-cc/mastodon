@@ -22,7 +22,10 @@ export const BirdUiComposer: React.FC = () => {
   const rootRef = useRef<HTMLDivElement>(null);
   const pendingFocus = useAppSelector((state) => state.composer.pendingFocus);
   const hasContext = useAppSelector(
-    (state) => !!state.compose.get('id') || !!state.compose.get('in_reply_to'),
+    (state) =>
+      !!state.compose.get('id') ||
+      !!state.compose.get('in_reply_to') ||
+      !!state.compose.get('scheduled_status_id'),
   );
 
   useEffect(() => {

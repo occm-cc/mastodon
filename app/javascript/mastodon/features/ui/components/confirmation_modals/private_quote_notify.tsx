@@ -6,7 +6,7 @@ import { submitCompose } from '@/mastodon/actions/compose';
 import { PRIVATE_QUOTE_MODAL_ID } from '@/mastodon/actions/compose_typed';
 import { changeSetting } from '@/mastodon/actions/settings';
 import { CheckBox } from '@/mastodon/components/check_box';
-import { useAppDispatch } from '@/mastodon/store';
+import { useAppDispatch, useAppSelector } from '@/mastodon/store';
 
 import { ConfirmationModal } from './confirmation_modal';
 import type { BaseConfirmationModalProps } from './confirmation_modal';
@@ -50,6 +50,9 @@ export const PrivateQuoteNotify = forwardRef<
     }, []);
 
     const dispatch = useAppDispatch();
+    const isScheduled = useAppSelector(
+      (state) => !!state.compose.get('scheduled_at'),
+    );
     const handleConfirm = useCallback(() => {
       dispatch(submitCompose());
       if (dismiss) {
@@ -63,7 +66,14 @@ export const PrivateQuoteNotify = forwardRef<
       <ConfirmationModal
         title={intl.formatMessage(messages.title)}
         message={intl.formatMessage(messages.message)}
-        confirm={intl.formatMessage(messages.confirm)}
+        confirm={
+          isScheduled
+            ? intl.formatMessage({
+                id: 'scheduled_statuses.publish',
+                defaultMessage: 'Schedule post',
+              })
+            : intl.formatMessage(messages.confirm)
+        }
         cancel={intl.formatMessage(messages.cancel)}
         onConfirm={handleConfirm}
         onClose={onClose}

@@ -37,6 +37,9 @@ export const ConfirmMissingAltTextModal: React.FC<
 > = ({ onClose }) => {
   const intl = useIntl();
   const dispatch = useAppDispatch();
+  const isScheduled = useAppSelector(
+    (state) => !!state.compose.get('scheduled_at'),
+  );
   const mediaId = useAppSelector(
     (state) =>
       (
@@ -72,7 +75,14 @@ export const ConfirmMissingAltTextModal: React.FC<
       title={intl.formatMessage(messages.title)}
       message={intl.formatMessage(messages.message)}
       confirm={intl.formatMessage(messages.confirm)}
-      secondary={intl.formatMessage(messages.secondary)}
+      secondary={
+        isScheduled
+          ? intl.formatMessage({
+              id: 'scheduled_statuses.anyway',
+              defaultMessage: 'Schedule anyway',
+            })
+          : intl.formatMessage(messages.secondary)
+      }
       onConfirm={handleConfirm}
       onSecondary={handleSecondary}
       onClose={onClose}

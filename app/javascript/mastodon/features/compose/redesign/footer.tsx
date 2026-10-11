@@ -23,6 +23,7 @@ import type { OnEmojiPick } from './emoji';
 import { ComposeEmojiButton } from './emoji';
 import {
   selectComposeAttachments,
+  selectComposeCanSubmit,
   selectComposeCharsCount,
   selectComposeHasAttachments,
   selectComposeType,
@@ -33,6 +34,7 @@ export const ComposeFooter: React.FC<{ onEmojiPick: OnEmojiPick }> = ({
   onEmojiPick,
 }) => {
   const type = useAppSelector(selectComposeType);
+  const canSubmit = useAppSelector(selectComposeCanSubmit);
   const { current, max } = useAppSelector(selectComposeCharsCount);
   const { hasPoll, quotedStatusId } = useAppSelector(
     selectComposeHasAttachments,
@@ -42,6 +44,12 @@ export const ComposeFooter: React.FC<{ onEmojiPick: OnEmojiPick }> = ({
     (state) => !!state.compose.get('is_submitting'),
   );
   const isEditing = useAppSelector((state) => !!state.compose.get('id'));
+  const isScheduledEdit = useAppSelector(
+    (state) => !!state.compose.get('scheduled_status_id'),
+  );
+  const scheduledAt = useAppSelector(
+    (state) => state.compose.get('scheduled_at') as string | null,
+  );
 
   const dispatch = useAppDispatch();
   const handlePoll = useCallback(() => {
@@ -51,7 +59,21 @@ export const ComposeFooter: React.FC<{ onEmojiPick: OnEmojiPick }> = ({
   let publishText = (
     <FormattedMessage id='compose.publish' defaultMessage='Publish' />
   );
-  if (isEditing) {
+  if (isScheduledEdit) {
+    publishText = (
+      <FormattedMessage
+        id='scheduled_statuses.save'
+        defaultMessage='Save schedule changes'
+      />
+    );
+  } else if (scheduledAt) {
+    publishText = (
+      <FormattedMessage
+        id='scheduled_statuses.publish'
+        defaultMessage='Schedule post'
+      />
+    );
+  } else if (isEditing) {
     publishText = <FormattedMessage id='compose.save' defaultMessage='Save' />;
   } else if (type === 'message' || type === 'replyPrivate') {
     publishText = (
@@ -97,6 +119,7 @@ export const ComposeFooter: React.FC<{ onEmojiPick: OnEmojiPick }> = ({
           color='accent'
           type='submit'
           loading={isSubmitting}
+          disabled={!canSubmit}
         >
           {publishText}
         </Button>

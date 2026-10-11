@@ -1,21 +1,12 @@
-import { useCallback } from 'react';
-
 import { FormattedMessage } from 'react-intl';
 
 import { WarningIcon } from '@phosphor-icons/react';
 
-import { changeComposeLanguage } from '@/mastodon/actions/compose';
 import { Callout } from '@/mastodon/components/callout/redesign';
 import { Icon } from '@/mastodon/components/icon';
-import { useDismissible } from '@/mastodon/hooks/useDismissible';
 import { selectAccountStatus } from '@/mastodon/selectors/statuses';
-import {
-  createAppSelector,
-  useAppDispatch,
-  useAppSelector,
-} from '@/mastodon/store';
+import { createAppSelector, useAppSelector } from '@/mastodon/store';
 
-import { languageName, useLanguageGuess } from './hooks';
 import { selectComposeAttachments } from './selectors';
 import classes from './styles.module.scss';
 
@@ -47,12 +38,6 @@ export const ComposeHints = () => {
     selectComposeAttachmentsWithoutAlt,
   );
   const replyFollowersHandle = useAppSelector(selectIsFollowersReply);
-
-  const lang = useAppSelector(
-    (state) => state.compose.get('language') as string,
-  );
-  const guess = useLanguageGuess();
-  const isDifferentLanguage = lang && guess && lang !== guess;
 
   const publishErrors = useAppSelector((state) => state.composer.publishErrors);
 
@@ -91,11 +76,6 @@ export const ComposeHints = () => {
         'followers-reply',
       ),
     );
-  }
-
-  const { wasDismissed } = useDismissible('compose_language_hint');
-  if (isDifferentLanguage && !wasDismissed) {
-    messages.push(<LanguageHint guess={guess} key='different-language' />);
   }
 
   if (missingAlt && count === 1) {
@@ -142,48 +122,5 @@ const ComposerError: React.FC<{ children: React.ReactNode }> = ({
 
       {children}
     </div>
-  );
-};
-
-const LanguageHint: React.FC<{ guess: string }> = ({ guess }) => {
-  const language = languageName(guess);
-
-  const { wasDismissed, dismiss } = useDismissible('compose_language_hint');
-
-  const dispatch = useAppDispatch();
-  const handleChange = useCallback(() => {
-    dispatch(changeComposeLanguage(guess));
-  }, [dispatch, guess]);
-
-  if (!language || wasDismissed) {
-    return null;
-  }
-
-  return (
-    <Callout
-      icon={WarningIcon}
-      actionClick={handleChange}
-      actionText={
-        <FormattedMessage
-          id='compose.hints.language.change'
-          defaultMessage='Change'
-          description='Label on button to accept language change prompt'
-        />
-      }
-      secondaryActionClick={dismiss}
-      secondaryActionText={
-        <FormattedMessage
-          id='compose.hints.language.dismiss'
-          defaultMessage='Dismiss'
-          description='Label on button to dismiss language change prompt'
-        />
-      }
-    >
-      <FormattedMessage
-        id='compose.hints.language'
-        defaultMessage='Change this post’s language to {language}?'
-        values={{ language }}
-      />
-    </Callout>
   );
 };

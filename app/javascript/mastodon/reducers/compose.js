@@ -15,6 +15,8 @@ import {
   deletePollOption,
 } from '@/mastodon/actions/compose_typed';
 import { timelineDelete } from 'mastodon/actions/timelines_typed';
+import { setComposeSchedule, setComposeToScheduledStatus } from '../actions/scheduled_statuses';
+import { postingLanguageForLocale } from '../utils/posting_language';
 
 import {
   COMPOSE_MOUNT,
@@ -71,6 +73,8 @@ const initialState = ImmutableMap({
   spoiler_text: '',
   privacy: null,
   id: null,
+  scheduled_status_id: null,
+  scheduled_at: null,
   text: '',
   focusDate: null,
   caretPosition: null,
@@ -128,6 +132,8 @@ function statusToTextMentions(state, status) {
 function clearAll(state) {
   return state.withMutations(map => {
     map.set('id', null);
+    map.set('scheduled_status_id', null);
+    map.set('scheduled_at', null);
     map.set('text', '');
     map.set('spoiler', false);
     map.set('spoiler_text', '');
@@ -247,7 +253,8 @@ const privacyPreference = (a, b) => {
   return order[Math.max(order.indexOf(a), order.indexOf(b), 0)];
 };
 
-const hydrate = (state, hydratedState) => {
+const hydrate = (state, hydratedState, locale) => {
+  if (locale) hydratedState = hydratedState.set('default_language', postingLanguageForLocale(locale));
   state = clearAll(state.merge(hydratedState));
 
   if (hydratedState.get('text')) {
@@ -335,7 +342,27 @@ const calculateProgress = (loaded, total) => Math.min(Math.round((loaded / total
 
 /** @type {import('@reduxjs/toolkit').Reducer<typeof initialState>} */
 export const composeReducer = (state = initialState, action) => {
-  if (changeComposeVisibility.match(action)) {
+  if (setComposeSchedule.match(action)) {
+    return state.set('scheduled_at', action.payload).set('idempotencyKey', uuid());
+  } else if (setComposeToScheduledStatus.match(action)) {
+    const { id, scheduled_at, params, media_attachments } = action.payload;
+    return clearAll(state).merge({
+      scheduled_status_id: id,
+      scheduled_at,
+      text: params.text || '',
+      spoiler: !!params.spoiler_text || (!!params.sensitive && media_attachments.length > 0),
+      spoiler_text: params.spoiler_text || '',
+      sensitive: !!params.sensitive,
+      privacy: params.visibility || state.get('default_privacy'),
+      language: params.language || state.get('default_language'),
+      in_reply_to: params.in_reply_to_id || null,
+      quoted_status_id: params.quoted_status_id || null,
+      quote_policy: params.quote_approval_policy || 'nobody',
+      media_attachments: fromJS(media_attachments).map(media => media.set('unattached', false)),
+      poll: params.poll ? fromJS(params.poll) : null,
+      focusDate: new Date(),
+    });
+  } else if (changeComposeVisibility.match(action)) {
     return state
       .set('privacy', action.payload)
       .set('idempotencyKey', uuid());
@@ -430,7 +457,7 @@ export const composeReducer = (state = initialState, action) => {
   switch(action.type) {
   case STORE_HYDRATE:
     if (action.state.get('compose'))
-      return hydrate(state, action.state.get('compose'));
+      return hydrate(state, action.state.get('compose'), action.state.getIn(['meta', 'locale']));
     return state;
   case COMPOSE_MOUNT:
     return state
@@ -479,6 +506,8 @@ export const composeReducer = (state = initialState, action) => {
   case COMPOSE_REPLY:
     return state.withMutations(map => {
       map.set('id', null);
+      map.set('scheduled_status_id', null);
+      map.set('scheduled_at', null);
       map.set('in_reply_to', action.status.get('id'));
       map.set('text', statusToTextMentions(state, action.status));
       map.set('privacy', privacyPreference(action.status.get('visibility'), state.get('default_privacy')));
@@ -490,11 +519,7 @@ export const composeReducer = (state = initialState, action) => {
 
       map.update('media_attachments', list => list.filter(media => media.get('unattached')));
 
-      if (action.status.get('language') && !action.status.has('translation')) {
-        map.set('language', action.status.get('language'));
-      } else {
-        map.set('language', state.get('default_language'));
-      }
+      map.set('language', state.get('default_language'));
 
       if (action.status.get('spoiler_text').length > 0) {
         map.set('spoiler', true);
@@ -588,6 +613,8 @@ export const composeReducer = (state = initialState, action) => {
     return insertEmoji(state, action.position, action.emoji, action.needsSpace);
   case REDRAFT:
     return state.withMutations(map => {
+      map.set('scheduled_status_id', null);
+      map.set('scheduled_at', null);
       map.set('text', action.raw_text || unescapeHTML(expandMentions(action.status)));
       map.set('in_reply_to', action.status.get('in_reply_to_id'));
       map.set('privacy', action.status.get('visibility'));
@@ -596,7 +623,7 @@ export const composeReducer = (state = initialState, action) => {
       map.set('caretPosition', null);
       map.set('idempotencyKey', uuid());
       map.set('sensitive', action.status.get('sensitive'));
-      map.set('language', action.status.get('language'));
+      map.set('language', state.get('default_language'));
       map.set('id', null);
       map.set('quoted_status_id', action.quoted_status_id);
       // Mastodon-authored posts can be expected to have at most one automatic approval policy
@@ -625,6 +652,8 @@ export const composeReducer = (state = initialState, action) => {
     });
   case COMPOSE_SET_STATUS:
     return state.withMutations(map => {
+      map.set('scheduled_status_id', null);
+      map.set('scheduled_at', null);
       map.set('id', action.status.get('id'));
       map.set('text', action.text);
       map.set('in_reply_to', action.status.get('in_reply_to_id'));

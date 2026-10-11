@@ -17,8 +17,8 @@ import type { OnEmojiPick } from './emoji';
 import { ComposeFooter } from './footer';
 import { ComposeFormHeader } from './header';
 import { ComposeHints } from './hints';
-import { LanguageButton } from './language';
 import { ComposeReply } from './reply';
+import { ComposeScheduleButton, ComposeScheduleSummary } from './schedule';
 import { selectComposeType } from './selectors';
 import { ComposeSensitiveField } from './sensitive';
 import { ComposeSettingsMenu } from './settings';
@@ -77,10 +77,12 @@ export const RedesignComposeForm: React.FC<
       <div className={classes.toolbar}>
         <ComposeVisibility className={classes.flexGrowWrap} />
 
-        <LanguageButton />
+        <ComposeScheduleButton />
 
         <ComposeSettingsMenu />
       </div>
+
+      <ComposeScheduleSummary />
 
       <ComposeTextarea
         autoFocus={autoFocus}

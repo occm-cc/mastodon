@@ -1,6 +1,6 @@
 import { defineMessages } from 'react-intl';
 
-import { isCancel } from 'axios';
+import { isCancel, isAxiosError } from 'axios';
 import { throttle } from 'lodash';
 
 import api from '@/mastodon/api';
@@ -8,16 +8,19 @@ import { browserHistory } from '@/mastodon/components/router';
 import { countableText } from '@/mastodon/features/compose/util/counter';
 import { tagHistory } from '@/mastodon/settings';
 import { emojiMartSearch } from '@/mastodon/features/emoji/picker';
+import { postingLanguageForLocale } from '@/mastodon/utils/posting_language';
+import { isValidSchedule } from '@/mastodon/features/compose/redesign/schedule_utils';
 
 import { showAlert, showAlertForError } from './alerts';
 import { isStandaloneComposePath } from './compose_path';
+import { scheduledMessages } from './scheduled_statuses';
 import { emojiUse } from './emojis';
 import { importFetchedAccounts, importFetchedStatus } from './importer';
 import { openModal } from './modal';
 import { updateTimeline } from './timelines';
 import { insertStatusIntoAccountTimelines } from './timelines_typed';
 import { isRedesignEnabled } from '../utils/environment';
-import { requestComposerFocus } from '../reducers/slices/composer';
+import { requestComposerFocus, resetComposer } from '../reducers/slices/composer';
 
 /** @type {AbortController | undefined} */
 let fetchComposeSuggestionsAccountsController;
@@ -209,6 +212,9 @@ export function submitCompose(successCallback) {
     const statusText   = getState().getIn(['compose', 'text'], '');
     const media        = getState().getIn(['compose', 'media_attachments']);
     const statusId     = getState().getIn(['compose', 'id'], null);
+    const scheduledId  = getState().getIn(['compose', 'scheduled_status_id'], null);
+    const scheduledAt  = getState().getIn(['compose', 'scheduled_at'], null);
+    const isScheduled  = !!scheduledAt || !!scheduledId;
     const hasQuote     = !!getState().getIn(['compose', 'quoted_status_id']);
     const spoiler_text = getState().getIn(['compose', 'spoiler']) ? getState().getIn(['compose', 'spoiler_text'], '') : '';
 
@@ -224,13 +230,21 @@ export function submitCompose(successCallback) {
       return;
     }
 
+    if (isScheduled && !isValidSchedule(scheduledAt)) {
+      dispatch(showAlert({ message: scheduledMessages.invalidTime }));
+      return;
+    }
+    if (getState().getIn(['compose', 'is_submitting']) ||
+        getState().getIn(['compose', 'is_uploading']) ||
+        getState().getIn(['compose', 'is_changing_upload'])) return;
+    const accountId = getState().getIn(['meta', 'me']);
     dispatch(submitComposeRequest());
 
     // If we're editing a post with media attachments, those have not
     // necessarily been changed on the server. Do it now in the same
     // API call.
     let media_attributes;
-    if (statusId !== null) {
+    if (statusId !== null || scheduledId !== null) {
       media_attributes = media.map(item => {
         let focus;
 
@@ -247,9 +261,11 @@ export function submitCompose(successCallback) {
     }
 
     const visibility = getState().getIn(['compose', 'privacy']);
+    const apiPath = isScheduled ? '/api/v2/scheduled_statuses' : '/api/v1/statuses';
+    const targetId = scheduledId || statusId;
     api().request({
-      url: statusId === null ? '/api/v1/statuses' : `/api/v1/statuses/${statusId}`,
-      method: statusId === null ? 'post' : 'put',
+      url: targetId ? `${apiPath}/${targetId}` : apiPath,
+      method: targetId ? 'put' : 'post',
       data: {
         status: statusText,
         spoiler_text,
@@ -259,7 +275,8 @@ export function submitCompose(successCallback) {
         sensitive: getState().getIn(['compose', 'sensitive']),
         visibility: visibility,
         poll: getState().getIn(['compose', 'poll'], null),
-        language: getState().getIn(['compose', 'language']),
+        language: statusId || scheduledId ? getState().getIn(['compose', 'language']) : postingLanguageForLocale(getState().getIn(['meta', 'locale'], 'en')),
+        ...(isScheduled ? { scheduled_at: scheduledAt } : {}),
         quoted_status_id: getState().getIn(['compose', 'quoted_status_id']),
         quote_approval_policy: visibility === 'private' || visibility === 'direct' ? 'nobody' : getState().getIn(['compose', 'quote_policy']),
       },
@@ -267,8 +284,22 @@ export function submitCompose(successCallback) {
         'Idempotency-Key': getState().getIn(['compose', 'idempotencyKey']),
       },
     }).then(function (response) {
+      if (getState().getIn(['meta', 'me']) !== accountId) return;
       if (isStandaloneComposePath(browserHistory.location.pathname) && window.history.state) {
         browserHistory.goBack();
+      }
+
+      if (isScheduled) {
+        dispatch(submitComposeSuccess(response.data));
+        if (typeof successCallback === 'function') successCallback(response.data);
+        dispatch(resetComposer());
+        dispatch(showAlert({
+          message: scheduledId ? scheduledMessages.saved : scheduledMessages.scheduled,
+          action: scheduledMessages.open,
+          dismissAfter: 10000,
+          onClick: () => dispatch(openModal({ modalType: 'SCHEDULED_STATUSES', modalProps: {} })),
+        }));
+        return;
       }
 
       dispatch(insertIntoTagHistory(response.data.tags, statusText));
@@ -318,6 +349,16 @@ export function submitCompose(successCallback) {
         ),
       }));
     }).catch(function (error) {
+      if (getState().getIn(['meta', 'me']) !== accountId) return;
+      if (isScheduled && isAxiosError(error) && error.response?.status === 404) {
+        dispatch(showAlert({
+          message: scheduledMessages.unavailable,
+          action: scheduledMessages.open,
+          onClick: () => dispatch(openModal({ modalType: 'SCHEDULED_STATUSES', modalProps: {} })),
+        }));
+        dispatch({ ...submitComposeFail(error), skipAlert: true });
+        return;
+      }
       dispatch(submitComposeFail(error));
     });
   };

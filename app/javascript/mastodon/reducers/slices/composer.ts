@@ -21,6 +21,7 @@ import {
   replyComposeById,
 } from '@/mastodon/actions/compose_typed';
 import { openModal } from '@/mastodon/actions/modal';
+import { setComposeToScheduledStatus } from '@/mastodon/actions/scheduled_statuses';
 import { REDRAFT } from '@/mastodon/actions/statuses';
 import type {
   ApiStatusJSON,
@@ -100,6 +101,9 @@ const composerSlice = createSlice({
     },
   },
   extraReducers(builder) {
+    builder.addCase(setComposeToScheduledStatus, (state) => {
+      state.publishErrors = [];
+    });
     builder.addMatcher(
       (action) =>
         isAction(action) &&
@@ -110,6 +114,7 @@ const composerSlice = createSlice({
           COMPOSE_DIRECT,
           COMPOSE_SET_STATUS,
           REDRAFT,
+          setComposeToScheduledStatus.type,
         ].includes(action.type),
       (state) => {
         state.displayState = 'showing';
@@ -148,14 +153,24 @@ export const selectComposerIsChanged = createAppSelector(
         'media_attachments',
       ) as unknown as Immutable.List<unknown>,
     (state) => Number(state.compose.get('pending_media_attachments')),
+    (state) => !!state.compose.get('scheduled_status_id'),
   ],
-  (text, spoilerText, hasPoll, hasQuote, attachments, pendingAttachmentsNum) =>
+  (
+    text,
+    spoilerText,
+    hasPoll,
+    hasQuote,
+    attachments,
+    pendingAttachmentsNum,
+    isScheduledEdit,
+  ) =>
     text.trim().length > 0 ||
     spoilerText.trim().length > 0 ||
     hasPoll ||
     hasQuote ||
     attachments.size > 0 ||
-    pendingAttachmentsNum > 0,
+    pendingAttachmentsNum > 0 ||
+    isScheduledEdit,
 );
 
 interface ComposeNewPost {
@@ -333,8 +348,8 @@ export const submitComposer = createAppThunk(
       );
     } else {
       dispatch(
-        submitCompose((status: ApiStatusJSON) => {
-          if (redirectOnSuccess) {
+        submitCompose((status: ApiStatusJSON | { scheduled_at: string }) => {
+          if (redirectOnSuccess && !('scheduled_at' in status)) {
             window.location.assign(status.url);
           }
 

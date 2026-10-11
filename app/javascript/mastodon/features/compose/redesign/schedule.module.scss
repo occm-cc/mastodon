@@ -1,0 +1,161 @@
+@use '@/styles/mastodon/variables';
+
+.modal[class] {
+  // Override the shared shell's padding regardless of CSS chunk load order.
+  width: min(600px, 100%);
+  max-height: min(840px, 90dvh);
+  padding: 0;
+  gap: 0;
+
+  @media (width <= #{variables.$mobile-menu-breakpoint}) {
+    max-height: calc(100dvh - var(--space-5) * 2);
+  }
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  flex-shrink: 0;
+
+  h1 {
+    min-width: 0;
+  }
+}
+
+.body {
+  padding: var(--space-4);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+
+  fieldset {
+    min-width: 0;
+    border: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+
+  legend {
+    color: var(--color-text-secondary);
+    margin-block-end: var(--space-3);
+  }
+}
+
+.fields {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+.label,
+.hint,
+.time,
+.summary {
+  color: var(--color-text-secondary);
+}
+
+.hint {
+  font-size: var(--fs-13);
+  margin-block-start: var(--space-2);
+}
+
+.time {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+
+  svg {
+    flex: 0 0 24px;
+    width: 24px;
+    height: 24px;
+  }
+}
+
+.summary {
+  justify-content: start;
+  text-align: start;
+  white-space: normal;
+}
+
+.actions {
+  padding: var(--space-3) var(--space-4);
+  border-block-start: 1px solid var(--color-border-primary);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+
+.error {
+  color: var(--color-text-error);
+}
+
+.list {
+  min-height: 0;
+  flex: 1;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.listModal {
+  height: min(800px, 90dvh);
+
+  @media (width <= #{variables.$mobile-menu-breakpoint}) {
+    height: 100dvh;
+  }
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  border-block-start: 1px solid var(--color-border-primary);
+  padding-inline: var(--space-4);
+
+  button {
+    flex: 1;
+    min-width: 0;
+    padding: var(--space-4) 0;
+    background: transparent;
+    border: 0;
+    color: var(--color-text-primary);
+    text-align: start;
+    cursor: pointer;
+
+    &:focus-visible {
+      outline: var(--outline-focus-default);
+    }
+  }
+
+  input {
+    margin-inline-end: var(--space-3);
+  }
+}
+
+.preview {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  margin-block-start: var(--space-2);
+}
+
+.metadata {
+  display: inline-block;
+  margin-inline-end: var(--space-2);
+  margin-block-start: var(--space-2);
+  font-size: var(--fs-13);
+  color: var(--color-text-secondary);
+}
+
+.empty {
+  padding: var(--space-6) var(--space-4);
+  color: var(--color-text-secondary);
+}

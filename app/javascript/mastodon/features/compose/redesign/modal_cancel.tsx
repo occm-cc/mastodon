@@ -37,7 +37,10 @@ const ComposerModalCancelConfirm: React.FC<{ openNew?: boolean }> = ({
     dispatch(requestComposerFocus());
   }, [dispatch]);
 
-  const isEditing = useAppSelector((state) => !!state.compose.get('id'));
+  const isEditing = useAppSelector(
+    (state) =>
+      !!state.compose.get('id') || !!state.compose.get('scheduled_status_id'),
+  );
 
   return (
     <ModalShell>

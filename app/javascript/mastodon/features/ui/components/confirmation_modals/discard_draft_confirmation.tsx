@@ -48,13 +48,16 @@ const messages = defineMessages({
   },
 });
 
-const DiscardDraftConfirmationModal: React.FC<
+export const DiscardDraftConfirmationModal: React.FC<
   {
     onConfirm: () => void;
   } & BaseConfirmationModalProps
 > = ({ onConfirm, onClose }) => {
   const intl = useIntl();
-  const isEditing = useAppSelector((state) => !!state.compose.get('id'));
+  const isEditing = useAppSelector(
+    (state) =>
+      !!state.compose.get('id') || !!state.compose.get('scheduled_status_id'),
+  );
 
   const contextualMessages = isEditing ? editMessages : postMessages;
 

@@ -20,6 +20,10 @@ import { selectComposeType } from './selectors';
 import classes from './styles.module.scss';
 
 const messages = defineMessages({
+  scheduledEdit: {
+    id: 'scheduled_statuses.edit_title',
+    defaultMessage: 'Edit scheduled post',
+  },
   postNew: {
     id: 'compose.post.title.new',
     defaultMessage: 'New post',
@@ -59,8 +63,13 @@ const messages = defineMessages({
 });
 
 const selectComposeFormTitle = createAppSelector(
-  [selectComposeType, (state) => state.compose.get('id') as null | string],
-  (type, id) => {
+  [
+    selectComposeType,
+    (state) => state.compose.get('id') as null | string,
+    (state) => !!state.compose.get('scheduled_status_id'),
+  ],
+  (type, id, isScheduledEdit) => {
+    if (isScheduledEdit) return messages.scheduledEdit;
     return messages[`${type}${id ? 'Edit' : 'New'}`];
   },
 );
