@@ -68,8 +68,15 @@ class PostStatusService < BaseService
     end
 
     unless scheduled?
-      postprocess_status!
-      bump_potential_friendship!
+      if @options[:defer_postprocessing]
+        ActiveRecord.after_all_transactions_commit do
+          postprocess_status!
+          bump_potential_friendship!
+        end
+      else
+        postprocess_status!
+        bump_potential_friendship!
+      end
     end
 
     @status
@@ -148,6 +155,16 @@ class PostStatusService < BaseService
   end
 
   def schedule_status!
+    validate_scheduled_status!
+
+    ApplicationRecord.transaction do
+      @status = persist_scheduled_status!
+    end
+  rescue Antispam::SilentlyDrop
+    @status = @account.scheduled_statuses.new(scheduled_status_attributes).tap(&:delete)
+  end
+
+  def validate_scheduled_status!
     status_for_validation = @account.statuses.build(status_attributes)
     safeguard_private_mention_quote!(status_for_validation)
 
@@ -159,18 +176,13 @@ class PostStatusService < BaseService
       # persisted when the associated media attachments get updated when creating the
       # scheduled status.
       status_for_validation.destroy
-
-      # The following transaction block is needed to wrap the UPDATEs to
-      # the media attachments when the scheduled status is created
-
-      ApplicationRecord.transaction do
-        @status = @account.scheduled_statuses.create!(scheduled_status_attributes)
-      end
     else
       raise ActiveRecord::RecordInvalid
     end
-  rescue Antispam::SilentlyDrop
-    @status = @account.scheduled_statuses.new(scheduled_status_attributes).tap(&:delete)
+  end
+
+  def persist_scheduled_status!
+    @account.scheduled_statuses.create!(scheduled_status_attributes)
   end
 
   def postprocess_status!

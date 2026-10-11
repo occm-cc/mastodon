@@ -7,14 +7,20 @@ class PublishScheduledStatusWorker
 
   def perform(scheduled_status_id)
     scheduled_status = ScheduledStatus.find(scheduled_status_id)
-    scheduled_status.destroy!
+    scheduled_status.with_lock do
+      # Jobs already queued for the previous time must not publish a moved post.
+      return true if scheduled_status.scheduled_at > Time.now.utc
 
-    return true if scheduled_status.account.user_disabled?
+      if scheduled_status.account.user_disabled?
+        scheduled_status.destroy!
+        return true
+      end
 
-    PostStatusService.new.call(
-      scheduled_status.account,
-      options_with_objects(scheduled_status.params.with_indifferent_access)
-    )
+      options = options_with_objects(scheduled_status.params.with_indifferent_access)
+      scheduled_status.destroy!
+
+      PostStatusService.new.call(scheduled_status.account, options.merge(defer_postprocessing: true))
+    end
   rescue ActiveRecord::RecordNotFound, ActiveRecord::RecordInvalid
     true
   end

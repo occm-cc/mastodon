@@ -366,6 +366,8 @@ namespace :api, format: false do
   namespace :v2 do
     get '/search', to: 'search#index', as: :search
 
+    resources :scheduled_statuses, only: [:index, :show, :create, :update, :destroy]
+
     resources :media, only: [:create]
     resources :suggestions, only: [:index]
     resource :instance, only: [:show]
