@@ -3,6 +3,7 @@ import { useCallback, useRef } from 'react';
 
 import { defineMessages, useIntl } from 'react-intl';
 
+import { useColumn } from '@/mastodon/components/column/context';
 import { fetchChatRooms } from 'mastodon/actions/dm';
 import { useAppDispatch, useAppSelector } from 'mastodon/store';
 
@@ -11,7 +12,10 @@ import { ChatRoomListHeader } from './chat_room_list_header';
 import { ChatRoomListSkeleton } from './skeleton_loading';
 
 const messages = defineMessages({
-  migrationLoading: { id: 'dm.chat_room_list.migration_loading', defaultMessage: 'Loading your conversation history...' },
+  migrationLoading: {
+    id: 'dm.chat_room_list.migration_loading',
+    defaultMessage: 'Loading your conversation history...',
+  },
   loading: { id: 'dm.chat_room_list.loading', defaultMessage: 'Loading...' },
 });
 
@@ -27,6 +31,7 @@ export const ChatRoomList: React.FC<ChatRoomListProps> = ({ activeRoomId }) => {
     (state) => state.dm.migrationInProgress,
   );
   const scrollRef = useRef<HTMLDivElement>(null);
+  const { scrollSensor } = useColumn();
 
   const handleScroll = useCallback(() => {
     const el = scrollRef.current;
@@ -44,7 +49,13 @@ export const ChatRoomList: React.FC<ChatRoomListProps> = ({ activeRoomId }) => {
         dispatch(fetchChatRooms({ max_id: lastRoom.id }));
       }
     }
-  }, [dispatch, chatRooms.isLoading, chatRooms.hasMore, chatRooms.orderedIds, chatRooms.items]);
+  }, [
+    dispatch,
+    chatRooms.isLoading,
+    chatRooms.hasMore,
+    chatRooms.orderedIds,
+    chatRooms.items,
+  ]);
 
   const isFirstLoad = chatRooms.isLoading && chatRooms.orderedIds.length === 0;
   const showMigrationBanner =
@@ -56,10 +67,11 @@ export const ChatRoomList: React.FC<ChatRoomListProps> = ({ activeRoomId }) => {
     <div className='dm-chat-room-list'>
       <ChatRoomListHeader />
       <div
-        className='dm-chat-room-list__items'
+        className='dm-chat-room-list__items scrollable'
         ref={scrollRef}
         onScroll={handleScroll}
       >
+        {scrollSensor}
         {isFirstLoad ? (
           <ChatRoomListSkeleton />
         ) : (

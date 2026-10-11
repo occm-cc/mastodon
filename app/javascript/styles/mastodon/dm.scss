@@ -1,6 +1,9 @@
 // DM Feature Styles
 
-.dm-page {
+.dm-page[data-column-root] {
+  // Column usually grows to fill the document. DM has its own viewport-sized
+  // scrollers and must reserve the mobile navigation space in every theme.
+  flex: 0 0 auto;
   display: flex;
   flex-direction: column;
   height: calc(100dvh - env(safe-area-inset-bottom, 0px));
@@ -43,64 +46,30 @@ body.app-body:has(.dm-page) {
   font-size: 14px;
 }
 
-// Chat Room List Header
-.dm-chat-room-list-header {
-  padding: 16px;
-  border-bottom: 1px solid var(--background-border-color);
-}
-
-.dm-chat-room-list-header__top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 12px;
-}
-
-.dm-chat-room-list-header__title {
-  font-size: 16px;
-  font-weight: 700;
-  color: var(--primary-text-color, #fff);
-  margin: 0;
-}
-
-.dm-chat-room-list-header__new-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  border: none;
-  border-radius: 50%;
-  background: transparent;
-  color: var(--primary-text-color, #fff);
-  cursor: pointer;
-
-  &:hover {
-    background: rgba(255, 255, 255, 10%);
-  }
-}
-
+// The heading and actions use the shared ColumnHeader. Search remains part
+// of the list content rather than changing the height of the page header.
 .dm-chat-room-list-header__search {
-  width: 100%;
+  padding: 8px 16px 16px;
+  flex-shrink: 0;
 }
 
 .dm-chat-room-list-header__search-input {
+  box-sizing: border-box;
   width: 100%;
-  padding: 8px 16px;
-  border: 1px solid var(--background-border-color);
   border-radius: 20px;
-  background: var(--surface-background-color, #1e2125);
-  color: var(--primary-text-color, #fff);
-  font-size: 14px;
-  outline: none;
+  background: var(--color-bg-secondary);
+  color: var(--color-text-primary);
 
   &::placeholder {
-    color: var(--secondary-text-color, #8899a6);
+    color: var(--color-text-secondary);
   }
+}
 
-  &:focus {
-    border-color: #1d9bf0;
-  }
+// These panels scroll internally. ColumnsArea normally binds .scrollable to
+// the document, so override that rule while retaining Column's scroll target.
+.dm-page .dm-chat-room-list .dm-chat-room-list__items,
+.dm-page .dm-chat-room-view .dm-message-list {
+  overflow-y: auto;
 }
 
 // Chat Room Item
@@ -248,38 +217,27 @@ body.app-body:has(.dm-page) {
 }
 
 // Chat Room Header
-.dm-chat-room-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  height: 56px;
-  padding: 0 16px;
-  border-bottom: 1px solid var(--background-border-color);
-  flex-shrink: 0;
-}
-
-.dm-chat-room-header__left {
+.dm-chat-room-header__identity {
   display: flex;
   align-items: center;
   min-width: 0;
+  text-align: start;
 }
 
 .dm-chat-room-header__avatar {
+  display: block;
+  flex-shrink: 0;
   margin-inline-end: 12px;
 }
 
-.dm-chat-room-header__avatar-placeholder {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  background: var(--surface-background-color, #38444d);
-}
-
+.dm-chat-room-header__avatar-placeholder,
 .dm-chat-room-header__avatar-img {
+  display: block;
   width: 36px;
   height: 36px;
   border-radius: 50%;
   object-fit: cover;
+  background: var(--color-bg-secondary);
 }
 
 .dm-chat-room-header__info {
@@ -289,58 +247,18 @@ body.app-body:has(.dm-page) {
 }
 
 .dm-chat-room-header__name {
-  font-size: 15px;
-  font-weight: 600;
-  color: var(--primary-text-color, #fff);
+  font: inherit;
+  color: inherit;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .dm-chat-room-header__members {
-  font-size: 13px;
-  color: var(--secondary-text-color, #8899a6);
-}
-
-.dm-chat-room-header__right {
-  flex-shrink: 0;
-}
-
-.dm-chat-room-header__settings-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  border: none;
-  border-radius: 50%;
-  background: transparent;
-  color: var(--secondary-text-color, #8899a6);
-  cursor: pointer;
-
-  &:hover {
-    background: rgba(255, 255, 255, 10%);
-    color: var(--primary-text-color, #fff);
-  }
-}
-
-// Back button in header (always visible)
-.dm-chat-room-header__back-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  border: none;
-  border-radius: 50%;
-  background: transparent;
-  color: var(--primary-text-color, #fff);
-  cursor: pointer;
-  margin-inline-end: 8px;
-
-  &:hover {
-    background: rgba(255, 255, 255, 10%);
-  }
+  font-size: var(--fs-13);
+  font-weight: normal;
+  line-height: var(--lh-tighter);
+  color: var(--color-text-secondary);
 }
 
 // Message List
@@ -1278,28 +1196,6 @@ body.app-body:has(.dm-page) {
 
 // Light mode overrides
 html[data-color-scheme='light'] {
-  // Chat Room List Header
-  .dm-chat-room-list-header__title {
-    color: #0f1419;
-  }
-
-  .dm-chat-room-list-header__new-btn {
-    color: #0f1419;
-
-    &:hover {
-      background: rgba(0, 0, 0, 5%);
-    }
-  }
-
-  .dm-chat-room-list-header__search-input {
-    background: #f7f9f9;
-    color: #0f1419;
-
-    &::placeholder {
-      color: #536471;
-    }
-  }
-
   // Chat Room Item
   .dm-chat-room-item {
     &:hover {
@@ -1326,36 +1222,6 @@ html[data-color-scheme='light'] {
   }
 
   .dm-chat-room-item__avatar-placeholder {
-    background: #e1e8ed;
-  }
-
-  // Chat Room Header
-  .dm-chat-room-header__name {
-    color: #0f1419;
-  }
-
-  .dm-chat-room-header__members {
-    color: #536471;
-  }
-
-  .dm-chat-room-header__back-btn {
-    color: #0f1419;
-
-    &:hover {
-      background: rgba(0, 0, 0, 5%);
-    }
-  }
-
-  .dm-chat-room-header__settings-btn {
-    color: #536471;
-
-    &:hover {
-      background: rgba(0, 0, 0, 5%);
-      color: #0f1419;
-    }
-  }
-
-  .dm-chat-room-header__avatar-placeholder {
     background: #e1e8ed;
   }
 

@@ -70,7 +70,11 @@ export const MessageList: React.FC<MessageListProps> = ({
   );
 
   return (
-    <div className='dm-message-list' ref={scrollRef} onScroll={handleScroll}>
+    <div
+      className='dm-message-list scrollable'
+      ref={scrollRef}
+      onScroll={handleScroll}
+    >
       {messages.map((message, index) => {
         const prevMessage = index > 0 ? messages[index - 1] : null;
         const isOwn = message.account_id === currentAccountId;

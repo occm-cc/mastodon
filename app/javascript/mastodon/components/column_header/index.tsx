@@ -31,6 +31,7 @@ export interface ColumnHeaderProps {
   // Set to auto to display the back button based on
   // the `fromMastodon` location state
   withBackButton?: boolean | 'auto';
+  onBack?: () => void;
   withUnreadMarker?: boolean;
   extraButtons?: React.ReactNode;
   extraStickyContent?: React.ReactNode;
@@ -40,6 +41,7 @@ export interface ColumnHeaderProps {
 export const ColumnHeader: React.FC<ColumnHeaderProps> = ({
   title,
   withBackButton,
+  onBack,
   withUnreadMarker,
   extraButtons,
   extraStickyContent,
@@ -90,7 +92,7 @@ export const ColumnHeader: React.FC<ColumnHeaderProps> = ({
           jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events
         */}
       <div className={classes.layout} onClick={handleHeaderClick}>
-        {hasBackButton ? <BackButton /> : <MobileMenuButton />}
+        {hasBackButton ? <BackButton onBack={onBack} /> : <MobileMenuButton />}
         <NavigationFocusTarget className={classes.title}>
           <button
             type='button'
@@ -164,7 +166,7 @@ export const ColumnHeaderButton: React.FC<ColumnHeaderButtonProps> = ({
   );
 };
 
-const BackButton: React.FC = () => {
+const BackButton: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
   const history = useAppHistory();
 
   const goBack = useCallback(() => {
@@ -177,7 +179,7 @@ const BackButton: React.FC = () => {
 
   return (
     <div className={classes.leftButton}>
-      <ColumnHeaderButton onClick={goBack} icon={ArrowLeftIcon}>
+      <ColumnHeaderButton onClick={onBack ?? goBack} icon={ArrowLeftIcon}>
         <FormattedMessage id='column_back_button.label' defaultMessage='Back' />
       </ColumnHeaderButton>
     </div>

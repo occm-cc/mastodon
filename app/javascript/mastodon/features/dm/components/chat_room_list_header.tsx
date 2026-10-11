@@ -3,12 +3,26 @@ import { useState, useCallback } from 'react';
 
 import { defineMessages, useIntl } from 'react-intl';
 
+import { NotePencilIcon } from '@phosphor-icons/react';
+
+import {
+  ColumnHeader,
+  ColumnHeaderButton,
+} from '@/mastodon/components/column_header';
+import { TextInput } from '@/mastodon/components/form_fields';
+
 import { NewChatRoomModal } from './new_chat_room_modal';
 
 const messages = defineMessages({
   title: { id: 'dm.chat_room_list_header.title', defaultMessage: 'Messages' },
-  newMessage: { id: 'dm.chat_room_list_header.new_message', defaultMessage: 'New message' },
-  searchPlaceholder: { id: 'dm.chat_room_list_header.search_placeholder', defaultMessage: 'Search conversations...' },
+  newMessage: {
+    id: 'dm.chat_room_list_header.new_message',
+    defaultMessage: 'New message',
+  },
+  searchPlaceholder: {
+    id: 'dm.chat_room_list_header.search_placeholder',
+    defaultMessage: 'Search conversations...',
+  },
 });
 
 export const ChatRoomListHeader: React.FC = () => {
@@ -24,39 +38,25 @@ export const ChatRoomListHeader: React.FC = () => {
   }, []);
 
   return (
-    <div className='dm-chat-room-list-header'>
-      <div className='dm-chat-room-list-header__top'>
-        <h2 className='dm-chat-room-list-header__title'>{intl.formatMessage(messages.title)}</h2>
-        <button
-          className='dm-chat-room-list-header__new-btn'
-          type='button'
-          title={intl.formatMessage(messages.newMessage)}
-          onClick={handleOpenModal}
-        >
-          <svg
-            width='20'
-            height='20'
-            viewBox='0 0 24 24'
-            fill='none'
-            stroke='currentColor'
-            strokeWidth='2'
-            strokeLinecap='round'
-            strokeLinejoin='round'
-          >
-            <path d='M12 20h9' />
-            <path d='M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z' />
-          </svg>
-        </button>
-      </div>
+    <>
+      <ColumnHeader
+        title={intl.formatMessage(messages.title)}
+        extraButtons={
+          <ColumnHeaderButton icon={NotePencilIcon} onClick={handleOpenModal}>
+            {intl.formatMessage(messages.newMessage)}
+          </ColumnHeaderButton>
+        }
+      />
       <div className='dm-chat-room-list-header__search'>
-        <input
-          type='text'
+        <TextInput
+          type='search'
           className='dm-chat-room-list-header__search-input'
           placeholder={intl.formatMessage(messages.searchPlaceholder)}
+          aria-label={intl.formatMessage(messages.searchPlaceholder)}
           readOnly
         />
       </div>
       <NewChatRoomModal isOpen={isModalOpen} onClose={handleCloseModal} />
-    </div>
+    </>
   );
 };

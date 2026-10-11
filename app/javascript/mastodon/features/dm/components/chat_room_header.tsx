@@ -1,15 +1,24 @@
 import type React from 'react';
 import { useState, useCallback } from 'react';
 
-import { defineMessages, useIntl } from 'react-intl';
+import { defineMessages, FormattedMessage, useIntl } from 'react-intl';
 
+import { GearIcon, ListIcon } from '@phosphor-icons/react';
+
+import { openNavigation } from '@/mastodon/actions/navigation';
+import {
+  ColumnHeader,
+  ColumnHeaderButton,
+} from '@/mastodon/components/column_header';
+import { useBreakpoint } from '@/mastodon/features/ui/hooks/useBreakpoint';
+import { useAppDispatch } from '@/mastodon/store';
 import { me } from 'mastodon/initial_state';
 import type { DmChatRoom } from 'mastodon/reducers/dm';
 
 import { RoomSettingsModal } from './room_settings_modal';
 
 const messages = defineMessages({
-  back: { id: 'dm.chat_room_header.back', defaultMessage: 'Back' },
+  title: { id: 'dm.chat_room_list_header.title', defaultMessage: 'Messages' },
   settings: {
     id: 'dm.chat_room_header.settings',
     defaultMessage: 'Room settings',
@@ -25,7 +34,7 @@ const messages = defineMessages({
 });
 
 interface ChatRoomHeaderProps {
-  room: DmChatRoom;
+  room?: DmChatRoom;
   onBack?: () => void;
 }
 
@@ -39,23 +48,29 @@ export const ChatRoomHeader: React.FC<ChatRoomHeaderProps> = ({
   onBack,
 }) => {
   const intl = useIntl();
+  const dispatch = useAppDispatch();
+  const isMobile = useBreakpoint('openable');
+  const handleOpenNavigation = useCallback(() => {
+    dispatch(openNavigation());
+  }, [dispatch]);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const otherParticipant = room.participants.find((p) => p.id !== me);
+  const otherParticipant = room?.participants.find((p) => p.id !== me);
   const fallbackName = intl.formatMessage(messages.roomFallback, {
-    id: room.id,
+    id: room?.id ?? '',
   });
-  const roomName =
-    room.room_type === 'direct'
+  const roomName = !room
+    ? intl.formatMessage(messages.title)
+    : room.room_type === 'direct'
       ? (firstNonBlank(
           otherParticipant?.display_name,
           otherParticipant?.username,
           room.title,
         ) ?? fallbackName)
       : (firstNonBlank(room.title) ?? fallbackName);
-  const participantCount = room.participant_ids.length;
+  const participantCount = room?.participant_ids.length ?? 0;
   const avatarUrl = firstNonBlank(
     otherParticipant?.avatar_static,
-    room.participants[0]?.avatar_static,
+    room?.participants[0]?.avatar_static,
   );
 
   const handleOpenSettings = useCallback(() => {
@@ -67,78 +82,66 @@ export const ChatRoomHeader: React.FC<ChatRoomHeaderProps> = ({
   }, []);
 
   return (
-    <div className='dm-chat-room-header'>
-      <div className='dm-chat-room-header__left'>
-        {onBack && (
-          <button
-            className='dm-chat-room-header__back-btn'
-            type='button'
-            title={intl.formatMessage(messages.back)}
-            onClick={onBack}
-          >
-            <svg
-              width='20'
-              height='20'
-              viewBox='0 0 24 24'
-              fill='none'
-              stroke='currentColor'
-              strokeWidth='2'
-              strokeLinecap='round'
-              strokeLinejoin='round'
-            >
-              <path d='M19 12H5M12 19l-7-7 7-7' />
-            </svg>
-          </button>
-        )}
-        <div className='dm-chat-room-header__avatar'>
-          {avatarUrl ? (
-            <img
-              className='dm-chat-room-header__avatar-img'
-              src={avatarUrl}
-              alt=''
-              width='36'
-              height='36'
-            />
+    <>
+      <ColumnHeader
+        withBackButton={!!onBack}
+        onBack={onBack}
+        title={
+          room ? (
+            <span className='dm-chat-room-header__identity'>
+              <span className='dm-chat-room-header__avatar'>
+                {avatarUrl ? (
+                  <img
+                    className='dm-chat-room-header__avatar-img'
+                    src={avatarUrl}
+                    alt=''
+                    width='36'
+                    height='36'
+                  />
+                ) : (
+                  <span className='dm-chat-room-header__avatar-placeholder' />
+                )}
+              </span>
+              <span className='dm-chat-room-header__info'>
+                <span className='dm-chat-room-header__name'>{roomName}</span>
+                <span className='dm-chat-room-header__members'>
+                  {intl.formatMessage(messages.membersCount, {
+                    count: participantCount,
+                  })}
+                </span>
+              </span>
+            </span>
           ) : (
-            <div className='dm-chat-room-header__avatar-placeholder' />
-          )}
-        </div>
-        <div className='dm-chat-room-header__info'>
-          <span className='dm-chat-room-header__name'>{roomName}</span>
-          <span className='dm-chat-room-header__members'>
-            {intl.formatMessage(messages.membersCount, {
-              count: participantCount,
-            })}
-          </span>
-        </div>
-      </div>
-      <div className='dm-chat-room-header__right'>
-        <button
-          className='dm-chat-room-header__settings-btn'
-          type='button'
-          title={intl.formatMessage(messages.settings)}
-          onClick={handleOpenSettings}
-        >
-          <svg
-            width='20'
-            height='20'
-            viewBox='0 0 24 24'
-            fill='none'
-            stroke='currentColor'
-            strokeWidth='2'
-            strokeLinecap='round'
-            strokeLinejoin='round'
-          >
-            <circle cx='12' cy='12' r='3' />
-            <path d='M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z' />
-          </svg>
-        </button>
-      </div>
-      <RoomSettingsModal
-        isOpen={isSettingsOpen}
-        onClose={handleCloseSettings}
-        room={room}
+            roomName
+          )
+        }
+        extraButtons={
+          <>
+            {isMobile && onBack && (
+              <ColumnHeaderButton
+                icon={ListIcon}
+                onClick={handleOpenNavigation}
+              >
+                <FormattedMessage id='tabs_bar.menu' defaultMessage='Menu' />
+              </ColumnHeaderButton>
+            )}
+            <ColumnHeaderButton
+              icon={GearIcon}
+              onClick={handleOpenSettings}
+              disabled={!room}
+            >
+              {intl.formatMessage(messages.settings)}
+            </ColumnHeaderButton>
+          </>
+        }
       />
-    </div>
+      {room && (
+        <RoomSettingsModal
+          isOpen={isSettingsOpen}
+          onClose={handleCloseSettings}
+          room={room}
+        />
+      )}
+    </>
   );
 };

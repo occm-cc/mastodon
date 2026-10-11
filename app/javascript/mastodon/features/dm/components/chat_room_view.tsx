@@ -80,6 +80,7 @@ export const ChatRoomView: React.FC<ChatRoomViewProps> = ({
   if (!room) {
     return (
       <div className='dm-chat-room-view'>
+        <ChatRoomHeader onBack={onBack} />
         <div className='dm-chat-room-view__loading'>Loading...</div>
       </div>
     );
