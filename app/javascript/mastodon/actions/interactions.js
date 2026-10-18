@@ -6,6 +6,7 @@ import { fetchRelationships } from './accounts';
 import { importFetchedAccounts, importFetchedStatus } from './importer';
 import { unreblog, reblog } from './interactions_typed';
 import { openModal } from './modal';
+import { fetchPendingMentions } from './pending_mentions';
 import {
   insertPinnedStatusIntoTimelines,
   removePinnedStatusFromTimelines,
@@ -54,12 +55,15 @@ export const UNBOOKMARK_FAIL    = 'UNBOOKMARKED_FAIL';
 export * from "./interactions_typed";
 
 export function favourite(status) {
-  return function (dispatch) {
+  return function (dispatch, getState) {
     dispatch(favouriteRequest(status));
 
     api().post(`/api/v1/statuses/${status.get('id')}/favourite`).then(function (response) {
       dispatch(importFetchedStatus(response.data));
       dispatch(favouriteSuccess(status));
+      if (getState().pendingMentions.isFetched) {
+        dispatch(fetchPendingMentions());
+      }
     }).catch(function (error) {
       dispatch(favouriteFail(status, error));
     });
@@ -67,12 +71,15 @@ export function favourite(status) {
 }
 
 export function unfavourite(status) {
-  return (dispatch) => {
+  return (dispatch, getState) => {
     dispatch(unfavouriteRequest(status));
 
     api().post(`/api/v1/statuses/${status.get('id')}/unfavourite`).then(response => {
       dispatch(importFetchedStatus(response.data));
       dispatch(unfavouriteSuccess(status));
+      if (getState().pendingMentions.isFetched) {
+        dispatch(fetchPendingMentions());
+      }
     }).catch(error => {
       dispatch(unfavouriteFail(status, error));
     });

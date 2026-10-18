@@ -11,6 +11,7 @@ import {
 interface PendingMentionsState {
   items: ApiNotificationJSON[];
   isLoading: boolean;
+  isFetched: boolean;
   hasMore: boolean;
   next: string | null;
 }
@@ -18,6 +19,7 @@ interface PendingMentionsState {
 const initialState: PendingMentionsState = {
   items: [],
   isLoading: false,
+  isFetched: false,
   hasMore: false,
   next: null,
 };
@@ -30,6 +32,7 @@ export const pendingMentionsReducer = createReducer(initialState, (builder) => {
     .addCase(fetchPendingMentions.fulfilled, (state, action) => {
       state.items = action.payload.notifications;
       state.isLoading = false;
+      state.isFetched = true;
       state.next = action.payload.next;
       state.hasMore = !!action.payload.next;
     })

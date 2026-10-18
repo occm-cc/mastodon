@@ -114,12 +114,13 @@ describe('Redesign navigation custom features', () => {
       const links = container.querySelectorAll('nav > ul > li > a');
       expect(
         Array.from(links)
-          .slice(0, 5)
+          .slice(0, 6)
           .map((link) => link.getAttribute('href')),
       ).toEqual([
         '/home',
         '/search',
         '/notifications',
+        '/pending-mentions',
         '/direct_message',
         '/bookmarks',
       ]);

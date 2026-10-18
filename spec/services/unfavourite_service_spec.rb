@@ -4,6 +4,63 @@ require 'rails_helper'
 
 RSpec.describe UnfavouriteService do
   describe '#call' do
+    context 'with a mention notification' do
+      let(:account) { Fabricate(:account) }
+      let(:status) { Fabricate(:status) }
+      let(:mention) { Fabricate(:mention, account: account, status: status) }
+      let!(:notification) { Fabricate(:notification, account: account, activity: mention, type: :mention) }
+
+      before do
+        PendingMentionCache.add(account.id, notification.id)
+        FavouriteService.new.call(account, status)
+      end
+
+      it 'restores the mention removed by favouriting, even when the cache is not empty' do
+        other_mention = Fabricate(:mention, account: account)
+        other_notification = Fabricate(:notification, account: account, activity: other_mention, type: :mention)
+        PendingMentionCache.add(account.id, other_notification.id)
+
+        expect(PendingMentionCache.exists?(account.id, notification.id)).to be false
+
+        subject.call(account, status)
+
+        expect(PendingMentionCache.get(account.id, 40)).to contain_exactly(notification.id, other_notification.id)
+      end
+
+      it 'keeps manually dismissed mentions excluded' do
+        PendingMentionDismissal.create!(account: account, notification: notification)
+
+        subject.call(account, status)
+        PendingMentionCache.populate(account.id)
+
+        expect(PendingMentionCache.exists?(account.id, notification.id)).to be false
+      end
+
+      it 'keeps already replied-to mentions excluded' do
+        Fabricate(:status, account: account, thread: status)
+
+        subject.call(account, status)
+
+        expect(PendingMentionCache.exists?(account.id, notification.id)).to be false
+      end
+
+      it 'keeps filtered notifications excluded' do
+        notification.update!(filtered: true)
+
+        subject.call(account, status)
+
+        expect(PendingMentionCache.exists?(account.id, notification.id)).to be false
+      end
+
+      it 'does not recreate dismissed notifications' do
+        notification.destroy!
+
+        subject.call(account, status)
+
+        expect(PendingMentionCache.count(account.id)).to eq(0)
+      end
+    end
+
     context 'with a favourited status' do
       let(:status) { Fabricate(:status, account: account) }
       let!(:favourite) { Fabricate(:favourite, status: status) }

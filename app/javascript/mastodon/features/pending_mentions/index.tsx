@@ -4,8 +4,8 @@ import { defineMessages, FormattedMessage, useIntl } from 'react-intl';
 
 import { Helmet } from '@unhead/react/helmet';
 
+import { ColumnHeader } from '@/mastodon/components/column_header';
 import AlternateEmailIcon from '@/material-icons/400-24px/alternate_email.svg?react';
-import ChatBubbleIcon from '@/material-icons/400-24px/chat_bubble.svg?react';
 import {
   fetchPendingMentions,
   fetchMorePendingMentions,
@@ -18,7 +18,6 @@ import { useIdentity } from 'mastodon/identity_context';
 import { useAppDispatch, useAppSelector } from 'mastodon/store';
 
 import { Column } from '../../components/column';
-import { ColumnHeader } from '@/mastodon/components/column/header';
 import ScrollableList from '../../components/scrollable_list';
 
 const messages = defineMessages({
@@ -143,12 +142,7 @@ export const PendingMentions: React.FC<{
       bindToDocument={!multiColumn}
       label={intl.formatMessage(messages.title)}
     >
-      <ColumnHeader
-        icon='chat_bubble'
-        iconComponent={ChatBubbleIcon}
-        title={intl.formatMessage(messages.title)}
-        multiColumn={multiColumn}
-      />
+      <ColumnHeader title={intl.formatMessage(messages.title)} />
 
       {scrollContainer}
 

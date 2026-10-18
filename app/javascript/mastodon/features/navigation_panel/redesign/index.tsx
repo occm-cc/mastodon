@@ -270,15 +270,7 @@ export const RedesignNavigationPanel: React.FC<{
             ) : (
               <PublicFeedsLink />
             )}
-            <NavigationLink
-              to='/pending-mentions'
-              iconComponent={ChatCircleIcon}
-            >
-              <FormattedMessage
-                id='navigation_bar.pending_mentions'
-                defaultMessage='Awaiting reply'
-              />
-            </NavigationLink>
+            {!birdUi && <PendingMentionsLink />}
             <AccountSwitcher renderTrigger={renderAccountSwitchLink} />
             {birdUi && newPostButton}
             <ListSection
@@ -423,6 +415,7 @@ const NavigationActions: React.FC<{
         defaultMessage='Notifications'
       />
     </NavigationLink>
+    {birdUi && <PendingMentionsLink stacked={stacked} />}
     <NavigationLink
       stacked={stacked}
       to='/direct_message'
@@ -450,6 +443,19 @@ const NavigationActions: React.FC<{
       )}
     </NavigationLink>
   </>
+);
+
+const PendingMentionsLink: React.FC<{ stacked?: boolean }> = ({ stacked }) => (
+  <NavigationLink
+    stacked={stacked}
+    to='/pending-mentions'
+    iconComponent={ChatCircleIcon}
+  >
+    <FormattedMessage
+      id='navigation_bar.pending_mentions'
+      defaultMessage='Awaiting reply'
+    />
+  </NavigationLink>
 );
 
 const ExploreLink: React.FC<{ birdUi?: boolean }> = ({ birdUi }) => {
