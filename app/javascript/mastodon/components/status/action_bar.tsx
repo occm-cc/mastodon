@@ -2,8 +2,6 @@ import { useCallback } from 'react';
 
 import { FormattedMessage } from 'react-intl';
 
-import classNames from 'classnames';
-
 import { DotsThreeIcon, ShareFatIcon } from '@phosphor-icons/react';
 
 import { statusInteraction } from '@/mastodon/actions/interactions';
@@ -38,21 +36,21 @@ import classes from './styles.module.scss';
 
 interface StatusActionBarProps {
   statusId: string;
+  reblogId: string | undefined;
   withDismiss?: boolean;
   onDismissPendingMention?: () => void;
   withCounters?: boolean;
-  /** Only show methods to respond (reply, boost, like) and not sharing, bookmarking, and the overflow menu. */
-  onlyResponses?: boolean;
 }
 
 export const StatusActionBar: React.FC<StatusActionBarProps> = ({
   statusId,
+  reblogId,
   withDismiss,
   onDismissPendingMention,
   withCounters,
-  onlyResponses,
 }) => {
   const status = useAccountStatus(statusId);
+  const reblogStatus = useAccountStatus(reblogId);
   const quotedAccountId = useAppSelector(
     (state) =>
       state.statuses.getIn([status?.quote?.quoted_status, 'account']) ?? null,
@@ -93,8 +91,8 @@ export const StatusActionBar: React.FC<StatusActionBarProps> = ({
   const shouldShowQuoteRemovalHint =
     isQuotingMe && contextType === 'notifications';
 
-  const responseButtons = (
-    <>
+  return (
+    <div className={classes.actions}>
       <Button
         data-status-action='reply'
         size='sm'
@@ -119,20 +117,10 @@ export const StatusActionBar: React.FC<StatusActionBarProps> = ({
         tooltip={{ type: 'label', text: like.title }}
         leadingIcon={like.icon}
         onClick={like.action}
-        className={classNames(!onlyResponses && classes.actionsButtonGap)}
+        className={classes.actionsButtonGap}
       >
         {withCounters && like.counter}
       </ToggleButton>
-    </>
-  );
-
-  if (onlyResponses) {
-    return <div className={classes.actions}>{responseButtons}</div>;
-  }
-
-  return (
-    <div className={classes.actions}>
-      {responseButtons}
 
       {isPublic && (
         <IconButton
@@ -165,6 +153,7 @@ export const StatusActionBar: React.FC<StatusActionBarProps> = ({
           <StatusActionMenu
             dismissQuoteHint={dismissQuoteHint}
             status={status}
+            reblogStatus={reblogStatus}
             withDismiss={withDismiss}
             onDismissPendingMention={onDismissPendingMention}
           />
@@ -247,14 +236,22 @@ const StatusReblogButton: React.FC<{
 const StatusActionMenu: React.FC<{
   dismissQuoteHint: () => void;
   status: AccountStatusShape;
+  reblogStatus: AccountStatusShape | null;
   withDismiss?: boolean;
   onDismissPendingMention?: () => void;
-}> = ({ status, dismissQuoteHint, withDismiss, onDismissPendingMention }) => {
+}> = ({
+  status,
+  reblogStatus,
+  dismissQuoteHint,
+  withDismiss,
+  onDismissPendingMention,
+}) => {
   const { contextType } = useStatusContext();
   const dispatch = useAppDispatch();
 
   const menu = useStatusMenuActions({
     status,
+    reblogStatus,
     contextType,
     withDismiss,
     onDismissPendingMention,

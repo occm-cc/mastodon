@@ -37,7 +37,6 @@ import { isBirdUiEnabled } from '@/mastodon/utils/bird_ui';
 
 const messages = defineMessages({
   title: { id: 'column.home', defaultMessage: 'Home' },
-  following: { id: 'column.following', defaultMessage: 'Following' },
   show_announcements: { id: 'home.show_announcements', defaultMessage: 'Show announcements' },
   hide_announcements: { id: 'home.hide_announcements', defaultMessage: 'Hide announcements' },
 });
@@ -154,7 +153,7 @@ class HomeTimeline extends PureComponent {
       <Column bindToDocument={!multiColumn} label={intl.formatMessage(messages.title)}>
         {isRedesignEnabled() ? (
           <ColumnHeader
-            title={intl.formatMessage(messages.following)}
+            title={intl.formatMessage(messages.title)}
             withBackButton={multiColumn && !pinned && 'auto'}
             withUnreadMarker={hasUnread}
             extraButtons={

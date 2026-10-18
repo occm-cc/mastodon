@@ -135,6 +135,24 @@ describe('Redesign navigation custom features', () => {
     },
   );
 
+  it.each([false, true])(
+    'shows one New Post button in the expected location with Bird UI %s',
+    (birdUi) => {
+      if (birdUi) {
+        document.documentElement.style.setProperty('--bird-ui-redesign', '1');
+      }
+      render(<RedesignNavigationPanel />);
+
+      const button = screen.getByRole('button', { name: 'New Post' });
+      if (birdUi) {
+        expect(button.closest('li')?.parentElement?.tagName).toBe('UL');
+        expect(button.closest('footer')).toBeNull();
+      } else {
+        expect(button.closest('footer')).not.toBeNull();
+      }
+    },
+  );
+
   it('also removes Public Feeds from signed-out Bird UI navigation', () => {
     document.documentElement.style.setProperty('--bird-ui-redesign', '1');
     const { container } = render(<RedesignNavigationPanel />, {

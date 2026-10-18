@@ -47,6 +47,7 @@ describe('Redesign pending mention actions', () => {
       () =>
         useStatusMenuActions({
           status,
+          reblogStatus: null,
           contextType: 'pending-mentions',
           withDismiss: true,
           onDismissPendingMention,
@@ -74,6 +75,7 @@ describe('Redesign pending mention actions', () => {
       () =>
         useStatusMenuActions({
           status,
+          reblogStatus: null,
           contextType: 'home',
           onDismissPendingMention: vi.fn(),
         }),
@@ -85,7 +87,12 @@ describe('Redesign pending mention actions', () => {
 
   it('does not offer dismissal when there is no notification callback', () => {
     const { result } = renderHook(
-      () => useStatusMenuActions({ status, contextType: 'pending-mentions' }),
+      () =>
+        useStatusMenuActions({
+          status,
+          reblogStatus: null,
+          contextType: 'pending-mentions',
+        }),
       { wrapper },
     );
 
