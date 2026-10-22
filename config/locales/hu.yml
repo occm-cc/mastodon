@@ -791,6 +791,12 @@ hu:
       last_synced_at: 'Utolsó szinkronizálás:'
       list_actions:
         default: Vegyes (engedélyezése és elutasítás)
+      list_actions_short:
+        accept: Engedélyezési lista
+        default: Vegyes
+        reject: Tiltólista
+      name: Név
+      priority: Prioritás
       tabs:
         logs: Naplók
         suggestions: Javaslatok
@@ -1359,9 +1365,8 @@ hu:
     warning_presets:
       add_new: Új hozzáadása
       delete: Törlés
-      edit_preset: Figyelmeztetés szerkesztése
-      empty: Nem definiáltál még egyetlen figyelmeztetést sem.
-      title: Figyelmeztető szövegek
+      navigation_title: Konzervválaszok
+      title: Moderátori konzervválaszok
     webhooks:
       add_new: Végpont hozzáadása
       delete: Törlés
@@ -1563,6 +1568,12 @@ hu:
     auto: Automatikus
     dark: Sötét
     light: Világos
+  color_theme:
+    cyan: Cián
+    indigo: Indigókék
+    lime: Lime
+    orange: Narancs
+    pink: Rózsaszín
   contrast:
     auto: Automatikus
     high: Magas
@@ -1606,9 +1617,6 @@ hu:
       more_details_html: A részletekért nézd meg az <a href="%{terms_path}">adatvédelmi szabályzatot</a>.
       username_available: A fiókod ismét elérhetővé válik
       username_unavailable: A fiókod elérhetetlen marad
-  density:
-    compact: Kompakt
-    default: Alapértelmezett
   disputes:
     strikes:
       action_taken: Intézkedés

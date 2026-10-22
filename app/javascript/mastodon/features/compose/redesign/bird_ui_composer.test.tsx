@@ -97,6 +97,16 @@ describe('Bird UI inline composer', () => {
     expect(store.getState().modal.stack.size).toBe(0);
   });
 
+  it.each(['', 'Keep this draft'])(
+    'only warns before leaving the inline composer when a draft has changes: %s',
+    (text) => {
+      renderComposer(text);
+      const event = new Event('beforeunload', { cancelable: true });
+      window.dispatchEvent(event);
+      expect(event.defaultPrevented).toBe(text.length > 0);
+    },
+  );
+
   it('does not force navigation to the compose page just because a draft is open', () => {
     renderComposer('Keep this draft', false);
     expect(screen.getByTestId('route-location').textContent).toBe('/');

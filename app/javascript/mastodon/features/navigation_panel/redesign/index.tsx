@@ -18,6 +18,8 @@ import {
   InfoIcon,
   ChatCircleIcon,
   ArrowsLeftRightIcon,
+  GavelIcon,
+  ShieldStarIcon,
 } from '@phosphor-icons/react';
 
 import FediIcon from '@/images/icons/icon_fediverse.svg?react';
@@ -40,7 +42,11 @@ import {
   trendsEnabled,
 } from '@/mastodon/initial_state';
 import { transientSingleColumn } from '@/mastodon/is_mobile';
-import { canViewFeed } from '@/mastodon/permissions';
+import {
+  canManageReports,
+  canViewAdminDashboard,
+  canViewFeed,
+} from '@/mastodon/permissions';
 import {
   openNewComposer,
   requestComposerFocus,
@@ -190,7 +196,7 @@ export const RedesignNavigationPanel: React.FC<{
 }> = ({ siteName, mode = 'static', multiColumn }) => {
   const intl = useIntl();
   const dispatch = useAppDispatch();
-  const { signedIn } = useIdentity();
+  const { signedIn, permissions } = useIdentity();
   const notificationsCount = useNotificationsCount();
   const dmUnreadCount = useDmUnreadCount();
   const birdUi = isBirdUiEnabled();
@@ -201,6 +207,9 @@ export const RedesignNavigationPanel: React.FC<{
   });
   const composeType = useAppSelector(selectComposeType);
   const isEditing = useAppSelector((state) => !!state.compose.get('id'));
+
+  const isManager = canManageReports(permissions);
+  const isAdmin = canViewAdminDashboard(permissions);
 
   const openComposer = useCallback(() => {
     dispatch(closeNavigation());
@@ -249,6 +258,7 @@ export const RedesignNavigationPanel: React.FC<{
     <nav
       className={classes.root}
       data-mode={mode}
+      data-scrollable={!isScrolledToTop || !isScrolledToBottom}
       aria-label={intl.formatMessage(messages.main)}
     >
       {topSensor}
@@ -273,6 +283,33 @@ export const RedesignNavigationPanel: React.FC<{
             {!birdUi && <PendingMentionsLink />}
             <AccountSwitcher renderTrigger={renderAccountSwitchLink} />
             {birdUi && newPostButton}
+
+            {isAdmin && (
+              <NavigationLink
+                as='a'
+                href='/admin/dashboard'
+                iconComponent={GavelIcon}
+              >
+                <FormattedMessage
+                  id='navigation_bar.administration'
+                  defaultMessage='Administration'
+                />
+              </NavigationLink>
+            )}
+
+            {isManager && (
+              <NavigationLink
+                as='a'
+                href='/admin/reports'
+                iconComponent={ShieldStarIcon}
+              >
+                <FormattedMessage
+                  id='navigation_bar.moderation'
+                  defaultMessage='Moderation'
+                />
+              </NavigationLink>
+            )}
+
             <ListSection
               id='custom-feeds'
               title={

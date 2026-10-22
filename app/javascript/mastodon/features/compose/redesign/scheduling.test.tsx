@@ -2,7 +2,11 @@ import { configureStore } from '@reduxjs/toolkit';
 import { fromJS } from 'immutable';
 import { Provider } from 'react-redux';
 
-import { COMPOSE_REPLY, submitCompose } from '@/mastodon/actions/compose';
+import {
+  changeCompose,
+  COMPOSE_REPLY,
+  submitCompose,
+} from '@/mastodon/actions/compose';
 import {
   editScheduledStatus,
   setComposeSchedule,
@@ -12,7 +16,12 @@ import { STORE_HYDRATE } from '@/mastodon/actions/store';
 import type * as ApiModule from '@/mastodon/api';
 import type { ApiScheduledStatusJSON } from '@/mastodon/api_types/scheduled_statuses';
 import { reducerWithInitialState } from '@/mastodon/reducers';
-import { submitComposer } from '@/mastodon/reducers/slices/composer';
+import {
+  closeComposer,
+  initializeComposer,
+  selectComposerIsChanged,
+  submitComposer,
+} from '@/mastodon/reducers/slices/composer';
 import { defaultMiddleware } from '@/mastodon/store/store';
 import {
   mediaAttachmentFactoryAPI,
@@ -86,6 +95,27 @@ describe('scheduled composition', () => {
   afterEach(() => {
     cleanup();
     vi.useRealTimers();
+  });
+
+  it('only treats edits to initialized mention text as draft changes', () => {
+    const store = createStore('@alice ');
+    store.dispatch(initializeComposer({}));
+    expect(selectComposerIsChanged(store.getState())).toBe(false);
+    store.dispatch(changeCompose('@alice A reply'));
+    expect(selectComposerIsChanged(store.getState())).toBe(true);
+    store.dispatch(changeCompose('@alice '));
+    expect(selectComposerIsChanged(store.getState())).toBe(false);
+  });
+
+  it('protects a scheduled edit even when its text matches the initial text', () => {
+    const store = createStore();
+    store.dispatch(setComposeToScheduledStatus(reservation()));
+    store.dispatch(initializeComposer({}));
+    expect(selectComposerIsChanged(store.getState())).toBe(true);
+    store.dispatch(closeComposer());
+    expect(store.getState().modal.stack.first()?.get('modalType')).toBe(
+      'COMPOSER_DRAFT_DELETE',
+    );
   });
 
   it('uses the interface locale rather than the posting-language preference at hydration', () => {

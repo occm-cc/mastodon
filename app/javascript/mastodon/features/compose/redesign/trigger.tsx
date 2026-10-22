@@ -17,6 +17,7 @@ import {
 import { useAppDispatch, useAppSelector } from '@/mastodon/store';
 import { isBirdUiEnabled } from '@/mastodon/utils/bird_ui';
 import { isRedesignEnabled } from '@/mastodon/utils/environment';
+import { includeMultiColumnPaths } from '@/mastodon/utils/react_router';
 
 import { useBreakpoint } from '../../ui/hooks/useBreakpoint';
 import { useColumnsContext } from '../../ui/util/columns_context';
@@ -100,6 +101,19 @@ export const ComposeRedesignButton: React.FC<{
     dispatch(minimizeComposerToggle());
   }, [dispatch]);
 
+  const handleMinimizedTextClick: React.MouseEventHandler<HTMLDivElement> =
+    useCallback(
+      (event) => {
+        if (
+          event.target instanceof HTMLElement &&
+          !event.target.closest('button')
+        ) {
+          dispatch(minimizeComposerToggle());
+        }
+      },
+      [dispatch],
+    );
+
   if (!isRedesignEnabled() || !signedIn) {
     return null;
   }
@@ -129,7 +143,9 @@ export const ComposeRedesignButton: React.FC<{
       </FloatingActionButton>
     ) : (
       <div className={classes.root} style={style}>
+        {/* eslint-disable jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
         <div
+          onClick={handleMinimizedTextClick}
           className={classNames(
             classes.composerMinimized,
             composerClasses.root,
@@ -137,6 +153,7 @@ export const ComposeRedesignButton: React.FC<{
         >
           <ComposeFormHeader />
         </div>
+        {/* eslint-enable */}
       </div>
     );
   }
@@ -181,10 +198,6 @@ const FloatingActionButton: React.FC<
     </div>
   );
 };
-
-function includeMultiColumnPaths(paths: string[]) {
-  return [...paths, ...paths.map((path) => `/deck${path}`)];
-}
 
 const MOBILE_COMPOSE_BUTTON_ALLOW_ROUTES = includeMultiColumnPaths([
   '/home',

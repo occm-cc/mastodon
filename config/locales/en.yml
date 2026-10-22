@@ -1424,6 +1424,13 @@ en:
     warning_presets:
       add_new: Add new
       delete: Delete
+      dropdown:
+        all_actions: All actions
+        disable: Freeze
+        none: Warning
+        sensitive: Sensitive
+        silence: Limit
+        suspend: Suspend
       edit_preset: Edit canned response
       empty: You haven't defined any canned responses yet.
       navigation_title: Canned Responses
@@ -1688,14 +1695,12 @@ en:
       more_details_html: For more details, see the <a href="%{terms_path}">privacy policy</a>.
       username_available: Your username will become available again
       username_unavailable: Your username will remain unavailable
-  density:
-    compact: Compact
-    default: Default
   disputes:
     strikes:
       action_taken: Action taken
       appeal: Appeal
       appeal_approved: This strike has been successfully appealed and is no longer valid
+      appeal_handled_by: Appeal handled by
       appeal_rejected: The appeal has been rejected
       appeal_submitted_at: Appeal submitted
       appealed_msg: Your appeal has been submitted. If it is approved, you will be notified.
