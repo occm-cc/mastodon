@@ -47,8 +47,10 @@ html:root {
       inset-inline-start: 0;
     }
 
+    // The header is a flex row and the avatar is taken out of flow above, so
+    // offset the author block by the avatar column to keep the name visible.
     ._comp_status_header__author {
-      grid-column: 2;
+      margin-inline-start: var(--first-col-width);
       display: flex;
       align-items: baseline;
       flex-wrap: wrap;
