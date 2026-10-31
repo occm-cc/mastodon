@@ -1759,6 +1759,12 @@ en:
     dark: Dark
     light: Light
   color_theme:
+    bird_blue: Blue
+    bird_green: Green
+    bird_orange: Orange
+    bird_pink: Pink
+    bird_purple: Purple
+    bird_yellow: Yellow
     cyan: Cyan
     indigo: Indigo
     lime: Lime

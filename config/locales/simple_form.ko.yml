@@ -242,6 +242,7 @@ ko:
         setting_always_send_emails: 항상 이메일 알림 보내기
         setting_auto_play_gif: 애니메이션 GIF를 자동 재생
         setting_boost_modal: 부스트 공개범위 제어
+        setting_color_scheme: 모드
         setting_contrast: 대비
         setting_default_language: 게시물 언어
         setting_default_privacy: 게시물 공개 범위
@@ -264,6 +265,7 @@ ko:
         setting_system_scrollbars_ui: 시스템 기본 스크롤바 사용
         setting_use_stars: 좋아요 기능에 하트 대신 별표 사용
         setting_theme: 사이트 테마
+        setting_theme_color: 테마 색
         setting_unfollow_modal: 누군가를 언팔로우 할 때 확인란 표시하기
         setting_use_blurhash: 숨겨진 미디어에 대해 그라디언트 표시
         setting_use_pending_items: 느린 모드

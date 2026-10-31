@@ -1,4 +1,12 @@
-default: styles/mastodon-bird-ui-auto.scss
+default:
+  path: styles/mastodon-bird-ui-auto.scss
+  colors:
+    - bird_blue
+    - bird_yellow
+    - bird_pink
+    - bird_purple
+    - bird_orange
+    - bird_green
 mastodon-dark:
   path: styles/application.scss
   colors:

@@ -1,0 +1,27 @@
+// Twitter-style accent colours for the "Theme color" setting.
+// The colour names are listed under the default theme in config/themes.yml and
+// end up in html[data-theme-color]. They use a `bird_` prefix so they never
+// match the core Mastodon colours (e.g. `pink`), which also tint backgrounds.
+// Every brand token in the redesign tokens derives from --color-accent, so
+// overriding it here recolours links, buttons, hashtags and focus rings.
+$bird-theme-colors: (
+  'bird_blue': #1d9bf0,
+  'bird_yellow': #ffd400,
+  'bird_pink': #f91880,
+  'bird_purple': #7856ff,
+  'bird_orange': #ff7a00,
+  'bird_green': #00ba7c,
+);
+
+@each $name, $color in $bird-theme-colors {
+  // :root raises specificity above the automatic light theme overrides
+  html[data-theme-color='#{$name}']:root {
+    --color-accent: #{$color};
+    --color-accent-dark: #{$color};
+  }
+}
+
+// White text is unreadable on yellow buttons
+html[data-theme-color='bird_yellow']:root {
+  --color-text-on-brand-base: #0f1419;
+}

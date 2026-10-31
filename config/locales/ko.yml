@@ -1431,6 +1431,18 @@ ko:
     auto: 자동
     dark: 어두움
     light: 밝음
+  color_theme:
+    bird_blue: 파랑
+    bird_green: 초록
+    bird_orange: 주황
+    bird_pink: 분홍
+    bird_purple: 보라
+    bird_yellow: 노랑
+    cyan: 청록
+    indigo: 남색
+    lime: 라임
+    orange: 주황
+    pink: 분홍
   contrast:
     auto: 자동
     high: 높음
