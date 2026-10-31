@@ -211,6 +211,7 @@ const StatusReblogButton: React.FC<{
         size='sm'
         variant='ghost'
         active={boost.active}
+        disabled={boost.disabled && quote.disabled}
         tooltip={{
           type: 'label',
           text: (

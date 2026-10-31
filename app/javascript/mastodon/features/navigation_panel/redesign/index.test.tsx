@@ -63,8 +63,8 @@ vi.mock('../../announcements/hooks', () => ({
   useHasAnnouncements: () => ({ unreadAnnouncementCount: 0 }),
 }));
 
-vi.mock('@/mastodon/features/compose/redesign/trigger', () => ({
-  ComposeRedesignButton: () => null,
+vi.mock('@/mastodon/features/compose/trigger', () => ({
+  ComposeButton: () => null,
 }));
 
 vi.mock('@/mastodon/utils/multi_account_db', () => ({

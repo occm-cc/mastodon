@@ -30,6 +30,7 @@ import {
 import { computeHashtagBarForStatus } from './legacy/hashtag_bar';
 import { StatusMeta } from './meta';
 import { StatusPrepend } from './prepend';
+import { StatusQuote } from './quote';
 import classes from './styles.module.scss';
 import { TranslateButton } from './translate';
 import type { StatusContainerProps, StatusContextType } from './types';
@@ -158,7 +159,10 @@ export const StatusRedesign: React.FC<StatusRedesignProps> = ({
 
   if (hidden) {
     return (
-      <StatusHotkeys {...hotkeysProps}>
+      <StatusHotkeys
+        {...hotkeysProps}
+        className={classNames(!muted && 'focusable')}
+      >
         <span>{status.account.display_name || status.account.username}</span>
         {status.spoiler_text && <span>{status.spoiler_text}</span>}
         {!isHidden && <span>{status.content}</span>}
@@ -182,11 +186,7 @@ export const StatusRedesign: React.FC<StatusRedesignProps> = ({
           isQuotedPost && classes.isQuote,
           shouldHighlightOnMount && classes.isHighlighted,
           status.visibility === 'direct' && classes.isMessage,
-          variant === 'thread' &&
-            isNextReplyingToMe &&
-            !showThread &&
-            classes.connectNextReply,
-          !unfocusable && 'focusable',
+          !muted && 'focusable',
         )}
         tabIndex={unfocusable ? undefined : -1}
         data-featured={featured ? 'true' : null}
@@ -202,72 +202,83 @@ export const StatusRedesign: React.FC<StatusRedesignProps> = ({
           />
         )}
 
-        <StatusRedesignHeader
-          status={status}
-          className={classes.header}
-          featured={featured}
-        />
-
-        <TranslateButton status={status} onTranslate={onTranslate} />
-
-        <StatusWarning
-          statusId={status.id}
-          dismissedFilter={showDespiteFilter}
-          onFilterToggle={onFilterToggle}
-          wrapperId={contentWrapperId}
-        />
+        <StatusRedesignHeader status={status} featured={featured} />
 
         <div
           className={classNames(
-            classes.contentWrapper,
-            isHidden && classes.hasContentWarning,
-            !showDespiteFilter && isFiltered && classes.isFiltered,
+            classes.mainWrapper,
+            variant === 'thread' &&
+              isNextReplyingToMe &&
+              !showThread &&
+              classes.connectNextReply,
           )}
-          id={contentWrapperId}
-          inert={isHidden}
         >
-          <StatusContent
-            status={status}
-            statusContent={statusContent}
-            onReadMore={onOpenCallback}
-            onTranslate={onTranslate}
-            collapsible={variant !== 'page'}
-          >
-            {!!status.poll && (
-              <Poll
-                pollId={status.poll}
-                statusUrl={status.uri}
-                accountId={status.account.id}
-                lang={status.translation?.language ?? status.language}
-              />
-            )}
+          <TranslateButton status={status} onTranslate={onTranslate} />
 
-            <StatusAttachments statusId={status.id} />
-
-            {children}
-          </StatusContent>
-
-          <StatusHashtagBar
-            hashtags={hashtagsInBar}
-            accountId={status.account.id}
+          <StatusWarning
+            statusId={status.id}
+            dismissedFilter={showDespiteFilter}
+            onFilterToggle={onFilterToggle}
+            wrapperId={contentWrapperId}
           />
-        </div>
 
-        {(variant === 'page' || (showActions && !isQuotedPost)) && (
-          <footer className={classes.footer}>
-            {showActions && !isQuotedPost && (
-              <StatusActionBar
-                statusId={status.id}
-                reblogId={parent?.id}
-                withDismiss={withDismiss}
-                onDismissPendingMention={onDismissPendingMention}
-                withCounters={withCounters}
-              />
+          <div
+            className={classNames(
+              classes.contentWrapper,
+              classes.contentWarningBlur,
+              isHidden && classes.contentWarningBlurActive,
+              !showDespiteFilter && isFiltered && classes.isFiltered,
             )}
+            id={contentWrapperId}
+            inert={isHidden}
+          >
+            <StatusContent
+              status={status}
+              statusContent={statusContent}
+              onReadMore={onOpenCallback}
+              onTranslate={onTranslate}
+              collapsible={variant !== 'page'}
+            >
+              {!!status.poll && (
+                <Poll
+                  pollId={status.poll}
+                  statusUrl={status.uri}
+                  accountId={status.account.id}
+                  lang={status.translation?.language ?? status.language}
+                />
+              )}
 
-            {variant === 'page' && <StatusMeta status={status} />}
-          </footer>
-        )}
+              <StatusAttachments statusId={status.id} />
+
+              {status.quote && (
+                <StatusQuote {...status.quote} parentId={status.id} />
+              )}
+
+              {children}
+            </StatusContent>
+
+            <StatusHashtagBar
+              hashtags={hashtagsInBar}
+              accountId={status.account.id}
+            />
+          </div>
+
+          {(variant === 'page' || (showActions && !isQuotedPost)) && (
+            <footer className={classes.footer}>
+              {showActions && !isQuotedPost && (
+                <StatusActionBar
+                  statusId={status.id}
+                  reblogId={parent?.id}
+                  withDismiss={withDismiss}
+                  onDismissPendingMention={onDismissPendingMention}
+                  withCounters={withCounters}
+                />
+              )}
+
+              {variant === 'page' && <StatusMeta status={status} />}
+            </footer>
+          )}
+        </div>
       </StatusHotkeys>
     </StatusContext.Provider>
   );

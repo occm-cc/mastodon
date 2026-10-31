@@ -3,6 +3,8 @@ import { useCallback, useState } from 'react';
 
 import { FormattedMessage } from 'react-intl';
 
+import classNames from 'classnames';
+
 import { CharacterCounter } from '@/mastodon/components/character_counter';
 import { Details } from '@/mastodon/components/details';
 import { TextAreaField } from '@/mastodon/components/form_fields';
@@ -74,9 +76,9 @@ export const ImageAltModal: FC<
       <div className={classes.wrapper}>
         <ImageAltTextField
           imageSrc={imageSrc}
+          imageLocation={location}
           altText={altText}
           onChange={setAltText}
-          hideTip={location === 'header'}
         />
       </div>
     </ConfirmationModal>
@@ -87,8 +89,8 @@ export const ImageAltTextField: FC<{
   imageSrc: string;
   altText: string;
   onChange: (altText: string) => void;
-  hideTip?: boolean;
-}> = ({ imageSrc, altText, onChange, hideTip }) => {
+  imageLocation?: ImageLocation;
+}> = ({ imageSrc, altText, onChange, imageLocation }) => {
   const altLimit = useAppSelector(
     (state) =>
       state.server.server.item?.configuration.accounts
@@ -104,7 +106,14 @@ export const ImageAltTextField: FC<{
 
   return (
     <>
-      <img src={imageSrc} alt='' className={classes.altImage} />
+      <img
+        src={imageSrc}
+        alt=''
+        className={classNames(
+          classes.altImage,
+          imageLocation === 'avatar' && classes.altImageAvatar,
+        )}
+      />
 
       <div>
         <TextAreaField
@@ -127,7 +136,7 @@ export const ImageAltTextField: FC<{
         <CharacterCounter currentString={altText} maxLength={altLimit} />
       </div>
 
-      {!hideTip && (
+      {imageLocation === 'avatar' && (
         <Details
           summary={
             <FormattedMessage

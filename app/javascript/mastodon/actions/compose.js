@@ -9,7 +9,7 @@ import { countableText } from '@/mastodon/features/compose/util/counter';
 import { tagHistory } from '@/mastodon/settings';
 import { emojiMartSearch } from '@/mastodon/features/emoji/picker';
 import { postingLanguageForLocale } from '@/mastodon/utils/posting_language';
-import { isValidSchedule } from '@/mastodon/features/compose/redesign/schedule_utils';
+import { isValidSchedule } from '@/mastodon/features/compose/components/schedule_utils';
 
 import { showAlert, showAlertForError } from './alerts';
 import { isStandaloneComposePath } from './compose_path';

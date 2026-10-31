@@ -31,7 +31,7 @@ import { fetchFollowedHashtags } from '@/mastodon/actions/tags_typed';
 import { Button } from '@/mastodon/components/button/redesign';
 import { Callout } from '@/mastodon/components/callout/redesign';
 import { FOCUS_TARGET } from '@/mastodon/components/navigation_focus_target';
-import { selectComposeType } from '@/mastodon/features/compose/redesign/selectors';
+import { selectComposeType } from '@/mastodon/features/compose/components/selectors';
 import { useBreakpoint } from '@/mastodon/features/ui/hooks/useBreakpoint';
 import { useScrollSensor } from '@/mastodon/hooks/useScrollSensor';
 import { useIdentity } from '@/mastodon/identity_context';

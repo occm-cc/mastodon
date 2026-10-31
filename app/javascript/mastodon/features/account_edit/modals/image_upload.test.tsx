@@ -4,6 +4,8 @@
 
 import { IntlProvider } from 'react-intl';
 
+import { MemoryRouter } from 'react-router';
+
 import {
   render,
   screen,
@@ -107,9 +109,11 @@ Object.defineProperty(URL, 'createObjectURL', {
 // Helper wrapper with IntlProvider
 function renderWithIntl(ui: React.ReactElement) {
   return render(
-    <IntlProvider locale='en' messages={{}}>
-      {ui}
-    </IntlProvider>,
+    <MemoryRouter>
+      <IntlProvider locale='en' messages={{}}>
+        {ui}
+      </IntlProvider>
+    </MemoryRouter>,
   );
 }
 

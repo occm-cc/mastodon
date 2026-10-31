@@ -8,14 +8,14 @@ vi.mock('@/mastodon/features/ui/hooks/useBreakpoint', () => ({
   useBreakpoint: () => false,
 }));
 
-vi.mock('@/mastodon/features/compose/components/search', () => ({
+vi.mock('@/mastodon/components/search', () => ({
   Search: ({ context }: { context?: string }) => (
     <input aria-label={`Search ${context ?? 'column'}`} />
   ),
 }));
 
-vi.mock('@/mastodon/features/compose/redesign/trigger', () => ({
-  ComposeRedesignButton: () => null,
+vi.mock('@/mastodon/features/compose/trigger', () => ({
+  ComposeButton: () => null,
 }));
 
 vi.mock('mastodon/features/custom_homepage/components/footer', () => ({

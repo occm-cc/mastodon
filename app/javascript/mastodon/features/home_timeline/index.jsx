@@ -32,7 +32,7 @@ import { isRedesignEnabled } from '@/mastodon/utils/environment';
 import { ColumnHeader } from '@/mastodon/components/column_header';
 import { HomeColumnSettings } from './components/column_settings_redesign';
 import { MultiColumnMenuItems } from '@/mastodon/components/column_header/multicolumn_settings';
-import { BirdUiComposer } from '@/mastodon/features/compose/redesign/bird_ui_composer';
+import { BirdUiComposer } from '@/mastodon/features/compose/components/bird_ui_composer';
 import { isBirdUiEnabled } from '@/mastodon/utils/bird_ui';
 
 const messages = defineMessages({

@@ -1,4 +1,4 @@
-import { Search } from '@/mastodon/features/compose/components/search';
+import { Search } from '@/mastodon/components/search';
 import { Trends } from '@/mastodon/features/navigation_panel/components/trends';
 import { NavigationFooterLinks } from '@/mastodon/features/navigation_panel/redesign/footer_links';
 

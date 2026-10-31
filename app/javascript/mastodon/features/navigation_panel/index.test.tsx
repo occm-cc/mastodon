@@ -114,7 +114,7 @@ vi.mock('./components/navigation_logo', () => ({
 }));
 
 // Mock other child components to avoid import errors
-vi.mock('mastodon/features/compose/components/search', () => ({
+vi.mock('@/mastodon/components/search', () => ({
   Search: () => null,
 }));
 

@@ -10,6 +10,7 @@ import type { Map as ImmutableMap } from 'immutable';
 import { animated, useSpring } from '@react-spring/web';
 import { useDrag } from '@use-gesture/react';
 
+import { Search } from '@/mastodon/components/search';
 import {
   StatusBookmarkActiveIcon,
   StatusBookmarkIcon,
@@ -41,8 +42,6 @@ import { openNavigation, closeNavigation } from 'mastodon/actions/navigation';
 import { Account } from 'mastodon/components/account';
 import { Icon } from 'mastodon/components/icon';
 import { IconWithBadge } from 'mastodon/components/icon_with_badge';
-import { NavigationLogo } from './components/navigation_logo';
-import { Search } from 'mastodon/features/compose/components/search';
 import { AccountSwitcher } from 'mastodon/features/ui/components/account_switcher';
 import { ColumnLink } from 'mastodon/features/ui/components/column_link';
 import { getNavigationSkipLinkId } from 'mastodon/features/ui/components/skip_links';
@@ -65,6 +64,7 @@ import { DisabledAccountBanner } from './components/disabled_account_banner';
 import { FollowedTagsPanel } from './components/followed_tags_panel';
 import { ListPanel } from './components/list_panel';
 import { MoreLink } from './components/more_link';
+import { NavigationLogo } from './components/navigation_logo';
 import { SignInBanner } from './components/sign_in_banner';
 import { Trends } from './components/trends';
 

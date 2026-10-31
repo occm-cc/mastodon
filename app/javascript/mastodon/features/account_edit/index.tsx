@@ -9,7 +9,7 @@ import type { ModalType } from '@/mastodon/actions/modal';
 import { openModal } from '@/mastodon/actions/modal';
 import { AccountBio } from '@/mastodon/components/account_bio';
 import { Avatar } from '@/mastodon/components/avatar';
-import { Button } from '@/mastodon/components/button';
+import { Button } from '@/mastodon/components/button/redesign';
 import { DismissibleCallout } from '@/mastodon/components/callout/dismissible';
 import { CustomEmojiProvider } from '@/mastodon/components/emoji/context';
 import { EmojiHTML } from '@/mastodon/components/emoji/html';
@@ -123,8 +123,7 @@ export const messages = defineMessages({
   },
   customLogoPlaceholder: {
     id: 'account_edit.custom_logo.placeholder',
-    defaultMessage:
-      'Replace the Mastodon logo with your own custom logo.',
+    defaultMessage: 'Replace the Mastodon logo with your own custom logo.',
   },
   backgroundImageTitle: {
     id: 'account_edit.background_image.title',
@@ -132,8 +131,7 @@ export const messages = defineMessages({
   },
   backgroundImagePlaceholder: {
     id: 'account_edit.background_image.placeholder',
-    defaultMessage:
-      'Add a background image to customize how you see Mastodon.',
+    defaultMessage: 'Add a background image to customize how you see Mastodon.',
   },
 });
 
@@ -214,7 +212,9 @@ export const AccountEdit: FC = () => {
 
   const handleBackgroundImageToggle = useCallback(() => {
     void dispatch(
-      patchProfile({ background_image_enabled: !profile?.backgroundImageEnabled }),
+      patchProfile({
+        background_image_enabled: !profile?.backgroundImageEnabled,
+      }),
     );
   }, [dispatch, profile?.backgroundImageEnabled]);
 
@@ -301,6 +301,7 @@ export const AccountEdit: FC = () => {
                 <Button
                   className={classes.editButton}
                   onClick={handleCustomFieldReorder}
+                  size='sm'
                 >
                   <FormattedMessage
                     id='account_edit.custom_fields.reorder_button'
@@ -332,7 +333,10 @@ export const AccountEdit: FC = () => {
           <Button
             onClick={handleCustomFieldsVerifiedHelp}
             className={classes.verifiedLinkHelpButton}
-            plain
+            variant='ghost'
+            color='neutral'
+            size='sm'
+            clipPadding
           >
             <FormattedMessage
               id='account_edit.custom_fields.verified_hint'
@@ -375,6 +379,7 @@ export const AccountEdit: FC = () => {
             <Button
               className={classes.editButton}
               onClick={handleProfileDisplayEdit}
+              size='sm'
             >
               <FormattedMessage
                 id='account_edit.profile_tab.button_label'
@@ -388,7 +393,12 @@ export const AccountEdit: FC = () => {
           title={messages.customLogoTitle}
           description={messages.customLogoPlaceholder}
           showDescription={!profile.customLogo}
-          buttons={<AccountImageEdit location='custom_logo' className={classes.sectionImageButton} />}
+          buttons={
+            <AccountImageEdit
+              location='custom_logo'
+              className={classes.sectionImageButton}
+            />
+          }
         >
           {profile.customLogo && (
             <img
@@ -414,7 +424,12 @@ export const AccountEdit: FC = () => {
           title={messages.backgroundImageTitle}
           description={messages.backgroundImagePlaceholder}
           showDescription={!profile.backgroundImage}
-          buttons={<AccountImageEdit location='background_image' className={classes.sectionImageButton} />}
+          buttons={
+            <AccountImageEdit
+              location='background_image'
+              className={classes.sectionImageButton}
+            />
+          }
         >
           {profile.backgroundImage && (
             <img
