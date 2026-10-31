@@ -6,6 +6,7 @@ require_relative 'accounts'
 require_relative 'branding'
 require_relative 'cache'
 require_relative 'canonical_email_blocks'
+require_relative 'dm'
 require_relative 'domains'
 require_relative 'email_domain_blocks'
 require_relative 'emoji'
@@ -69,6 +70,9 @@ module Mastodon::CLI
 
     desc 'maintenance SUBCOMMAND ...ARGS', 'Various maintenance utilities'
     subcommand 'maintenance', Maintenance
+
+    desc 'dm SUBCOMMAND ...ARGS', 'Manage direct message chat rooms'
+    subcommand 'dm', Dm
 
     include Federation
 

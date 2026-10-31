@@ -29,6 +29,37 @@ class MigrateConversationsToDmWorker
     true
   end
 
+  # Re-run migration for group conversations only. Safe to run repeatedly:
+  # conversations whose statuses were already migrated reuse their room.
+  # Returns { migrated:, failed: } counts.
+  def migrate_group_conversations(account, dry_run: false)
+    @account = account
+    result = { migrated: 0, failed: 0 }
+
+    self.class.group_conversations_for(account).find_each do |conversation|
+      next unless self.class.pending_statuses?(conversation)
+
+      migrate_single_conversation(conversation) unless dry_run
+      result[:migrated] += 1
+    rescue => e
+      result[:failed] += 1
+      Rails.logger.warn("Failed to migrate group conversation #{conversation.id} for account #{account.id}: #{e.message}")
+    end
+
+    result
+  end
+
+  def self.group_conversations_for(account)
+    AccountConversation.where(account: account).where('cardinality(participant_account_ids) > 1')
+  end
+
+  def self.pending_statuses?(conversation)
+    return false if conversation.status_ids.blank?
+
+    migrated = DmMessage.where(status_id: conversation.status_ids).count
+    migrated < Status.where(id: conversation.status_ids).count
+  end
+
   private
 
   def already_migrated?
@@ -71,14 +102,21 @@ class MigrateConversationsToDmWorker
 
     room_type = participant_ids.size == 1 ? :direct : :group_chat
 
-    existing_room = find_existing_room(participant_ids, room_type)
+    existing_room = find_existing_room(conversation, participant_ids, room_type)
     room = existing_room || create_room(participant_ids, room_type)
 
     migrate_messages(room, conversation)
   end
 
-  def find_existing_room(participant_ids, room_type)
-    if room_type == :direct && participant_ids.size == 1
+  def find_existing_room(conversation, participant_ids, room_type)
+    if room_type == :group_chat
+      # Group rooms are never deduplicated by members, so look up the room
+      # that already holds messages from this conversation instead.
+      DmChatRoom.group_chat
+        .joins(:dm_messages)
+        .where(dm_messages: { status_id: conversation.status_ids })
+        .first
+    elsif participant_ids.size == 1
       other_account_id = participant_ids.first
       my_rooms = DmChatRoomAccount.where(account: @account).active.pluck(:dm_chat_room_id)
       other_rooms = DmChatRoomAccount.where(account_id: other_account_id).active.pluck(:dm_chat_room_id)
