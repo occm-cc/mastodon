@@ -44,15 +44,15 @@ class MigrateConversationsToDmWorker
     elapsed = Time.current - @start_time
 
     # Always send refresh event so frontend reloads the room list
-    payload = Oj.dump(event: 'dm_migration_complete', payload: '{}')
+    payload = { event: 'dm_migration_complete', payload: '{}' }.to_json
     redis.publish("timeline:dm:#{@account.id}", payload)
 
     # Only send notification if migration took more than 1 minute
     if elapsed > 60
-      notification_payload = Oj.dump(
+      notification_payload = {
         event: 'dm_migration_notification',
-        payload: Oj.dump({ message: 'migration_complete' })
-      )
+        payload: { message: 'migration_complete' }.to_json,
+      }.to_json
       redis.publish("timeline:dm:#{@account.id}", notification_payload)
     end
   end
@@ -69,7 +69,7 @@ class MigrateConversationsToDmWorker
     participant_ids = conversation.participant_account_ids
     return if participant_ids.empty?
 
-    room_type = participant_ids.size == 1 ? :direct : :group
+    room_type = participant_ids.size == 1 ? :direct : :group_chat
 
     existing_room = find_existing_room(participant_ids, room_type)
     room = existing_room || create_room(participant_ids, room_type)
@@ -137,10 +137,10 @@ class MigrateConversationsToDmWorker
       message.skip_side_effects = true
       message.save!
 
-      if status.media_attachments.any?
-        status.media_attachments.each do |media|
-          message.dm_message_attachments.create!(media_attachment: media)
-        end
+      next unless status.media_attachments.any?
+
+      status.media_attachments.each do |media|
+        message.dm_message_attachments.create!(media_attachment: media)
       end
     end
 
