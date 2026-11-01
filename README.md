@@ -1,3 +1,58 @@
+<h1><picture>
+  <source media="(prefers-color-scheme: dark)" srcset="./lib/assets/wordmark.dark.png?raw=true">
+  <source media="(prefers-color-scheme: light)" srcset="./lib/assets/wordmark.light.png?raw=true">
+  <img alt="OCCM SNS" src="./lib/assets/wordmark.light.png?raw=true" height="34">
+</picture></h1>
+
+[![GitHub release](https://img.shields.io/github/release/Lastorder-DC/mastodon.svg)][releases]
+
+[releases]: https://github.com/Lastorder-DC/mastodon/releases
+
+OCCM SNS is a fork of [Mastodon](https://github.com/mastodon/mastodon), a **free, open-source social network server** based on ActivityPub. It tracks upstream Mastodon closely and adds features for a Korean, community-focused server.
+
+While installing OCCM SNS is possible, it's recommended to install the original Mastodon instead, since OCCM SNS is focused on not exposing posts to other servers by default.
+
+## OCCM SNS features
+
+**Bird UI theme** - A Twitter-like default theme based on [Mastodon Bird UI](https://github.com/ronilaukkarinen/mastodon-bird-ui), customized for OCCM SNS and integrated with the redesigned Mastodon layout. Choose from classic Twitter accent colors (blue, yellow, pink, purple, orange, green) with the theme color setting.
+
+**Direct messages** - Dedicated one-to-one and group chat rooms, separate from private mentions, with custom emoji and push notifications. Available between local users.
+
+**Scheduled posts** - Schedule posts from the composer, then review, edit, or cancel them in the scheduled posts list.
+
+**Mentions to reply** - A view that collects mentions you haven't replied to yet, with the option to dismiss them.
+
+**Account switcher** - Switch between multiple accounts on the same server without logging out. Securely stores encrypted tokens locally using the WebCrypto API. See the [Account Switcher Guide](docs/multi_account_switcher.md) for setup and usage.
+
+**Protected accounts** - A profile setting that requires approving followers, sets the default post visibility to followers-only, and hides the account from other servers (WebFinger and ActivityPub).
+
+**Custom logo and background** - Users can replace the logo and set a background image for their own view.
+
+**Translation proxy** - Translate posts with Papago or Google Translate through a translation proxy.
+
+**Stars instead of hearts** - An option to show likes as stars.
+
+**Longer posts** - Posts can be up to 2,000 characters by default.
+
+**Separate visibility and quote settings** - The composer has separate dropdowns for post visibility and quote policy.
+
+**Role badges** - Account roles are shown as badges in the web interface.
+
+**Korean localization** - Missing Korean translations are filled in, and terminology is adjusted for the community.
+
+### Credits
+
+OCCM SNS includes code from the following projects:
+
+- [Mastodon Bird UI](https://github.com/ronilaukkarinen/mastodon-bird-ui) by Roni Laukkarinen
+- [mementomori-social/mastodon](https://github.com/mementomori-social/mastodon) (stars instead of hearts)
+- 마스토돈 한참 에디션 (protected accounts, AGPLv3)
+- qdon (translation proxy and other modifications)
+
+---
+
+The rest of this document is the upstream Mastodon README.
+
 > [!NOTE]
 > Want to learn more about Mastodon?
 > Click below to find out more in a video.
@@ -19,20 +74,6 @@
 </p>
 
 Mastodon is a **free, open-source social network server** based on [ActivityPub](https://www.w3.org/TR/activitypub/) where users can follow friends and discover new ones. On Mastodon, users can publish anything they want: links, pictures, text, and video. All Mastodon servers are interoperable as a federated network (users on one server can seamlessly communicate with users from another one, including non-Mastodon software that implements ActivityPub!)
-
-<h1><picture>
-  <source media="(prefers-color-scheme: dark)" srcset="./lib/assets/wordmark.dark.png?raw=true">
-  <source media="(prefers-color-scheme: light)" srcset="./lib/assets/wordmark.light.png?raw=true">
-  <img alt="Mastodon" src="./lib/assets/wordmark.light.png?raw=true" height="34">
-</picture></h1>
-
-[![GitHub release](https://img.shields.io/github/release/Lastorder-DC/mastodon.svg)][releases]
-
-[releases]: https://github.com/Lastorder-DC/mastodon/releases
-
-OCCM SNS is fork of Mastodon, which is **free, open-source social network server** based on ActivityPub where users can follow friends and discover new ones. On Mastodon, users can publish anything they want: links, pictures, text, video. All Mastodon servers are interoperable as a federated network (users on one server can seamlessly communicate with users from another one, including non-Mastodon software that implements ActivityPub)!
-
-While installing OCCM SNS is possible, it's recommended to install original Mastodon instead, since OCCM SNS is focused to not expose any toot to other server by default.
 
 ## Navigation
 
@@ -56,8 +97,6 @@ While installing OCCM SNS is possible, it's recommended to install original Mast
 **Safety and moderation tools** - Mastodon includes private posts, locked accounts, phrase filtering, muting, blocking, and many other features, along with a reporting and moderation system.
 
 **OAuth2 and a straightforward REST API** - Mastodon acts as an OAuth2 provider, and third party apps can use the REST and Streaming APIs. This results in a [rich app ecosystem](https://joinmastodon.org/apps) with a variety of choices!
-
-**Account Switcher** - Switch between multiple accounts on the same server without logging out. Securely stores encrypted tokens locally using WebCrypto API. See the [Account Switcher Guide](docs/multi_account_switcher.md) for setup and usage.
 
 ## Deployment
 
