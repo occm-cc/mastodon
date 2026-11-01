@@ -29,13 +29,19 @@ module Mastodon::CLI
         # Process accounts sequentially: members of the same group conversation
         # handled in parallel could otherwise each create a separate room.
         processed = migrated = failed = 0
+        scope = accounts_with_group_conversations
+        progress = create_progress_bar(scope.count)
 
-        accounts_with_group_conversations.find_each do |account|
+        scope.find_each do |account|
           result = MigrateConversationsToDmWorker.new.migrate_group_conversations(account, dry_run: dry_run?)
           processed += 1
           migrated += result[:migrated]
           failed += result[:failed]
+          progress.log("#{account.username}: #{result[:failed]} group conversations failed") if result[:failed].positive?
+          progress.increment
         end
+
+        progress.finish
 
         say("Processed #{processed} accounts: migrated #{migrated} group conversations, #{failed} failed#{dry_run_mode_suffix}", failed.zero? ? :green : :yellow)
       else
