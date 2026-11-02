@@ -34,20 +34,14 @@ While installing OCCM SNS is possible, it's recommended to install the original 
 
 **Longer posts** - Posts can be up to 2,000 characters by default.
 
-**Separate visibility and quote settings** - The composer has separate dropdowns for post visibility and quote policy.
-
-**Role badges** - Account roles are shown as badges in the web interface.
-
-**Korean localization** - Missing Korean translations are filled in, and terminology is adjusted for the community.
-
 ### Credits
 
 OCCM SNS includes code from the following projects:
 
 - [Mastodon Bird UI](https://github.com/ronilaukkarinen/mastodon-bird-ui) by Roni Laukkarinen
 - [mementomori-social/mastodon](https://github.com/mementomori-social/mastodon) (stars instead of hearts)
-- 마스토돈 한참 에디션 (protected accounts, AGPLv3)
-- qdon (translation proxy and other modifications)
+- [마스토돈 한참 에디션](https://github.com/long-while/longwhile-mastodon) (account switcher, protected accounts, AGPLv3)
+- [qdon.space](https://bitbucket.org/qdon/qdon.space) (translation proxy and other modifications)
 
 ---
 
