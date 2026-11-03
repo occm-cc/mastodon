@@ -41,6 +41,9 @@ vi.mock('@/mastodon/features/navigation_panel/components/trends', () => ({
 vi.mock('@/mastodon/features/navigation_panel/redesign/footer_links', () => ({
   NavigationFooterLinks: () => null,
 }));
+vi.mock('@/mastodon/features/discovery_panel/footer_links', () => ({
+  FooterLinks: () => null,
+}));
 
 vi.mock('./multi_column_content', () => ({
   MultiColumnContent: ({ children }: { children: React.ReactNode }) => (
