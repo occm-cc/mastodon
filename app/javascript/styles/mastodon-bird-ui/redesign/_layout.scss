@@ -7,6 +7,8 @@ html:root {
     --navigation-width: 260px;
     --main-column-max-width: 600px;
     --composer-grid-column: 3;
+    --bird-ui-sidebar-width: 350px;
+    --bird-ui-sidebar-gap: 16px;
 
     padding-inline: 0;
     gap: 0;
@@ -19,7 +21,9 @@ html:root {
     }
 
     @media (width >= 1200px) {
-      --columns-area-grid-columns: minmax(0, 1fr) 260px minmax(0, 600px) 320px
+      // Keep the original 350px compose panel usable; its gutter is separate.
+      --columns-area-grid-columns: minmax(0, 1fr) 260px minmax(0, 600px)
+        calc(var(--bird-ui-sidebar-width) + var(--bird-ui-sidebar-gap))
         minmax(0, 1fr);
     }
   }
@@ -72,7 +76,7 @@ html:root {
       scrollbar-width: thin;
       flex-direction: column;
       gap: 16px;
-      padding: 8px 24px;
+      padding: 8px 0 8px var(--bird-ui-sidebar-gap);
       min-width: 0;
     }
   }
