@@ -1,11 +1,14 @@
 import type React from 'react';
 
+import { useIntl } from 'react-intl';
+
 interface DateSeparatorProps {
   date: string;
 }
 
 export const DateSeparator: React.FC<DateSeparatorProps> = ({ date }) => {
-  const formatted = new Date(date).toLocaleDateString(undefined, {
+  const intl = useIntl();
+  const formatted = intl.formatDate(date, {
     year: 'numeric',
     month: 'long',
     day: 'numeric',

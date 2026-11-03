@@ -8,7 +8,12 @@ import { RelativeTimestamp } from 'mastodon/components/relative_timestamp';
 import { me } from 'mastodon/initial_state';
 import type { DmChatRoom } from 'mastodon/reducers/dm';
 
+import { RoomAvatar } from './room_avatar';
+
 const messages = defineMessages({
+  photo: { id: 'dm.preview.photo', defaultMessage: 'Photo' },
+  empty: { id: 'dm.preview.empty', defaultMessage: 'No messages yet' },
+  fromMe: { id: 'dm.preview.from_me', defaultMessage: 'You: {body}' },
   pending: { id: 'dm.invite.pending', defaultMessage: 'Conversation request' },
 });
 
@@ -32,36 +37,34 @@ export const ChatRoomItem: React.FC<ChatRoomItemProps> = ({ room, active }) => {
         otherParticipant?.username,
         room.title,
       ) ?? `Chat ${room.id}`)
-    : (firstNonBlank(room.title) ?? `Chat ${room.id}`);
-  const lastMessagePreview = room.last_message?.content_plain ?? '';
+    : (firstNonBlank(room.title) ??
+      room.participants
+        .filter((p) => p.id !== me)
+        .map((p) => firstNonBlank(p.display_name, p.username))
+        .join(', '));
+  const preview =
+    firstNonBlank(room.last_message?.content_plain) ??
+    (room.last_message?.attachments.length
+      ? intl.formatMessage(messages.photo)
+      : intl.formatMessage(messages.empty));
+  const lastMessagePreview =
+    room.last_message?.account.id === me
+      ? intl.formatMessage(messages.fromMe, { body: preview })
+      : preview;
   const lastMessageTime = room.last_message_at;
-  const avatarUrl = firstNonBlank(
-    otherParticipant?.avatar_static,
-    room.participants[0]?.avatar_static,
-  );
 
   return (
     <Link
       to={`/direct_message/${room.uuid}`}
+      aria-current={active ? 'page' : undefined}
       className={`dm-chat-room-item ${active ? 'dm-chat-room-item--active' : ''} ${room.unread ? 'dm-chat-room-item--unread' : ''} ${!room.accepted ? 'dm-chat-room-item--pending' : ''} ${isGroupChat ? 'dm-chat-room-item--group' : ''}`}
     >
       <div className='dm-chat-room-item__avatar'>
-        {avatarUrl ? (
-          <img
-            className='dm-chat-room-item__avatar-img'
-            src={avatarUrl}
-            alt=''
-            width='48'
-            height='48'
-          />
-        ) : (
-          <div className='dm-chat-room-item__avatar-placeholder' />
-        )}
-        {isGroupChat && (
-          <span className='dm-chat-room-item__group-badge'>
-            {room.participant_ids.length}
-          </span>
-        )}
+        <RoomAvatar
+          participants={room.participants}
+          isGroup={isGroupChat}
+          size={48}
+        />
       </div>
       <div className='dm-chat-room-item__content'>
         <div className='dm-chat-room-item__top'>

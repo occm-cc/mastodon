@@ -5,6 +5,8 @@ import { DM_MESSAGE_REMOVE_FAILED, sendMessage } from 'mastodon/actions/dm';
 import type { DmMessage } from 'mastodon/reducers/dm';
 import { useAppSelector, useAppDispatch } from 'mastodon/store';
 
+import { continuesMessageGroup, isSameMessageDay } from '../message_groups';
+
 import { DateSeparator } from './date_separator';
 import { MessageItem } from './message_item';
 
@@ -12,16 +14,6 @@ interface MessageListProps {
   roomId: string;
   currentAccountId: string | undefined;
   isGroupChat: boolean;
-}
-
-function isSameDay(d1: string, d2: string): boolean {
-  const a = new Date(d1);
-  const b = new Date(d2);
-  return (
-    a.getFullYear() === b.getFullYear() &&
-    a.getMonth() === b.getMonth() &&
-    a.getDate() === b.getDate()
-  );
 }
 
 export const MessageList: React.FC<MessageListProps> = ({
@@ -76,9 +68,13 @@ export const MessageList: React.FC<MessageListProps> = ({
       onScroll={handleScroll}
     >
       {messages.map((message, index) => {
-        const prevMessage = index > 0 ? messages[index - 1] : null;
+        const prevMessage = messages[index - 1];
         const isOwn = message.account_id === currentAccountId;
-        const showAvatar = prevMessage?.account_id !== message.account_id;
+        const showAvatar = !continuesMessageGroup(prevMessage, message);
+        const showTimestamp = !continuesMessageGroup(
+          message,
+          messages[index + 1],
+        );
         const showName = isGroupChat && !isOwn && showAvatar;
 
         // Calculate unread count for the message
@@ -103,7 +99,7 @@ export const MessageList: React.FC<MessageListProps> = ({
 
         const showDateSeparator =
           !prevMessage ||
-          !isSameDay(prevMessage.created_at, message.created_at);
+          !isSameMessageDay(prevMessage.created_at, message.created_at);
 
         return (
           <div key={message.id}>
@@ -115,6 +111,7 @@ export const MessageList: React.FC<MessageListProps> = ({
               isGroupChat={isGroupChat}
               showAvatar={showAvatar}
               showName={showName}
+              showTimestamp={showTimestamp}
               onRetry={handleRetry}
               account={accounts[message.account_id]}
             />

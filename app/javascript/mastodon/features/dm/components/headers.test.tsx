@@ -10,6 +10,12 @@ import { ChatRoomListHeader } from './chat_room_list_header';
 import '@testing-library/jest-dom';
 
 const mocks = vi.hoisted(() => ({ isMobile: false, dispatch: vi.fn() }));
+const listHeaderProps = {
+  query: '',
+  onQueryChange: vi.fn(),
+  unreadOnly: false,
+  onUnreadOnlyChange: vi.fn(),
+};
 
 vi.mock('@/mastodon/features/ui/hooks/useBreakpoint', () => ({
   useBreakpoint: () => mocks.isMobile,
@@ -78,7 +84,7 @@ describe('DM shared page headers', () => {
   });
 
   it('uses the common heading and preserves the new-message action on desktop', () => {
-    const { container } = render(<ChatRoomListHeader />);
+    const { container } = render(<ChatRoomListHeader {...listHeaderProps} />);
     expect(
       screen.getByRole('heading', { level: 1, name: 'Messages' }),
     ).toBeInTheDocument();
@@ -94,9 +100,22 @@ describe('DM shared page headers', () => {
 
   it('opens the mobile navigation from the message list', () => {
     mocks.isMobile = true;
-    render(<ChatRoomListHeader />);
+    render(<ChatRoomListHeader {...listHeaderProps} />);
     fireEvent.click(screen.getByRole('button', { name: 'Menu' }));
     expect(mocks.dispatch).toHaveBeenCalledWith(openNavigation());
+  });
+
+  it('connects search and unread filtering to the conversation list', () => {
+    render(<ChatRoomListHeader {...listHeaderProps} />);
+    fireEvent.change(screen.getByRole('searchbox'), {
+      target: { value: 'friend' },
+    });
+    expect(listHeaderProps.onQueryChange).toHaveBeenCalledWith('friend');
+    fireEvent.change(
+      screen.getByRole('combobox', { name: 'Filter conversations' }),
+      { target: { value: 'unread' } },
+    );
+    expect(listHeaderProps.onUnreadOnlyChange).toHaveBeenCalledWith(true);
   });
 
   it('preserves the conversation name, member count, back action, and settings', () => {

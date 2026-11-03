@@ -113,7 +113,10 @@ export const MessageCompose: React.FC<MessageComposeProps> = ({ roomId }) => {
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-      if (e.key === 'Enter' && !e.shiftKey) {
+      // Safari may end composition before keydown; 229 still identifies the IME Enter.
+      // eslint-disable-next-line @typescript-eslint/no-deprecated
+      const isComposing = e.nativeEvent.isComposing || e.keyCode === 229;
+      if (e.key === 'Enter' && !e.shiftKey && !isComposing) {
         e.preventDefault();
         handleSubmit();
       }
@@ -363,68 +366,71 @@ export const MessageCompose: React.FC<MessageComposeProps> = ({ roomId }) => {
         </div>
       )}
       <div className='dm-message-compose__input-row'>
-        <div className='dm-message-compose__actions-left'>
-          <button
-            ref={emojiButtonRef}
-            className='dm-message-compose__btn'
-            type='button'
-            title={intl.formatMessage(messages.emoji)}
-            onClick={handleToggleEmojiPicker}
-          >
-            <svg
-              width='20'
-              height='20'
-              viewBox='0 0 24 24'
-              fill='none'
-              stroke='currentColor'
-              strokeWidth='2'
-              strokeLinecap='round'
-              strokeLinejoin='round'
+        <div className='dm-message-compose__field'>
+          <div className='dm-message-compose__actions-left'>
+            <button
+              ref={emojiButtonRef}
+              className='dm-message-compose__btn'
+              type='button'
+              title={intl.formatMessage(messages.emoji)}
+              onClick={handleToggleEmojiPicker}
             >
-              <circle cx='12' cy='12' r='10' />
-              <path d='M8 14s1.5 2 4 2 4-2 4-2' />
-              <line x1='9' y1='9' x2='9.01' y2='9' />
-              <line x1='15' y1='9' x2='15.01' y2='9' />
-            </svg>
-          </button>
-          <button
-            className='dm-message-compose__btn'
-            type='button'
-            title={intl.formatMessage(messages.attachImage)}
-            onClick={handleAttachClick}
-            disabled={mediaAttachments.length >= 4 || uploading}
-          >
-            <svg
-              width='20'
-              height='20'
-              viewBox='0 0 24 24'
-              fill='none'
-              stroke='currentColor'
-              strokeWidth='2'
-              strokeLinecap='round'
-              strokeLinejoin='round'
+              <svg
+                width='20'
+                height='20'
+                viewBox='0 0 24 24'
+                fill='none'
+                stroke='currentColor'
+                strokeWidth='2'
+                strokeLinecap='round'
+                strokeLinejoin='round'
+              >
+                <circle cx='12' cy='12' r='10' />
+                <path d='M8 14s1.5 2 4 2 4-2 4-2' />
+                <line x1='9' y1='9' x2='9.01' y2='9' />
+                <line x1='15' y1='9' x2='15.01' y2='9' />
+              </svg>
+            </button>
+            <button
+              className='dm-message-compose__btn'
+              type='button'
+              title={intl.formatMessage(messages.attachImage)}
+              onClick={handleAttachClick}
+              disabled={mediaAttachments.length >= 4 || uploading}
             >
-              <path d='M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48' />
-            </svg>
-          </button>
-          <input
-            ref={fileInputRef}
-            type='file'
-            accept='image/*'
-            multiple
-            style={{ display: 'none' }}
-            onChange={handleFileSelect}
+              <svg
+                width='20'
+                height='20'
+                viewBox='0 0 24 24'
+                fill='none'
+                stroke='currentColor'
+                strokeWidth='2'
+                strokeLinecap='round'
+                strokeLinejoin='round'
+              >
+                <path d='M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48' />
+              </svg>
+            </button>
+            <input
+              ref={fileInputRef}
+              type='file'
+              accept='image/*'
+              multiple
+              style={{ display: 'none' }}
+              onChange={handleFileSelect}
+            />
+          </div>
+          <textarea
+            ref={textareaRef}
+            className='dm-message-compose__input'
+            placeholder={intl.formatMessage(messages.placeholder)}
+            aria-label={intl.formatMessage(messages.placeholder)}
+            value={text}
+            onChange={handleChange}
+            onKeyDown={handleKeyDown}
+            rows={1}
           />
         </div>
-        <textarea
-          ref={textareaRef}
-          className='dm-message-compose__input'
-          placeholder={intl.formatMessage(messages.placeholder)}
-          value={text}
-          onChange={handleChange}
-          onKeyDown={handleKeyDown}
-          rows={1}
-        />
         <button
           className={`dm-message-compose__send ${text.trim() || mediaAttachments.length > 0 ? 'dm-message-compose__send--active' : ''}`}
           type='button'

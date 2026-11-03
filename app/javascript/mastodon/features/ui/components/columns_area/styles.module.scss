@@ -103,3 +103,15 @@
     border-radius: 0;
   }
 }
+
+// The message list takes the place of the discovery sidebar on wide screens.
+.root:has(:global(.dm-page)) {
+  > .discoveryWrapper,
+  > .birdUiSidebar {
+    display: none;
+  }
+
+  @media (width >= 1175px) {
+    --main-column-max-width: 950px;
+  }
+}

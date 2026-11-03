@@ -25,6 +25,17 @@ html:root {
     }
   }
 
+  ._comp_columns_area__root:not(._comp_columns_area__rootMinimal):has(
+      .dm-page
+    ) {
+    @media (width >= 1175px) {
+      grid-template-columns: minmax(0, 1fr) 260px minmax(0, 950px) minmax(
+          0,
+          1fr
+        );
+    }
+  }
+
   ._comp_columns_area__navigationWrapper {
     grid-column: 2;
     box-sizing: border-box;

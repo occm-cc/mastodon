@@ -15,6 +15,7 @@ import { useAppDispatch } from '@/mastodon/store';
 import { me } from 'mastodon/initial_state';
 import type { DmChatRoom } from 'mastodon/reducers/dm';
 
+import { RoomAvatar } from './room_avatar';
 import { RoomSettingsModal } from './room_settings_modal';
 
 const messages = defineMessages({
@@ -66,12 +67,12 @@ export const ChatRoomHeader: React.FC<ChatRoomHeaderProps> = ({
           otherParticipant?.username,
           room.title,
         ) ?? fallbackName)
-      : (firstNonBlank(room.title) ?? fallbackName);
+      : (firstNonBlank(room.title) ??
+        room.participants
+          .filter((p) => p.id !== me)
+          .map((p) => firstNonBlank(p.display_name, p.username))
+          .join(', '));
   const participantCount = room?.participant_ids.length ?? 0;
-  const avatarUrl = firstNonBlank(
-    otherParticipant?.avatar_static,
-    room?.participants[0]?.avatar_static,
-  );
 
   const handleOpenSettings = useCallback(() => {
     setIsSettingsOpen(true);
@@ -84,23 +85,18 @@ export const ChatRoomHeader: React.FC<ChatRoomHeaderProps> = ({
   return (
     <>
       <ColumnHeader
+        className='dm-chat-room-header'
         withBackButton={!!onBack}
         onBack={onBack}
         title={
           room ? (
             <span className='dm-chat-room-header__identity'>
               <span className='dm-chat-room-header__avatar'>
-                {avatarUrl ? (
-                  <img
-                    className='dm-chat-room-header__avatar-img'
-                    src={avatarUrl}
-                    alt=''
-                    width='36'
-                    height='36'
-                  />
-                ) : (
-                  <span className='dm-chat-room-header__avatar-placeholder' />
-                )}
+                <RoomAvatar
+                  participants={room.participants}
+                  isGroup={room.room_type === 'group_chat'}
+                  size={36}
+                />
               </span>
               <span className='dm-chat-room-header__info'>
                 <span className='dm-chat-room-header__name'>{roomName}</span>

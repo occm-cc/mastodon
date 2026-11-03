@@ -10,6 +10,7 @@ import { useAppDispatch } from 'mastodon/store';
 
 import { ChatRoomList } from './components/chat_room_list';
 import { ChatRoomView } from './components/chat_room_view';
+import { EmptyConversation } from './components/empty_conversation';
 
 export const DirectMessages: React.FC = () => {
   const intl = useIntl();
@@ -39,11 +40,19 @@ export const DirectMessages: React.FC = () => {
         }),
       )}
     >
-      {roomId ? (
-        <ChatRoomView roomId={roomId} onBack={handleBack} />
-      ) : (
-        <ChatRoomList />
-      )}
+      {/* Layout adapted from 한참 (@_longwhile), longwhile-mastodon (AGPLv3). */}
+      <div className={`dm-shell ${roomId ? 'dm-shell--room-open' : ''}`}>
+        <div className='dm-shell__list'>
+          <ChatRoomList activeRoomId={roomId} />
+        </div>
+        <div className='dm-shell__thread'>
+          {roomId ? (
+            <ChatRoomView key={roomId} roomId={roomId} onBack={handleBack} />
+          ) : (
+            <EmptyConversation />
+          )}
+        </div>
+      </div>
     </Column>
   );
 };

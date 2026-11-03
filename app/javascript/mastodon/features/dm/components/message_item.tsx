@@ -26,6 +26,7 @@ interface MessageItemProps {
   isGroupChat?: boolean;
   showAvatar: boolean;
   showName: boolean;
+  showTimestamp: boolean;
   onRetry?: (message: DmMessage) => void;
   account?: DmChatRoomParticipant;
 }
@@ -37,13 +38,15 @@ export const MessageItem: React.FC<MessageItemProps> = ({
   isGroupChat,
   showAvatar,
   showName,
+  showTimestamp,
   onRetry,
   account,
 }) => {
   const intl = useIntl();
-  const time = new Date(message.created_at).toLocaleTimeString(undefined, {
+  const time = intl.formatTime(message.created_at, {
     hour: '2-digit',
     minute: '2-digit',
+    hour12: false,
   });
 
   const classNames = [
@@ -58,7 +61,7 @@ export const MessageItem: React.FC<MessageItemProps> = ({
 
   return (
     <div className={classNames}>
-      {!isOwn && (
+      {!isOwn && isGroupChat && (
         <div className='dm-message-item__avatar'>
           {showAvatar &&
             (account?.avatar_static ? (
@@ -66,8 +69,8 @@ export const MessageItem: React.FC<MessageItemProps> = ({
                 className='dm-message-item__avatar-img'
                 src={account.avatar_static}
                 alt=''
-                width='24'
-                height='24'
+                width='28'
+                height='28'
               />
             ) : (
               <div className='dm-message-item__avatar-placeholder' />
@@ -118,27 +121,40 @@ export const MessageItem: React.FC<MessageItemProps> = ({
             />
           )}
         </div>
-        <span className='dm-message-item__time'>{time}</span>
-        {isOwn &&
-          isGroupChat &&
-          unreadCount !== undefined &&
-          unreadCount > 0 && (
-            <span className='dm-message-item__read-status dm-message-item__unread-count'>
-              {unreadCount}
-            </span>
-          )}
-        {isOwn &&
-          !isGroupChat &&
-          unreadCount !== undefined &&
-          unreadCount === 0 && (
-            <span className='dm-message-item__read-status'>
-              {intl.formatMessage(messages.read_status)}
-            </span>
-          )}
         {message.failed && (
           <FailedMessageRetry message={message} onRetry={onRetry} />
         )}
       </div>
+      {showTimestamp && (
+        <div className='dm-message-item__meta'>
+          {isOwn &&
+            isGroupChat &&
+            unreadCount !== undefined &&
+            unreadCount > 0 && (
+              <span className='dm-message-item__read-status dm-message-item__unread-count'>
+                {unreadCount}
+              </span>
+            )}
+          {isOwn &&
+            !isGroupChat &&
+            unreadCount !== undefined &&
+            unreadCount === 0 && (
+              <span className='dm-message-item__read-status'>
+                {intl.formatMessage(messages.read_status)}
+              </span>
+            )}
+          <time
+            className='dm-message-item__time'
+            dateTime={message.created_at}
+            title={intl.formatDate(message.created_at, {
+              dateStyle: 'full',
+              timeStyle: 'short',
+            })}
+          >
+            {time}
+          </time>
+        </div>
+      )}
     </div>
   );
 };
