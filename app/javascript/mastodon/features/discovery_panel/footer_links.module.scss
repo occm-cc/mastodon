@@ -10,6 +10,13 @@
 
   @include mixins.type-caption;
 
+  // The footer sits directly on the wallpaper in the sidebars.
+  @media screen and (width >= variables.$custom-background-breakpoint) {
+    :global(body.custom-background) & {
+      @include mixins.custom-background-text-outline;
+    }
+  }
+
   // Hide footer links from the nav when they fit into the Discovery panel…
   // …in single column layout:
   :global(body.layout-single-column) &[data-context='navigation'] {

@@ -225,3 +225,33 @@
   border-radius: inherit;
   border: 1px solid transparent;
 }
+
+// Readable text over a user-supplied wallpaper: outline text (and icons) with
+// the theme's surface colour, which contrasts with the text colour in both
+// light (white halo) and dark (dark halo) themes. Plain `<button>`s (e.g.
+// navigation items) sit on the wallpaper too, but browsers reset their
+// text-shadow, so it is re-inherited explicitly. Form controls keep plain text.
+@mixin custom-background-text-outline {
+  --custom-background-outline: var(--color-bg-primary);
+
+  text-shadow:
+    -1px -1px 0 var(--custom-background-outline),
+    1px -1px 0 var(--custom-background-outline),
+    -1px 1px 0 var(--custom-background-outline),
+    1px 1px 0 var(--custom-background-outline),
+    0 0 3px var(--custom-background-outline);
+
+  svg {
+    filter: drop-shadow(0 0 1px var(--custom-background-outline))
+      drop-shadow(0 0 1px var(--custom-background-outline));
+  }
+
+  button {
+    text-shadow: inherit;
+  }
+
+  input,
+  textarea {
+    text-shadow: none;
+  }
+}

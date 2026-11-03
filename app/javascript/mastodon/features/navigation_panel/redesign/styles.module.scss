@@ -29,6 +29,17 @@
   @media screen and (width >= variables.$custom-background-breakpoint) {
     :global(body.custom-background) &[data-mode='static'] {
       --navigation-background-color: transparent;
+
+      @include mixins.custom-background-text-outline;
+
+      // The filled "New post" button paints its own background.
+      .newPostButton {
+        text-shadow: none;
+
+        svg {
+          filter: none;
+        }
+      }
     }
   }
 
