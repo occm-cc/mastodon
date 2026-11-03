@@ -50,6 +50,11 @@ html:root {
     @media (width >= mastodon.$mobile-menu-breakpoint) {
       padding-bottom: 0;
     }
+
+    // The main panel already owns the outer frame in single-column layouts.
+    > [data-column-root] {
+      border-inline: 0;
+    }
   }
 
   ._comp_columns_area__rootMinimal ._comp_columns_area__main {
@@ -85,21 +90,33 @@ html:root {
   }
 
   ._comp_column_header__root {
-    --column-header-gradient-start: 100%;
-
     border-top: 0;
+    padding-top: 0;
     margin-inline: 0;
     background: rgb(from var(--color-bg) r g b / 90%);
     backdrop-filter: blur(12px);
     border-bottom: 1px solid var(--color-border);
+
+    // The flat header has its own separator and translucent surface. The
+    // upstream card fade would extend another rectangle over the content.
+    &::after {
+      display: none;
+    }
   }
 
   ._comp_column_header__layout {
+    --column-header-padding: 0 12px;
+
     min-height: 54px;
+    border: 0;
     border-radius: 0;
     background: transparent;
     text-align: start;
     grid-template-columns: auto minmax(0, 1fr) auto;
+  }
+
+  ._comp_column_header__extraStickyContent {
+    border-inline: 0;
   }
 
   ._comp_column_header__title {
