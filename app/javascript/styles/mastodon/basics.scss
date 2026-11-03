@@ -333,7 +333,13 @@ article {
   }
 }
 
-@media screen and (width >= 890px) {
+@media screen and (width >= $custom-background-breakpoint) {
+  body.custom-background {
+    // Bird UI also sets a body background. Reveal the wallpaper only at the
+    // widths where it is rendered; compact layouts keep their normal surface.
+    background: transparent !important;
+  }
+
   body.custom-background::before {
     z-index: -1;
     content: '';
@@ -343,28 +349,4 @@ article {
     position: fixed;
     inset: 0;
   }
-}
-
-// Ensure content areas remain opaque with custom background active
-body.custom-background {
-  background: transparent !important;
-
-  .columns-area.columns-area--mobile,
-  .tabs-bar__wrapper {
-    background-color: var(--color-bg-primary);
-  }
-
-  .tabs-bar__wrapper {
-    border-top-color: transparent !important;
-  }
-
-  .columns-area__panels__main {
-    background-color: transparent !important;
-  }
-}
-
-// Also handle bird-ui theme body background overrides
-body.custom-background.layout-single-column,
-body.custom-background.layout-multiple-columns {
-  background-color: transparent !important;
 }

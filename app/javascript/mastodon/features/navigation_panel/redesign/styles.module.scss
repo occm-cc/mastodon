@@ -1,4 +1,5 @@
 @use '@/styles/mastodon/mixins';
+@use '@/styles/mastodon/variables';
 
 .root {
   position: relative;
@@ -21,6 +22,14 @@
 
   &[data-mode='slide-out'] {
     --navigation-background-color: var(--color-bg-primary);
+  }
+
+  // The wallpaper belongs to the desktop shell. Keep its header and footer
+  // transparent together, while slide-out navigation retains an opaque surface.
+  @media screen and (width >= variables.$custom-background-breakpoint) {
+    :global(body.custom-background) &[data-mode='static'] {
+      --navigation-background-color: transparent;
+    }
   }
 
   &[data-scrollable='true'] {

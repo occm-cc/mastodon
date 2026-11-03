@@ -33,6 +33,12 @@
   padding-bottom: env(safe-area-inset-bottom);
   background: var(--color-bg-desktop);
 
+  @media screen and (width >= $custom-background-breakpoint) {
+    :global(body.custom-background) & {
+      background: transparent;
+    }
+  }
+
   @media (max-width: ($mobile-menu-breakpoint - 1)) {
     display: none;
   }
@@ -42,4 +48,10 @@
   padding: var(--space-5) var(--space-4) var(--space-6);
   background: var(--color-bg-desktop) !important;
   border: none !important;
+
+  @media screen and (width >= $custom-background-breakpoint) {
+    :global(body.custom-background) & {
+      background: transparent !important;
+    }
+  }
 }
