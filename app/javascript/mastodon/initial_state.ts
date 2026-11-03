@@ -53,6 +53,7 @@ interface InitialStateMeta {
   status_page_url: string;
   terms_of_service_enabled: boolean;
   emoji_style?: string;
+  composer_position?: 'sidebar' | 'top' | 'popup';
   wrapstodon?: InitialStateWrapstodon | null;
 }
 

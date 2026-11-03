@@ -58,7 +58,7 @@
 .composerMinimized {
   @media (width >= #{variables.$mobile-menu-breakpoint}) {
     box-sizing: border-box;
-    grid-column: 2;
+    grid-column: var(--composer-grid-column, 2);
     pointer-events: auto;
   }
 }

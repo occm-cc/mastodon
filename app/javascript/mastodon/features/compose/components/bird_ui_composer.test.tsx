@@ -8,14 +8,25 @@ import { defaultMiddleware } from '@/mastodon/store/store';
 import { accountFactoryImmutable } from '@/testing/factories';
 import { cleanup, fireEvent, render, screen } from '@/testing/rendering';
 
+import { BirdUiSidebar } from '../../ui/components/columns_area/bird_ui_sidebar';
 import { ComposeButton } from '../trigger';
 
 import { BirdUiComposer } from './bird_ui_composer';
 
-const mocks = vi.hoisted(() => ({ isMobile: false }));
+const mocks = vi.hoisted(() => ({ isMobile: false, isNarrow: false }));
+vi.mock('@/mastodon/components/search', () => ({
+  Search: () => <div data-testid='sidebar-search' />,
+}));
+vi.mock('@/mastodon/features/navigation_panel/components/trends', () => ({
+  Trends: () => null,
+}));
+vi.mock('@/mastodon/features/navigation_panel/redesign/footer_links', () => ({
+  NavigationFooterLinks: () => null,
+}));
 vi.mock('@/mastodon/components/avatar', () => ({ Avatar: () => null }));
 vi.mock('@/mastodon/features/ui/hooks/useBreakpoint', () => ({
-  useBreakpoint: () => mocks.isMobile,
+  useBreakpoint: (breakpoint: string) =>
+    breakpoint === 'sidebar' ? mocks.isNarrow : mocks.isMobile,
 }));
 vi.mock('@/mastodon/hooks/useScrollSensor', () => ({
   useScrollSensor: () => ({ sensor: null, isInViewport: true }),
@@ -29,10 +40,20 @@ const RouteLocation = () => {
   return <output data-testid='route-location'>{pathname}</output>;
 };
 
-function renderComposer(text = '', withInlineForm = true) {
+function renderComposer(
+  text = '',
+  withInlineForm = true,
+  position = 'top',
+  withSidebar = false,
+) {
   const store = configureStore({
     reducer: reducerWithInitialState({
-      meta: { me: '123', locale: 'en', emoji_style: 'native' },
+      meta: {
+        me: '123',
+        locale: 'en',
+        emoji_style: 'native',
+        composer_position: position,
+      },
       accounts: { '123': accountFactoryImmutable({ id: '123' }) },
       compose: {
         text,
@@ -51,6 +72,7 @@ function renderComposer(text = '', withInlineForm = true) {
   const result = render(
     <Provider store={store}>
       {withInlineForm && <BirdUiComposer />}
+      {withSidebar && <BirdUiSidebar />}
       <ComposeButton />
       <RouteLocation />
     </Provider>,
@@ -65,6 +87,7 @@ describe('Bird UI inline composer', () => {
       configurable: true,
     });
     mocks.isMobile = false;
+    mocks.isNarrow = false;
     document.documentElement.style.setProperty('--bird-ui-redesign', '1');
     vi.stubGlobal('visualViewport', undefined);
     vi.stubGlobal(
@@ -81,6 +104,49 @@ describe('Bird UI inline composer', () => {
     cleanup();
     document.documentElement.style.removeProperty('--bird-ui-redesign');
     vi.unstubAllGlobals();
+  });
+
+  it('places the default sidebar composer directly below search, without a second form', () => {
+    const { container } = renderComposer('', true, 'sidebar', true);
+    const sidebar = container.querySelector(
+      '[data-composer-position="sidebar"]',
+    );
+    expect(sidebar).not.toBeNull();
+    expect(sidebar?.previousElementSibling?.getAttribute('data-testid')).toBe(
+      'sidebar-search',
+    );
+    expect(
+      container.querySelector('[data-composer-position="top"]'),
+    ).toBeNull();
+    expect(container.querySelectorAll('#composer-text')).toHaveLength(1);
+  });
+
+  it('uses one bottom popup when popup is selected', () => {
+    const { container } = renderComposer('Existing draft', true, 'popup', true);
+    expect(container.querySelector('form[data-inline]')).toBeNull();
+    expect(screen.getByRole('dialog')).toBeTruthy();
+    expect(container.querySelectorAll('#composer-text')).toHaveLength(1);
+    expect(screen.getByRole('textbox')).toHaveProperty(
+      'value',
+      'Existing draft',
+    );
+  });
+
+  it('moves the sidebar composer above the timeline when the right sidebar cannot fit', () => {
+    mocks.isNarrow = true;
+    const { container } = renderComposer(
+      'Draft on a smaller desktop',
+      true,
+      'sidebar',
+      true,
+    );
+    expect(
+      container.querySelector('[data-composer-position="top"]'),
+    ).not.toBeNull();
+    expect(
+      container.querySelector('[data-composer-position="sidebar"]'),
+    ).toBeNull();
+    expect(container.querySelectorAll('#composer-text')).toHaveLength(1);
   });
 
   it('uses the existing form and updates the existing compose draft', () => {

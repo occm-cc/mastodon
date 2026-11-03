@@ -14,6 +14,10 @@ vi.mock('@/mastodon/components/search', () => ({
   ),
 }));
 
+vi.mock('@/mastodon/features/compose/components/bird_ui_composer', () => ({
+  BirdUiComposer: () => null,
+}));
+
 vi.mock('@/mastodon/features/compose/trigger', () => ({
   ComposeButton: () => null,
 }));

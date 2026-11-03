@@ -71,6 +71,18 @@
                    wrapper: :with_label,
                    required: false
 
+      = ff.input :'web.composer_position',
+                 as: :radio_buttons,
+                 collection_wrapper_tag: 'ul',
+                 collection: user_settings_collection('web.composer_position'),
+                 item_wrapper_tag: 'li',
+                 label: t('appearance.composer_position.label'),
+                 hint: t('appearance.composer_position.hint'),
+                 label_method: ->(position) { t("appearance.composer_position.options.#{position}") },
+                 include_blank: false,
+                 wrapper: :with_label,
+                 required: false
+
   - unless I18n.locale == :en
     .flash-message.translation-prompt
       = t 'appearance.localization.body'

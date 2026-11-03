@@ -4,6 +4,7 @@ const breakpoints = {
   narrow: 479, // Device width under which horizontal space is constrained
   openable: 759, // Device width at which the sidebar becomes an openable hamburger menu
   full: 1174, // Device width at which all 3 columns can be displayed
+  sidebar: 1199, // Bird UI's right-hand search/composer sidebar starts at 1200px
 };
 
 type Breakpoint = keyof typeof breakpoints;

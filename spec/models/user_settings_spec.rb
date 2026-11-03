@@ -7,6 +7,23 @@ RSpec.describe UserSettings do
 
   let(:json) { {} }
 
+  describe 'composer position' do
+    it 'defaults to the sidebar for existing and new users' do
+      expect(subject['web.composer_position']).to eq 'sidebar'
+    end
+
+    it 'accepts each supported position' do
+      %w(sidebar top popup).each do |position|
+        subject['web.composer_position'] = position
+        expect(subject['web.composer_position']).to eq position
+      end
+    end
+
+    it 'rejects unsupported positions' do
+      expect { subject['web.composer_position'] = 'invalid' }.to raise_error ArgumentError
+    end
+  end
+
   describe '#[]' do
     context 'when setting is not set' do
       it 'returns default value' do

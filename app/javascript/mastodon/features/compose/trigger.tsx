@@ -16,16 +16,15 @@ import {
   openNewComposer,
 } from '@/mastodon/reducers/slices/composer';
 import { useAppDispatch, useAppSelector } from '@/mastodon/store';
-import { isBirdUiEnabled } from '@/mastodon/utils/bird_ui';
 import { includeMultiColumnPaths } from '@/mastodon/utils/react_router';
 
 import { useBreakpoint } from '../ui/hooks/useBreakpoint';
-import { useColumnsContext } from '../ui/util/columns_context';
 
 import { ComposeFormHeader } from './components/header';
 import { ComposeForm } from './form';
 import composerClasses from './styles.module.scss';
 import classes from './trigger.module.scss';
+import { useComposerPlacement } from './useComposerPlacement';
 
 export const ComposeButton: React.FC<{
   /**
@@ -36,7 +35,7 @@ export const ComposeButton: React.FC<{
   const displayState = useAppSelector((state) => state.composer.displayState);
   const pendingFocus = useAppSelector((state) => state.composer.pendingFocus);
   const isMobile = useBreakpoint('openable');
-  const { multiColumn } = useColumnsContext();
+  const placement = useComposerPlacement();
   const history = useHistory();
   const isHome = !!useRouteMatch({
     path: ['/home', '/timelines/home'],
@@ -46,7 +45,7 @@ export const ComposeButton: React.FC<{
     path: ['/publish', '/statuses/new'],
     exact: true,
   });
-  const useEmbeddedForm = isBirdUiEnabled() && !isMobile && !multiColumn;
+  const useEmbeddedForm = placement === 'top';
   const { signedIn } = useIdentity();
 
   useEffect(() => {
@@ -120,7 +119,7 @@ export const ComposeButton: React.FC<{
     return null;
   }
 
-  if (useEmbeddedForm) return null;
+  if (placement !== 'popup') return null;
 
   const floatingButtonProps = {
     inline,

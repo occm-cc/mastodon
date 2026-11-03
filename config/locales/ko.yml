@@ -1308,6 +1308,13 @@ ko:
     remove: 별칭 연결 끊기
   appearance:
     advanced_settings: 고급 설정
+    composer_position:
+      label: 툿 작성창 위치
+      hint: 유사 트위터 테마의 PC 화면에 적용됩니다. 우측 작성창은 검색창 아래에 표시되며, 공간이 부족하면 홈 타임라인 위쪽에 표시됩니다. 모바일과 고급 웹 인터페이스에서는 기존 작성창을 사용합니다.
+      options:
+        sidebar: 타임라인 우측, 검색창 아래 (기본값)
+        top: 홈 타임라인 위쪽
+        popup: 타임라인 하단 팝업 (순정 마스토돈 스타일)
     animations_and_accessibility: 애니메이션과 접근성
     boosting_preferences: 부스팅 설정
     boosting_preferences_info_html: "<strong>팁:</strong> 설정에 관계 없이 %{icon}을 <kbd>시프트</kbd>+<kbd>클릭</kbd>하여 곧바로 부스트할 수 있습니다."

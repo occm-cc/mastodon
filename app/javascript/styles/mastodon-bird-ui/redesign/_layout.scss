@@ -6,22 +6,21 @@ html:root {
   ._comp_columns_area__root:not(._comp_columns_area__rootMinimal) {
     --navigation-width: 260px;
     --main-column-max-width: 600px;
+    --composer-grid-column: 3;
 
     padding-inline: 0;
     gap: 0;
 
     @media (width >= mastodon.$mobile-menu-breakpoint) {
-      grid-template-columns: minmax(0, 1fr) 260px minmax(0, 600px) minmax(
-          0,
-          1fr
-        );
+      --columns-area-grid-columns: minmax(0, 1fr) 260px minmax(0, 600px)
+        minmax(0, 1fr);
+
+      grid-template-columns: var(--columns-area-grid-columns);
     }
 
     @media (width >= 1200px) {
-      grid-template-columns: minmax(0, 1fr) 260px minmax(0, 600px) 320px minmax(
-          0,
-          1fr
-        );
+      --columns-area-grid-columns: minmax(0, 1fr) 260px minmax(0, 600px) 320px
+        minmax(0, 1fr);
     }
   }
 
@@ -29,10 +28,8 @@ html:root {
       .dm-page
     ) {
     @media (width >= 1175px) {
-      grid-template-columns: minmax(0, 1fr) 260px minmax(0, 950px) minmax(
-          0,
-          1fr
-        );
+      --columns-area-grid-columns: minmax(0, 1fr) 260px minmax(0, 950px)
+        minmax(0, 1fr);
     }
   }
 

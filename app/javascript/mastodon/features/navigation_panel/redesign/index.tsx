@@ -32,7 +32,7 @@ import { Button } from '@/mastodon/components/button/redesign';
 import { Callout } from '@/mastodon/components/callout/redesign';
 import { FOCUS_TARGET } from '@/mastodon/components/navigation_focus_target';
 import { selectComposeType } from '@/mastodon/features/compose/components/selectors';
-import { useBreakpoint } from '@/mastodon/features/ui/hooks/useBreakpoint';
+import { useComposerPlacement } from '@/mastodon/features/compose/useComposerPlacement';
 import { useScrollSensor } from '@/mastodon/hooks/useScrollSensor';
 import { useIdentity } from '@/mastodon/identity_context';
 import {
@@ -200,13 +200,13 @@ export const RedesignNavigationPanel: React.FC<{
   const notificationsCount = useNotificationsCount();
   const dmUnreadCount = useDmUnreadCount();
   const birdUi = isBirdUiEnabled();
-  const isMobile = useBreakpoint('openable');
   const isHome = !!useRouteMatch({
     path: ['/home', '/timelines/home'],
     exact: true,
   });
   const composeType = useAppSelector(selectComposeType);
   const isEditing = useAppSelector((state) => !!state.compose.get('id'));
+  const composerPlacement = useComposerPlacement();
 
   const isManager = canManageReports(permissions);
   const isAdmin = canViewAdminDashboard(permissions);
@@ -214,10 +214,8 @@ export const RedesignNavigationPanel: React.FC<{
   const openComposer = useCallback(() => {
     dispatch(closeNavigation());
     if (
-      birdUi &&
-      !isMobile &&
-      !multiColumn &&
-      isHome &&
+      (composerPlacement === 'sidebar' ||
+        (composerPlacement === 'top' && isHome)) &&
       composeType === 'post' &&
       !isEditing
     ) {
@@ -225,7 +223,7 @@ export const RedesignNavigationPanel: React.FC<{
     } else {
       dispatch(openNewComposer({ type: 'post' }));
     }
-  }, [dispatch, birdUi, isMobile, multiColumn, isHome, composeType, isEditing]);
+  }, [dispatch, composerPlacement, isHome, composeType, isEditing]);
 
   const { customFeeds } = useCustomFeeds();
   const { followedHashtags } = useFollowedHashtags();
