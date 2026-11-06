@@ -66,6 +66,16 @@ module SettingsHelper
     end
   end
 
+  def default_content_type_label(content_type)
+    variant = content_type.split('/').last
+    safe_join(
+      [
+        t("simple_form.labels.defaults.setting_default_content_type_#{variant}"),
+        content_tag(:span, t("simple_form.hints.defaults.setting_default_content_type_#{variant}"), class: 'hint'),
+      ]
+    )
+  end
+
   def time_zone_options
     ActiveSupport::TimeZone.all.map { |tz| ["(GMT#{tz.now.formatted_offset}) #{tz.name}", tz.tzinfo.name] }
   end

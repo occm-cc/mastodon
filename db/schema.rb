@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_06_000002) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_06_100001) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -1360,6 +1360,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_06_000002) do
     t.bigint "status_id", null: false
     t.text "text", default: "", null: false
     t.datetime "updated_at", null: false
+    t.string "content_type"
     t.index ["account_id"], name: "index_status_edits_on_account_id"
     t.index ["status_id"], name: "index_status_edits_on_status_id"
   end
@@ -1423,6 +1424,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_06_000002) do
     t.string "url"
     t.integer "visibility", default: 0, null: false
     t.integer "visibility_before_protection"
+    t.string "content_type"
     t.index ["account_id", "id", "visibility", "updated_at"], name: "index_statuses_20190820", order: { id: :desc }, where: "(deleted_at IS NULL)"
     t.index ["account_id"], name: "index_statuses_on_account_id"
     t.index ["conversation_id"], name: "index_statuses_on_conversation_id"

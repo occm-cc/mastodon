@@ -57,6 +57,9 @@ ko:
         setting_aggregate_reblogs: 최근에 부스트 됐던 게시물은 새로 부스트 되어도 보여주지 않기 (새로 받은 부스트에만 적용됩니다)
         setting_always_send_emails: 기본적으로 마스토돈을 활동적으로 사용하고 있을 때에는 이메일 알림이 보내지지 않습니다
         setting_boost_modal: 활성화하면 부스트하기 전에 부스트의 공개설정을 바꿀 수 있는 확인창이 먼저 뜨게 됩니다.
+        setting_default_content_type_html: HTML로 게시물을 작성합니다. 위험한 태그와 속성은 제거됩니다
+        setting_default_content_type_markdown: 마크다운으로 게시물을 작성합니다. 섞여 있는 HTML은 HTML 게시물과 같이 필터링됩니다
+        setting_default_content_type_plain: 서식 없이 게시물을 작성합니다
         setting_default_quote_policy_private: 마스토돈에서 작성된 팔로워 전용 게시물은 다른 사용자가 인용할 수 없습니다.
         setting_default_quote_policy_unlisted: 사람들에게 인용된 경우, 인용한 게시물도 유행 타임라인에서 감추게 됩니다.
         setting_default_sensitive: 민감한 미디어는 기본적으로 가려져 있으며 클릭해서 볼 수 있습니다
@@ -244,6 +247,10 @@ ko:
         setting_boost_modal: 부스트 공개범위 제어
         setting_color_scheme: 모드
         setting_contrast: 대비
+        setting_default_content_type: 기본 게시물 형식
+        setting_default_content_type_html: HTML
+        setting_default_content_type_markdown: 마크다운
+        setting_default_content_type_plain: 일반 텍스트
         setting_default_language: 게시물 언어
         setting_default_privacy: 게시물 공개 범위
         setting_default_quote_policy: 인용할 수 있는 사람

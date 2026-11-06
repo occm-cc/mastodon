@@ -67,6 +67,18 @@
                  wrapper: :with_label
 
     .fields-group
+      = ff.input :default_content_type,
+                 as: :radio_buttons,
+                 collection: HtmlAwareFormatter::STATUS_MIME_TYPES,
+                 collection_wrapper_tag: 'ul',
+                 include_blank: false,
+                 item_wrapper_tag: 'li',
+                 label: I18n.t('simple_form.labels.defaults.setting_default_content_type'),
+                 label_method: ->(item) { default_content_type_label(item) },
+                 required: false,
+                 wrapper: :with_label
+
+    .fields-group
       = ff.input :default_sensitive,
                  hint: I18n.t('simple_form.hints.defaults.setting_default_sensitive'),
                  label: I18n.t('simple_form.labels.defaults.setting_default_sensitive'),

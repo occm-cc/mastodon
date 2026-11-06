@@ -131,10 +131,13 @@ export interface ApiContextJSON {
   descendants: ApiStatusJSON[];
 }
 
+export type ApiStatusContentType = 'text/plain' | 'text/markdown' | 'text/html';
+
 export interface ApiStatusSourceJSON {
   id: string;
   text: string;
   spoiler_text: string;
+  content_type?: ApiStatusContentType | null;
 }
 
 export interface ApiStatusTranslationJSON {

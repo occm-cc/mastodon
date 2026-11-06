@@ -68,6 +68,7 @@ class Api::V2::ScheduledStatusesController < Api::BaseController
       :quote_approval_policy,
       :sensitive,
       :spoiler_text,
+      :content_type,
       :visibility,
       :language,
       :scheduled_at,

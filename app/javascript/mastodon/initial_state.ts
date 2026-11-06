@@ -75,6 +75,7 @@ interface InitialStateCompose {
   text: string;
   default_privacy?: string;
   default_sensitive?: boolean;
+  default_content_type?: string;
   default_language?: string;
   default_quote_policy?: string;
   me?: string;

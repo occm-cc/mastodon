@@ -312,6 +312,7 @@ class PostStatusService < BaseService
       poll_attributes: poll_attributes,
       sensitive: @sensitive,
       spoiler_text: @options[:spoiler_text] || '',
+      content_type: @options[:content_type].presence || @account.user&.setting_default_content_type,
       visibility: @visibility,
       visibility_before_protection: @visibility_before_protection,
       language: valid_locale_cascade(@options[:language], @account.user&.preferred_posting_language, I18n.default_locale),

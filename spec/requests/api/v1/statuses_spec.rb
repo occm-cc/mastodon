@@ -154,6 +154,53 @@ RSpec.describe '/api/v1/statuses' do
         end
       end
 
+      context 'with a markdown content type' do
+        let(:params) { { status: '**bold** and <script>alert(1)</script>', content_type: 'text/markdown' } }
+
+        it 'stores the content type and renders sanitized markdown', :aggregate_failures do
+          subject
+
+          expect(response).to have_http_status(200)
+          expect(response.parsed_body[:content]).to include('<strong>bold</strong>')
+          expect(response.parsed_body[:content]).to_not include('<script')
+          expect(Status.find(response.parsed_body[:id]).content_type).to eq 'text/markdown'
+        end
+      end
+
+      context 'with an HTML content type' do
+        let(:params) { { status: '<p>Hi <em>there</em></p><img src="x" onerror="alert(1)">', content_type: 'text/html' } }
+
+        it 'renders sanitized HTML', :aggregate_failures do
+          subject
+
+          expect(response).to have_http_status(200)
+          expect(response.parsed_body[:content]).to include('<em>there</em>')
+          expect(response.parsed_body[:content]).to_not include('onerror')
+        end
+      end
+
+      context 'with an unknown content type' do
+        let(:params) { { status: 'Hello', content_type: 'application/javascript' } }
+
+        it 'returns http unprocessable entity' do
+          subject
+
+          expect(response).to have_http_status(422)
+        end
+      end
+
+      context 'without a content type' do
+        before { user.settings.update(default_content_type: 'text/markdown') && user.save! }
+
+        let(:params) { { status: '**bold**' } }
+
+        it 'uses the default content type from the user settings' do
+          subject
+
+          expect(response.parsed_body[:content]).to include('<strong>bold</strong>')
+        end
+      end
+
       %w(public unlisted).each do |requested_visibility|
         context "when a protected account requests #{requested_visibility} visibility" do
           let(:params) do
@@ -553,6 +600,19 @@ RSpec.describe '/api/v1/statuses' do
       let(:status) { Fabricate(:status, account: user.account) }
 
       it_behaves_like 'forbidden for wrong scope', 'read read:statuses'
+
+      context 'when changing the content type' do
+        let(:params) { { status: '*updated*', content_type: 'text/markdown' } }
+
+        it 'updates the content type', :aggregate_failures do
+          subject
+
+          expect(response).to have_http_status(200)
+          expect(response.parsed_body[:content]).to include('<em>updated</em>')
+          expect(status.reload.content_type).to eq 'text/markdown'
+          expect(status.edits.ordered.last.content_type).to eq 'text/markdown'
+        end
+      end
 
       it 'updates the status', :aggregate_failures do
         subject

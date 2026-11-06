@@ -116,6 +116,7 @@ class UpdateStatusService < BaseService
       @status.text = @options.delete(:spoiler_text) || '' if @status.text.blank? && @status.quote.blank?
     end
     @status.spoiler_text = @options[:spoiler_text] || '' if @options.key?(:spoiler_text)
+    @status.content_type = @options[:content_type] if @options[:content_type].present?
     @status.sensitive    = explicit_sensitive.nil? ? @options[:spoiler_text].present? : explicit_sensitive if @options.key?(:sensitive) || @options.key?(:spoiler_text)
     @status.language     = valid_locale_cascade(@options[:language], @status.language, @status.account.user&.preferred_posting_language, I18n.default_locale)
     @status.quote_approval_policy = @options[:quote_approval_policy] if @options[:quote_approval_policy].present?

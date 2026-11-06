@@ -7,6 +7,7 @@ import { apiUpdateMedia } from '@/mastodon/api/compose';
 import { apiGetSearch } from '@/mastodon/api/search';
 import type { ApiMediaAttachmentJSON } from '@/mastodon/api_types/media_attachments';
 import type { ApiQuotePolicy } from '@/mastodon/api_types/quotes';
+import type { ApiStatusContentType } from '@/mastodon/api_types/statuses';
 import type { MediaAttachment } from '@/mastodon/models/media_attachment';
 import type {
   MediaAttachmentShape,
@@ -338,6 +339,10 @@ export const quoteComposeCancel = createAction('compose/quoteComposeCancel');
 
 export const setComposeQuotePolicy = createAction<ApiQuotePolicy>(
   'compose/setQuotePolicy',
+);
+
+export const setComposeContentType = createAction<ApiStatusContentType>(
+  'compose/setContentType',
 );
 
 export const setDragUploadEnabled = createAction<boolean>(

@@ -56,6 +56,25 @@ class Sanitize
       current_node.replace(current_node.document.create_text_node(current_node.text)) unless LINK_PROTOCOLS.include?(scheme)
     end
 
+    IMG_TAG_TRANSFORMER = lambda do |env|
+      node = env[:node]
+
+      return unless env[:node_name] == 'img'
+
+      node.name = 'a'
+
+      node['href'] = node['src']
+      if node['alt'].present?
+        node.content = "[🖼  #{node['alt']}]"
+      else
+        url = node['href']
+        prefix = url.match(%r{\Ahttps?://(www\.)?}).to_s
+        text   = url[prefix.length, 30]
+        text += '…' if url.length - prefix.length > 30
+        node.content = "[🖼  #{text}]"
+      end
+    end
+
     UNSUPPORTED_ELEMENTS_TRANSFORMER = lambda do |env|
       return unless %w(h1 h2 h3 h4 h5 h6).include?(env[:node_name])
 
@@ -154,6 +173,54 @@ class Sanitize
       add_attributes: {
         'iframe' => { 'sandbox' => 'allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox allow-forms' },
       }
+    )
+
+    LINK_REL_TRANSFORMER = lambda do |env|
+      return unless env[:node_name] == 'a' && env[:node]['href']
+
+      node = env[:node]
+
+      rel = (node['rel'] || '').split & ['tag']
+      rel += %w(nofollow noopener) unless TagManager.instance.local_url?(node['href'])
+
+      if rel.empty?
+        node.remove_attribute('rel')
+      else
+        node['rel'] = rel.join(' ')
+      end
+    end
+
+    LINK_TARGET_TRANSFORMER = lambda do |env|
+      return unless env[:node_name] == 'a' && env[:node]['href']
+
+      node = env[:node]
+      if node['target'] != '_blank' && TagManager.instance.local_url?(node['href'])
+        node.remove_attribute('target')
+      else
+        node['target'] = '_blank'
+      end
+    end
+
+    # Used for Markdown and HTML posts written on this server. Rendering stays
+    # as strict as for incoming remote posts, so headings still become bold
+    # paragraphs, and links get the same rel and target as everywhere else.
+    MASTODON_OUTGOING = freeze_config MASTODON_STRICT.merge(
+      attributes: merge(
+        MASTODON_STRICT[:attributes],
+        'a' => %w(href rel class title target translate)
+      ),
+
+      add_attributes: {},
+
+      transformers: [
+        ALLOWED_CLASS_TRANSFORMER,
+        IMG_TAG_TRANSFORMER,
+        TRANSLATE_TRANSFORMER,
+        UNSUPPORTED_ELEMENTS_TRANSFORMER,
+        UNSUPPORTED_HREF_TRANSFORMER,
+        LINK_REL_TRANSFORMER,
+        LINK_TARGET_TRANSFORMER,
+      ]
     )
   end
 end

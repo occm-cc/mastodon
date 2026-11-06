@@ -60,6 +60,9 @@ en:
         setting_aggregate_reblogs: Do not show new boosts for posts that have been recently boosted (only affects newly-received boosts)
         setting_always_send_emails: Normally e-mail notifications won't be sent when you are actively using Mastodon
         setting_boost_modal: When enabled, boosting will first open a confirmation dialog in which you can change the visibility of your boost.
+        setting_default_content_type_html: Write posts in HTML. Unsafe tags and attributes are removed
+        setting_default_content_type_markdown: Write posts in Markdown. Raw HTML in it is filtered like HTML posts
+        setting_default_content_type_plain: Write posts without formatting
         setting_default_quote_policy_private: Followers-only posts authored on Mastodon can't be quoted by others.
         setting_default_quote_policy_unlisted: When people quote you, their post will also be hidden from trending timelines.
         setting_default_sensitive: Sensitive media is hidden by default and can be revealed with a click
@@ -257,6 +260,10 @@ en:
         setting_boost_modal: Control boosting visibility
         setting_color_scheme: Mode
         setting_contrast: Contrast
+        setting_default_content_type: Default post format
+        setting_default_content_type_html: HTML
+        setting_default_content_type_markdown: Markdown
+        setting_default_content_type_plain: Plain text
         setting_default_language: Posting language
         setting_default_privacy: Posting visibility
         setting_default_quote_policy: Who can quote

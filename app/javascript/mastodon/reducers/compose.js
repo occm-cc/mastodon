@@ -7,6 +7,7 @@ import {
   quoteCompose,
   quoteComposeCancel,
   setComposeQuotePolicy,
+  setComposeContentType,
   pasteLinkCompose,
   cancelPasteLinkCompose,
   setDragUploadEnabled,
@@ -71,6 +72,7 @@ const initialState = ImmutableMap({
   sensitive: false,
   spoiler: false,
   spoiler_text: '',
+  content_type: 'text/plain',
   privacy: null,
   id: null,
   scheduled_status_id: null,
@@ -96,6 +98,7 @@ const initialState = ImmutableMap({
   suggestions: ImmutableList(),
   default_privacy: 'public',
   default_sensitive: false,
+  default_content_type: 'text/plain',
   default_spoiler_field: false,
   default_language: 'en',
   resetFileKey: Math.floor((Math.random() * 0x10000)),
@@ -142,6 +145,7 @@ function clearAll(state) {
     map.set('in_reply_to', null);
     map.set('privacy', state.get('default_privacy'));
     map.set('sensitive', state.get('default_sensitive'));
+    map.set('content_type', state.get('default_content_type') || 'text/plain');
     map.set('spoiler', state.get('default_spoiler_field', false));
     map.set('language', state.get('default_language'));
     map.update('media_attachments', list => list.clear());
@@ -350,6 +354,7 @@ export const composeReducer = (state = initialState, action) => {
       text: params.text || '',
       spoiler: !!params.spoiler_text,
       spoiler_text: params.spoiler_text || '',
+      content_type: params.content_type || state.get('default_content_type') || 'text/plain',
       sensitive: !!params.sensitive,
       privacy: params.visibility || state.get('default_privacy'),
       language: params.language || state.get('default_language'),
@@ -408,6 +413,8 @@ export const composeReducer = (state = initialState, action) => {
     return state.set('quoted_status_id', null);
   } else if (setComposeQuotePolicy.match(action)) {
     return state.set('quote_policy', action.payload);
+  } else if (setComposeContentType.match(action)) {
+    return state.set('content_type', action.payload).set('idempotencyKey', uuid());
   } else if (pasteLinkCompose.pending.match(action)) {
     return state.set('fetching_link', action.meta.requestId);
   } else if (pasteLinkCompose.fulfilled.match(action) || pasteLinkCompose.rejected.match(action)) {
@@ -613,6 +620,8 @@ export const composeReducer = (state = initialState, action) => {
       map.set('scheduled_status_id', null);
       map.set('scheduled_at', null);
       map.set('text', action.raw_text || unescapeHTML(expandMentions(action.status)));
+      // Without the source text, the rendered HTML is turned into plain text.
+      map.set('content_type', (action.raw_text && action.content_type) || 'text/plain');
       map.set('in_reply_to', action.status.get('in_reply_to_id'));
       map.set('privacy', action.status.get('visibility'));
       map.set('media_attachments', action.status.get('media_attachments').map((media) => media.set('unattached', true)));
@@ -650,6 +659,7 @@ export const composeReducer = (state = initialState, action) => {
       map.set('scheduled_at', null);
       map.set('id', action.status.get('id'));
       map.set('text', action.text);
+      map.set('content_type', action.content_type || 'text/plain');
       map.set('in_reply_to', action.status.get('in_reply_to_id'));
       map.set('privacy', action.status.get('visibility'));
       map.set('media_attachments', action.status.get('media_attachments'));

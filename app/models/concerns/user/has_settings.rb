@@ -32,6 +32,10 @@ module User::HasSettings
     settings['default_sensitive']
   end
 
+  def setting_default_content_type
+    settings['default_content_type']
+  end
+
   def setting_boost_modal
     settings['web.reblog_modal']
   end

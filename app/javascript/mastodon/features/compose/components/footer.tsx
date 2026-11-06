@@ -23,6 +23,7 @@ import {
 
 import classes from '../styles.module.scss';
 
+import { ComposeContentTypeButton } from './content_type';
 import {
   selectComposeAttachments,
   selectComposeCanSubmit,
@@ -99,6 +100,8 @@ export const ComposeFooter: React.FC<{ onEmojiPick: OnEmojiPick }> = ({
           defaultMessage='Add a poll'
         />
       </IconButton>
+
+      <ComposeContentTypeButton />
 
       <div className={classes.flexGrowWrap}>
         <span

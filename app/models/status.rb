@@ -5,6 +5,7 @@
 # Table name: statuses
 #
 #  id                           :bigint(8)        not null, primary key
+#  content_type                 :string
 #  deleted_at                   :datetime
 #  edited_at                    :datetime
 #  fetched_replies_at           :datetime
@@ -119,6 +120,7 @@ class Status < ApplicationRecord
   has_one :quote, inverse_of: :status, dependent: :destroy
 
   validates :uri, uniqueness: true, presence: true, unless: :local?
+  validates :content_type, inclusion: { in: HtmlAwareFormatter::STATUS_MIME_TYPES }, allow_nil: true
   validates :text, presence: true, unless: -> { with_media? || reblog? || with_quote? }
   validates_with StatusLengthValidator
   validates_with DisallowedHashtagsValidator
