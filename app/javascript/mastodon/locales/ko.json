@@ -1462,7 +1462,6 @@
   "scheduled_statuses.send_at": "{date}에 전송 예정",
   "scheduled_statuses.time": "시간",
   "scheduled_statuses.timezone": "시간대",
-  "scheduled_statuses.timezone_hint": "기기의 시간대를 사용합니다. 현지 시각이 두 번 발생하는 경우 먼저 오는 시각으로 예약합니다.",
   "scheduled_statuses.unavailable": "이미 전송되었거나 취소된 예약 게시물입니다. 저장하지 않은 변경 내용은 유지했습니다.",
   "scheduled_statuses.year": "년",
   "search.clear": "검색 초기화",

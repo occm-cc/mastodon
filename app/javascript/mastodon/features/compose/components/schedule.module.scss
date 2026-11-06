@@ -54,15 +54,9 @@
 }
 
 .label,
-.hint,
 .time,
 .summary {
   color: var(--color-text-secondary);
-}
-
-.hint {
-  font-size: var(--fs-13);
-  margin-block-start: var(--space-2);
 }
 
 .time {

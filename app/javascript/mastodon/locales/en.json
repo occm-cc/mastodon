@@ -1439,7 +1439,6 @@
   "scheduled_statuses.send_at": "Will send on {date}",
   "scheduled_statuses.time": "Time",
   "scheduled_statuses.timezone": "Time zone",
-  "scheduled_statuses.timezone_hint": "Uses your device time zone. If a local time occurs twice, the earlier occurrence is used.",
   "scheduled_statuses.unavailable": "This scheduled post has already been sent or cancelled. Your unsaved changes have been kept.",
   "scheduled_statuses.year": "Year",
   "search.clear": "Clear search",

@@ -315,12 +315,6 @@ const ScheduleModal: React.FC<{
           <p>
             {timezone} · {offset}
           </p>
-          <p className={classes.hint}>
-            <FormattedMessage
-              id='scheduled_statuses.timezone_hint'
-              defaultMessage='Uses your device time zone. If a local time occurs twice, the earlier occurrence is used.'
-            />
-          </p>
         </div>
         {!valid && (
           <p role='alert' className={classes.error}>
