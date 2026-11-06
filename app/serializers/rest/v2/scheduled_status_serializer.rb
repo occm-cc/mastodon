@@ -9,8 +9,8 @@ class REST::V2::ScheduledStatusSerializer < REST::ScheduledStatusSerializer
       language: valid_locale_cascade(object.params['language'], object.account.user&.preferred_posting_language, I18n.default_locale)
     )
     boolean_type = ActiveModel::Type::Boolean.new
-    sensitive = values[:sensitive].nil? ? object.account.user&.setting_default_sensitive : values[:sensitive]
-    values[:sensitive] = boolean_type.cast(sensitive) || values[:spoiler_text].present?
+    sensitive = boolean_type.cast(values[:sensitive])
+    values[:sensitive] = sensitive.nil? ? (object.account.user&.setting_default_sensitive || values[:spoiler_text].present?) : sensitive
     if values[:poll].present?
       values[:poll] = values[:poll].dup
       %i(multiple hide_totals).each { |key| values[:poll][key] = boolean_type.cast(values[:poll][key]) || false }

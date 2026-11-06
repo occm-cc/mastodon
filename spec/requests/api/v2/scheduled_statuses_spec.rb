@@ -45,6 +45,19 @@ RSpec.describe '/api/v2/scheduled_statuses' do
       expect(response.parsed_body[:params][:poll][:multiple]).to be(false)
     end
 
+    it 'keeps media unblurred with a content warning when sensitive is false' do
+      create_schedule(spoiler_text: 'CW', sensitive: false)
+      expect(response).to have_http_status(200)
+      expect(user.account.scheduled_statuses.last.params).to include('sensitive' => false, 'spoiler_text' => 'CW')
+      expect(response.parsed_body[:params]).to include(sensitive: false)
+    end
+
+    it 'keeps the content type for later publishing' do
+      create_schedule(status: '**bold**', content_type: 'text/markdown')
+      expect(response).to have_http_status(200)
+      expect(response.parsed_body[:params]).to include(content_type: 'text/markdown')
+    end
+
     it 'honors the idempotency key' do
       keyed_headers = headers.merge('Idempotency-Key' => SecureRandom.uuid)
       2.times { post api_v2_scheduled_statuses_path, headers: keyed_headers, params: { status: 'Once', scheduled_at: schedule_time }, as: :json }
