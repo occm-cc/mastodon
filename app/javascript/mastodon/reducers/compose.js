@@ -169,12 +169,10 @@ function appendMedia(state, media, file) {
     map.set('idempotencyKey', uuid());
     map.update('pending_media_attachments', n => n - 1);
 
+    // Blurring media is a default here, not a requirement: it can still be
+    // turned off independently of the content warning.
     if (prevSize === 0 && (state.get('default_sensitive') || state.get('spoiler'))) {
       map.set('sensitive', true);
-
-      if (state.get('default_sensitive')) {
-        map.set('spoiler', true);
-      }
     }
   });
 }
@@ -350,7 +348,7 @@ export const composeReducer = (state = initialState, action) => {
       scheduled_status_id: id,
       scheduled_at,
       text: params.text || '',
-      spoiler: !!params.spoiler_text || (!!params.sensitive && media_attachments.length > 0),
+      spoiler: !!params.spoiler_text,
       spoiler_text: params.spoiler_text || '',
       sensitive: !!params.sensitive,
       privacy: params.visibility || state.get('default_privacy'),
@@ -484,6 +482,12 @@ export const composeReducer = (state = initialState, action) => {
     return state.withMutations(map => {
       map.set('spoiler', !state.get('spoiler'));
       map.set('idempotencyKey', uuid());
+
+      // Adding a content warning blurs attached media by default, but the
+      // author can still unblur it.
+      if (!state.get('spoiler') && state.get('media_attachments').size > 0) {
+        map.set('sensitive', true);
+      }
     });
   case COMPOSE_SPOILER_TEXT_CHANGE:
     if (!state.get('spoiler')) return state;

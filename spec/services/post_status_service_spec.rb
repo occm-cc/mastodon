@@ -96,6 +96,24 @@ RSpec.describe PostStatusService do
     expect(status).to be_sensitive
   end
 
+  it 'creates a sensitive status when there is a CW and sensitive is not given' do
+    status = create_status_with_options(spoiler_text: 'foo')
+
+    expect(status).to be_sensitive
+  end
+
+  it 'creates a non-sensitive status with a CW when sensitive is explicitly false' do
+    status = create_status_with_options(spoiler_text: 'foo', sensitive: false)
+
+    expect(status).to have_attributes(spoiler_text: 'foo', sensitive: false)
+  end
+
+  it 'treats a string false sensitive value as explicitly false' do
+    status = create_status_with_options(spoiler_text: 'foo', sensitive: 'false')
+
+    expect(status).to have_attributes(spoiler_text: 'foo', sensitive: false)
+  end
+
   it 'creates a status with spoiler text' do
     spoiler_text = 'spoiler text'
 

@@ -179,15 +179,6 @@ const ComposeSettingsInnerMenu: React.FC = () => {
           name='media_spoiler'
           value='on'
           checked={mediaSensitive}
-          disabled={sensitive}
-          description={
-            sensitive && (
-              <FormattedMessage
-                id='compose.sensitive.media_added'
-                defaultMessage='Media is always blurred if a content warning is added'
-              />
-            )
-          }
           onChange={onMediaSensitiveChange}
           keepMenuOpenOnClick
           icon={EyeSlashIcon}

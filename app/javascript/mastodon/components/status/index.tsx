@@ -153,9 +153,9 @@ export const Status: React.FC<StatusProps> = ({
     handlers: hotkeyHandlers,
   };
 
-  const isHidden =
-    (!showDespiteFilter && isFiltered) ||
-    (!!status.spoiler_text && status.hidden);
+  const isFilterHidden = !showDespiteFilter && isFiltered;
+  const isSpoilerHidden = !!status.spoiler_text && status.hidden;
+  const isHidden = isFilterHidden || isSpoilerHidden;
 
   if (hidden) {
     return (
@@ -226,8 +226,11 @@ export const Status: React.FC<StatusProps> = ({
             className={classNames(
               classes.contentWrapper,
               classes.contentWarningBlur,
-              isHidden && classes.contentWarningBlurActive,
-              !showDespiteFilter && isFiltered && classes.isFiltered,
+              isFilterHidden && classes.contentWarningBlurActive,
+              isFilterHidden && classes.isFiltered,
+              // Content warnings collapse the post body, as they did before
+              // the redesign, so they still save space in timelines.
+              isSpoilerHidden && !isFilterHidden && classes.contentCollapsed,
             )}
             id={contentWrapperId}
             inert={isHidden}

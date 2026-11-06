@@ -123,7 +123,7 @@ const ComposeAudioUpload: React.FC<{
   attachment: ComposeAttachment<ApiAudioAttachmentJSON>;
 }> = ({ attachment }) => {
   const { id, preview_url } = attachment;
-  const sensitive = useAppSelector((state) => !!state.compose.get('spoiler'));
+  const sensitive = useAppSelector((state) => !!state.compose.get('sensitive'));
 
   const dispatch = useAppDispatch();
   const handleDelete = useCallback(() => {

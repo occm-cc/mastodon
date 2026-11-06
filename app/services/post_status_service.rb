@@ -86,8 +86,14 @@ class PostStatusService < BaseService
 
   private
 
+  # A content warning only implies sensitive media when the client did not say
+  # otherwise. ActivityPub keeps `summary` and `sensitive` independent.
+  def explicit_sensitive
+    ActiveModel::Type::Boolean.new.cast(@options[:sensitive])
+  end
+
   def preprocess_attributes!
-    @sensitive    = (@options[:sensitive].nil? ? @account.user&.setting_default_sensitive : @options[:sensitive]) || @options[:spoiler_text].present?
+    @sensitive    = explicit_sensitive.nil? ? (@account.user&.setting_default_sensitive || @options[:spoiler_text].present?) : explicit_sensitive
     @text         = @options.delete(:spoiler_text) if @text.blank? && @options[:spoiler_text].present? && @quoted_status.blank?
     @visibility   = @options[:visibility] || @account.user&.setting_default_privacy
     @visibility   = :unlisted if @visibility&.to_sym == :public && @account.silenced?

@@ -89,6 +89,18 @@ RSpec.describe UpdateStatusService do
       expect(status.edits.ordered.pluck(:text, :spoiler_text))
         .to eq [['Foo', ''], ['Foo', 'Bar']]
     end
+
+    it 'marks the status sensitive when sensitive is not given' do
+      subject.call(status, status.account_id, text: 'Foo', spoiler_text: 'Bar')
+
+      expect(status.reload).to be_sensitive
+    end
+
+    it 'keeps the status non-sensitive when sensitive is explicitly false' do
+      subject.call(status, status.account_id, text: 'Foo', spoiler_text: 'Bar', sensitive: false)
+
+      expect(status.reload).to have_attributes(spoiler_text: 'Bar', sensitive: false)
+    end
   end
 
   context 'when media attachments change' do
