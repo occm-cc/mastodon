@@ -97,13 +97,25 @@ export const CompatibilityHashtag: React.FC<{
   />
 );
 
+const HashtagName: React.FC<{ name: string }> = ({ name }) =>
+  name ? (
+    <>
+      #<span>{name}</span>
+    </>
+  ) : (
+    <Skeleton width={50} />
+  );
+
 export interface HashtagProps {
   className?: string;
   description?: React.ReactNode;
   history?: number[];
   name: string;
   people?: number;
-  to: string;
+  /** In-app route, rendered with react-router */
+  to?: string;
+  /** Plain link, for use outside the web app router (e.g. admin pages) */
+  href?: string;
   uses?: number;
   withGraph?: boolean;
   children?: React.ReactNode;
@@ -112,6 +124,7 @@ export interface HashtagProps {
 export const Hashtag: React.FC<HashtagProps> = ({
   name,
   to,
+  href,
   people,
   uses,
   history,
@@ -122,15 +135,15 @@ export const Hashtag: React.FC<HashtagProps> = ({
 }) => (
   <div className={classNames('trends__item', className)}>
     <div className='trends__item__name'>
-      <Link to={to}>
-        {name ? (
-          <>
-            #<span>{name}</span>
-          </>
-        ) : (
-          <Skeleton width={50} />
-        )}
-      </Link>
+      {to === undefined ? (
+        <a href={href}>
+          <HashtagName name={name} />
+        </a>
+      ) : (
+        <Link to={to}>
+          <HashtagName name={name} />
+        </Link>
+      )}
 
       {description ? (
         <span>{description}</span>
