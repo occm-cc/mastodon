@@ -107,4 +107,36 @@ RSpec.describe Follow do
       end
     end
   end
+
+  describe 'syncing account announcements' do
+    let(:follower) { Fabricate(:account) }
+    let(:author) { Fabricate(:account) }
+
+    it 'enqueues a sync when following an account with published announcements' do
+      Fabricate(:announcement, account: author)
+
+      expect { follower.follow!(author) }
+        .to enqueue_sidekiq_job(SyncFollowedAnnouncementsWorker).with(follower.id, author.id)
+    end
+
+    it 'enqueues a sync when unfollowing an account with published announcements' do
+      follower.follow!(author)
+      Fabricate(:announcement, account: author)
+
+      expect { follower.unfollow!(author) }
+        .to enqueue_sidekiq_job(SyncFollowedAnnouncementsWorker).with(follower.id, author.id)
+    end
+
+    it 'does not enqueue anything for accounts without announcements' do
+      expect { follower.follow!(author) }
+        .to_not enqueue_sidekiq_job(SyncFollowedAnnouncementsWorker)
+    end
+
+    it 'does not enqueue anything for remote accounts' do
+      remote = Fabricate(:account, domain: 'example.com')
+
+      expect { follower.follow!(remote) }
+        .to_not enqueue_sidekiq_job(SyncFollowedAnnouncementsWorker)
+    end
+  end
 end

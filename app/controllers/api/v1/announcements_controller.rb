@@ -17,11 +17,14 @@ class Api::V1::AnnouncementsController < Api::BaseController
 
   private
 
+  # Server-wide announcements and announcements of followed accounts are
+  # returned together so that existing clients show both.
   def set_announcements
-    @announcements = Announcement.published.chronological
+    @announcements = Announcement.visible_records_for(current_account, Announcement.visible_to(current_account).chronological)
   end
 
   def set_announcement
-    @announcement = Announcement.published.find(params[:id])
+    @announcement = Announcement.visible_to(current_account).find(params[:id])
+    raise ActiveRecord::RecordNotFound unless @announcement.author_can_publish?
   end
 end

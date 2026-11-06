@@ -1,5 +1,6 @@
 // See app/serializers/rest/announcement_serializer.rb
 
+import type { ApiAccountJSON } from './accounts';
 import type { ApiCustomEmojiJSON } from './custom_emoji';
 import type { ApiMentionJSON, ApiStatusJSON, ApiTagJSON } from './statuses';
 
@@ -18,7 +19,12 @@ export interface ApiAnnouncementJSON {
   emojis: ApiCustomEmojiJSON[];
   reactions: ApiAnnouncementReactionJSON[];
   reactions_allowed: boolean;
+  /** Author of an account announcement, `null` for server-wide announcements */
+  account?: ApiAccountJSON | null;
 }
+
+/** Which announcements to show: everything, server-wide only or account ones only */
+export type AnnouncementScope = 'all' | 'server' | 'account';
 
 export interface ApiAnnouncementReactionJSON {
   name: string;

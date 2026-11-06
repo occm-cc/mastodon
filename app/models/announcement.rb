@@ -5,6 +5,7 @@
 # Table name: announcements
 #
 #  id                   :bigint(8)        not null, primary key
+#  account_id           :bigint(8)
 #  all_day              :boolean          default(FALSE), not null
 #  ends_at              :datetime
 #  notification_sent_at :datetime
@@ -19,10 +20,16 @@
 #
 
 class Announcement < ApplicationRecord
+  PER_ACCOUNT_LIMIT = 5
+
   scope :unpublished, -> { where(published: false) }
   scope :published, -> { where(published: true) }
+  scope :server_wide, -> { where(account_id: nil) }
+  scope :account_scoped, -> { where.not(account_id: nil) }
   scope :chronological, -> { order(coalesced_chronology_timestamps.asc) }
   scope :reverse_chronological, -> { order(coalesced_chronology_timestamps.desc) }
+
+  belongs_to :account, optional: true, inverse_of: :announcements
 
   has_many :announcement_mutes, dependent: :destroy
   has_many :announcement_reactions, dependent: :destroy
@@ -30,6 +37,8 @@ class Announcement < ApplicationRecord
   validates :text, presence: true
   validates :starts_at, presence: true, if: :ends_at?
   validates :ends_at, presence: true, if: :starts_at?
+  validate :validate_account_is_local, if: :account_id?
+  validate :validate_per_account_limit, on: :create, if: :account_id?
 
   before_validation :set_published, on: :create
 
@@ -41,6 +50,38 @@ class Announcement < ApplicationRecord
         SQL
       )
     end
+
+    # Published announcements a given account is allowed to see: server-wide
+    # announcements, its own announcements and those of accounts it follows,
+    # minus blocked, muted or suspended authors.
+    def visible_to(account)
+      return published.server_wide if account.nil?
+
+      followed_accounts = Account
+        .without_suspended
+        .where(id: Follow.where(account_id: account.id).select(:target_account_id))
+        .where.not(id: account.excluded_from_timeline_account_ids)
+
+      published.server_wide
+        .or(published.where(account_id: account.id))
+        .or(published.where(account_id: followed_accounts.select(:id)))
+    end
+
+    # Same as `visible_to`, but also drops announcements whose author lost
+    # the permission to publish them, which cannot be expressed in SQL.
+    def visible_records_for(account, scope = visible_to(account))
+      scope.includes(account: [:account_stat, { user: :role }]).to_a.select(&:author_can_publish?)
+    end
+  end
+
+  def server_wide?
+    account_id.nil?
+  end
+
+  def author_can_publish?
+    return true if server_wide?
+
+    account&.user&.role&.can?(:manage_follower_announcements) || false
   end
 
   def to_log_human_identifier
@@ -102,6 +143,17 @@ class Announcement < ApplicationRecord
   end
 
   private
+
+  def validate_account_is_local
+    errors.add(:account, :invalid) unless account&.local?
+  end
+
+  def validate_per_account_limit
+    return if account.nil?
+
+    active_count = account.announcements.where(published: true).or(account.announcements.where.not(scheduled_at: nil)).count
+    errors.add(:base, I18n.t('settings.announcements.errors.limit_reached', count: PER_ACCOUNT_LIMIT)) if active_count >= PER_ACCOUNT_LIMIT
+  end
 
   def grouped_ordered_announcement_reactions
     announcement_reactions

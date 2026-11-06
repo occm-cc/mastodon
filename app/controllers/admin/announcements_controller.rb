@@ -6,7 +6,7 @@ class Admin::AnnouncementsController < Admin::BaseController
 
   def index
     authorize :announcement, :index?
-    @published_announcements_count = Announcement.published.async_count
+    @published_announcements_count = AnnouncementFilter.new(filter_params.except(:unpublished).merge(published: '1')).results.async_count
   end
 
   def new
@@ -16,7 +16,7 @@ class Admin::AnnouncementsController < Admin::BaseController
   end
 
   def edit
-    authorize :announcement, :update?
+    authorize @announcement, :update?
   end
 
   def create
@@ -34,7 +34,7 @@ class Admin::AnnouncementsController < Admin::BaseController
   end
 
   def update
-    authorize :announcement, :update?
+    authorize @announcement, :update?
 
     if @announcement.update(resource_params)
       PublishScheduledAnnouncementWorker.perform_async(@announcement.id) if @announcement.published?
@@ -46,7 +46,7 @@ class Admin::AnnouncementsController < Admin::BaseController
   end
 
   def publish
-    authorize :announcement, :update?
+    authorize @announcement, :update?
     @announcement.publish!
     PublishScheduledAnnouncementWorker.perform_async(@announcement.id)
     log_action :update, @announcement
@@ -54,15 +54,15 @@ class Admin::AnnouncementsController < Admin::BaseController
   end
 
   def unpublish
-    authorize :announcement, :update?
+    authorize @announcement, :unpublish?
     @announcement.unpublish!
-    UnpublishAnnouncementWorker.perform_async(@announcement.id)
+    UnpublishAnnouncementWorker.perform_async(@announcement.id, @announcement.account_id)
     log_action :update, @announcement
     redirect_to admin_announcements_path, notice: I18n.t('admin.announcements.unpublished_msg')
   end
 
   def destroy
-    authorize :announcement, :destroy?
+    authorize @announcement, :destroy?
     @announcement.destroy!
     UnpublishAnnouncementWorker.perform_async(@announcement.id) if @announcement.published?
     log_action :destroy, @announcement
@@ -72,7 +72,7 @@ class Admin::AnnouncementsController < Admin::BaseController
   private
 
   def set_announcements
-    @announcements = AnnouncementFilter.new(filter_params).results.reverse_chronological.page(params[:page])
+    @announcements = AnnouncementFilter.new(filter_params).results.includes(:account).reverse_chronological.page(params[:page])
   end
 
   def set_announcement

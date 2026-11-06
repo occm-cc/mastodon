@@ -48,6 +48,7 @@ class Follow < ApplicationRecord
   after_destroy :decrement_cache_counters
   after_commit :invalidate_follow_recommendations_cache
   after_commit :invalidate_hash_cache
+  after_commit :sync_account_announcements, on: [:create, :destroy]
 
   private
 
@@ -77,5 +78,14 @@ class Follow < ApplicationRecord
 
   def invalidate_follow_recommendations_cache
     Rails.cache.delete("follow_recommendations/#{account_id}")
+  end
+
+  # Only local accounts can publish announcements and only local followers can
+  # see them; the indexed lookup keeps follow/unfollow cheap in all other cases.
+  def sync_account_announcements
+    return unless account&.local? && target_account&.local?
+    return unless Announcement.published.exists?(account_id: target_account_id)
+
+    SyncFollowedAnnouncementsWorker.perform_async(account_id, target_account_id)
   end
 end

@@ -1,5 +1,6 @@
 import api from '../api';
 
+import { importFetchedAccounts } from './importer';
 import { normalizeAnnouncement } from './importer/normalizer';
 
 export const ANNOUNCEMENTS_FETCH_REQUEST = 'ANNOUNCEMENTS_FETCH_REQUEST';
@@ -32,6 +33,7 @@ export const fetchAnnouncements = (done = noOp) => (dispatch) => {
   dispatch(fetchAnnouncementsRequest());
 
   api().get('/api/v1/announcements').then(response => {
+    dispatch(importAnnouncementAuthors(response.data));
     dispatch(fetchAnnouncementsSuccess(response.data.map(x => normalizeAnnouncement(x))));
   }).catch(error => {
     dispatch(fetchAnnouncementsFail(error));
@@ -58,10 +60,16 @@ export const fetchAnnouncementsFail= error => ({
   skipAlert: true,
 });
 
-export const updateAnnouncements = announcement => ({
-  type: ANNOUNCEMENTS_UPDATE,
-  announcement: normalizeAnnouncement(announcement),
-});
+const importAnnouncementAuthors = announcements =>
+  importFetchedAccounts(announcements.map(x => x.account).filter(Boolean));
+
+export const updateAnnouncements = announcement => (dispatch) => {
+  dispatch(importAnnouncementAuthors([announcement]));
+  dispatch({
+    type: ANNOUNCEMENTS_UPDATE,
+    announcement: normalizeAnnouncement(announcement),
+  });
+};
 
 export const dismissAnnouncement = announcementId => (dispatch) => {
   dispatch(dismissAnnouncementRequest(announcementId));
@@ -173,16 +181,19 @@ export const updateReaction = reaction => ({
   reaction,
 });
 
-export const toggleShowAnnouncements = () => ({
+export const toggleShowAnnouncements = (scope = 'all') => ({
   type: ANNOUNCEMENTS_TOGGLE_SHOW,
+  scope,
 });
 
-export const hideAnnouncements = () => ({
+export const hideAnnouncements = (scope = 'all') => ({
   type: ANNOUNCEMENTS_HIDE,
+  scope,
 });
 
-export const showAnnouncements = () => ({
+export const showAnnouncements = (scope = 'all') => ({
   type: ANNOUNCEMENTS_SHOW,
+  scope,
 });
 
 export const deleteAnnouncement = id => ({

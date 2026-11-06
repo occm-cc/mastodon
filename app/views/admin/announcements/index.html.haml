@@ -6,6 +6,11 @@
 
 .filters
   .filter-subset
+    %strong= t('admin.announcements.origin.title')
+    %ul
+      %li= filter_link_to t('admin.announcements.origin.server'), origin: nil
+      %li= filter_link_to t('admin.announcements.origin.account'), origin: 'account'
+  .filter-subset
     %strong= t('admin.relays.status')
     %ul
       %li= filter_link_to t('generic.all'), published: nil, unpublished: nil

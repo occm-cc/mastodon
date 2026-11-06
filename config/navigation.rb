@@ -29,6 +29,7 @@ SimpleNavigation::Configuration.run do |navigation|
       s.item :severed_relationships, safe_join([material_symbol('link_off'), t('settings.severed_relationships')]), severed_relationships_path
     end
 
+    n.item :follower_announcements, safe_join([material_symbol('campaign'), t('settings.announcements.title')]), settings_announcements_path, highlights_on: %r{/settings/announcements}, if: -> { current_user.functional? && current_user.role.can?(:manage_follower_announcements) && !self_destruct }
     n.item :filters, safe_join([material_symbol('filter_alt'), t('filters.index.title')]), filters_path, highlights_on: %r{/filters}, if: -> { current_user.functional? && !self_destruct }
     n.item :statuses_cleanup, safe_join([material_symbol('history'), t('settings.statuses_cleanup')]), statuses_cleanup_path, if: -> { current_user.functional_or_moved? && !self_destruct }
 

@@ -353,6 +353,11 @@ ko:
       new:
         create: 공지사항 생성
         title: 새 공지사항
+      origin:
+        account: 팔로워 공지
+        server: 서버 공지
+        title: 출처
+      posted_by_html: "%{account} 님이 게시"
       preview:
         disclaimer: 사용자들은 수신설정을 끌 수 없기 때문에 이메일 알림은 개인정보 유출이나 서버 종료와 같은 중요한 공지사항에만 사용해야 합니다.
         explanation_html: "<strong>%{display_count} 명의 사용자</strong>에게 이메일이 발송됩니다. 다음 내용이 이메일에 포함됩니다:"
@@ -851,6 +856,7 @@ ko:
         other: "%{count}명의 사용자"
       categories:
         administration: 관리
+        community: 커뮤니티
         devops: 데브옵스
         email: 이메일
         invites: 초대
@@ -884,6 +890,8 @@ ko:
         manage_email_subscriptions_description: 이 권한을 가진 계정들이 본인들의 계정에 이메일 뉴스레터를 활성화할 수 있도록 허용합니다
         manage_federation: 연합 관리
         manage_federation_description: 사용자가 다른 도메인과의 연합을 차단하거나 허용할 수 있도록 하고, 전달 가능 여부를 조정할 수 있도록 허용
+        manage_follower_announcements: 계정 단위 공지
+        manage_follower_announcements_description: 사용자가 자신의 팔로워에게 표시되는 공지를 발행할 수 있도록 허용
         manage_invites: 초대 관리
         manage_invites_description: 사용자가 초대 링크를 보고 비활성화 할 수 있도록 허용
         manage_reports: 신고 관리
@@ -2034,6 +2042,15 @@ ko:
     account: 계정
     account_settings: 계정 설정
     aliases: 계정 별명
+    announcements:
+      edit:
+        title: 공지 수정
+      errors:
+        limit_reached: 게시 중이거나 예약된 공지는 최대 %{count}개까지만 둘 수 있습니다
+      hint: 공지는 이 서버의 팔로워들에게 표시됩니다. 게시 중이거나 예약된 공지는 최대 %{count}개까지 둘 수 있습니다.
+      new:
+        title: 새 공지
+      title: 팔로워 공지
     appearance: 외관
     authorized_apps: 승인된 애플리케이션
     back: 마스토돈으로 돌아가기

@@ -42,6 +42,8 @@ class UserRole < ApplicationRecord
     view_feeds: (1 << 20),
     invite_bypass_approval: (1 << 21),
     manage_email_subscriptions: (1 << 22),
+    # Fork-specific flags start at bit 32 to stay clear of upstream additions
+    manage_follower_announcements: (1 << 32),
   }.freeze
 
   EVERYONE_ROLE_ID = -99
@@ -66,6 +68,10 @@ class UserRole < ApplicationRecord
 
       email: %i(
         manage_email_subscriptions
+      ).freeze,
+
+      community: %i(
+        manage_follower_announcements
       ).freeze,
 
       moderation: %i(

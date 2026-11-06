@@ -8,6 +8,7 @@ class DeleteAccountService < BaseService
     account_pins
     active_relationships
     aliases
+    announcements
     block_relationships
     blocked_by_relationships
     collections
@@ -40,6 +41,7 @@ class DeleteAccountService < BaseService
     account_notes
     account_pins
     aliases
+    announcements
     conversation_mutes
     conversations
     custom_filters

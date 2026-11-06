@@ -9,6 +9,7 @@ import { XIcon } from '@phosphor-icons/react';
 
 import elephantUIPlane from '@/images/elephant_ui_plane.svg';
 import { hideAnnouncements } from '@/mastodon/actions/announcements';
+import type { AnnouncementScope } from '@/mastodon/api_types/announcements';
 import { IconButton } from '@/mastodon/components/button/redesign';
 import type { RenderSlideFn } from '@/mastodon/components/carousel';
 import { Carousel } from '@/mastodon/components/carousel';
@@ -24,23 +25,34 @@ import { isRedesignEnabled } from '@/mastodon/utils/environment';
 
 import type { IAnnouncement } from './announcement';
 import { Announcement } from './announcement';
+import { isInAnnouncementScope } from './hooks';
 
 const announcementSelector = createAppSelector(
-  [(state) => state.announcements as Map<string, List<Map<string, unknown>>>],
-  (announcements) =>
+  [
+    (state) => state.announcements as Map<string, List<Map<string, unknown>>>,
+    (_state, scope: AnnouncementScope) => scope,
+  ],
+  (announcements, scope) =>
     ((announcements.get('items')?.toJS() as IAnnouncement[] | undefined) ?? [])
+      .filter((announcement) =>
+        isInAnnouncementScope(announcement.account_id, scope),
+      )
       .map((announcement) => ({ announcement, id: announcement.id }))
       .toReversed(),
 );
 
-export const Announcements: FC = () => {
+export const Announcements: FC<{ scope?: AnnouncementScope }> = ({
+  scope = 'all',
+}) => {
   const dispatch = useAppDispatch();
-  const announcements = useAppSelector(announcementSelector);
+  const announcements = useAppSelector((state) =>
+    announcementSelector(state, scope),
+  );
   const emojis = useCustomEmojis();
 
   const closeAnnouncements = useCallback(() => {
-    dispatch(hideAnnouncements());
-  }, [dispatch]);
+    dispatch(hideAnnouncements(scope));
+  }, [dispatch, scope]);
 
   const renderSlide: RenderSlideFn<{
     id: string;

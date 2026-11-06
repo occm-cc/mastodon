@@ -179,4 +179,111 @@ RSpec.describe Announcement do
       end
     end
   end
+
+  describe 'account announcements' do
+    let(:publisher_role) { Fabricate(:user_role, permissions: UserRole::FLAGS[:manage_follower_announcements]) }
+    let(:author) { Fabricate(:user, role: publisher_role).account }
+    let(:viewer) { Fabricate(:account) }
+
+    describe '.visible_to' do
+      let!(:server_announcement) { Fabricate(:announcement) }
+      let!(:account_announcement) { Fabricate(:announcement, account: author) }
+      let!(:other_announcement) { Fabricate(:announcement, account: Fabricate(:user, role: publisher_role).account) }
+
+      it 'only returns server-wide announcements without an account' do
+        expect(described_class.visible_to(nil)).to contain_exactly(server_announcement)
+      end
+
+      it 'returns server-wide announcements and those of followed accounts' do
+        viewer.follow!(author)
+
+        expect(described_class.visible_to(viewer)).to contain_exactly(server_announcement, account_announcement)
+        expect(described_class.visible_to(viewer)).to_not include(other_announcement)
+      end
+
+      it 'returns the own announcements of the author' do
+        expect(described_class.visible_to(author)).to contain_exactly(server_announcement, account_announcement)
+      end
+
+      it 'returns announcements of every followed publisher' do
+        second_author = Fabricate(:user, role: publisher_role).account
+        second_announcement = Fabricate(:announcement, account: second_author)
+        viewer.follow!(author)
+        viewer.follow!(second_author)
+
+        expect(described_class.visible_to(viewer)).to contain_exactly(server_announcement, account_announcement, second_announcement)
+      end
+
+      it 'hides announcements again after unfollowing' do
+        viewer.follow!(author)
+        viewer.unfollow!(author)
+
+        expect(described_class.visible_to(viewer)).to contain_exactly(server_announcement)
+      end
+
+      it 'excludes unpublished account announcements' do
+        viewer.follow!(author)
+        account_announcement.unpublish!
+
+        expect(described_class.visible_to(viewer)).to contain_exactly(server_announcement)
+      end
+
+      it 'excludes announcements of muted authors' do
+        viewer.follow!(author)
+        viewer.mute!(author)
+
+        expect(described_class.visible_to(viewer)).to contain_exactly(server_announcement)
+      end
+
+      it 'excludes announcements of suspended authors' do
+        viewer.follow!(author)
+        author.suspend!
+
+        expect(described_class.visible_to(viewer)).to contain_exactly(server_announcement)
+      end
+    end
+
+    describe '.visible_records_for' do
+      let!(:account_announcement) { Fabricate(:announcement, account: author) }
+
+      before { viewer.follow!(author) }
+
+      it 'includes announcements of authors with the permission' do
+        expect(described_class.visible_records_for(viewer)).to contain_exactly(account_announcement)
+      end
+
+      it 'excludes announcements of authors that lost the permission' do
+        author.user.update!(role: nil)
+
+        expect(described_class.visible_records_for(viewer)).to be_empty
+      end
+    end
+
+    describe 'validations' do
+      it 'rejects remote authors' do
+        announcement = Fabricate.build(:announcement, account: Fabricate(:account, domain: 'example.com'))
+
+        expect(announcement).to_not be_valid
+        expect(announcement.errors[:account]).to be_present
+      end
+
+      it 'limits the number of active announcements per account' do
+        Fabricate.times(Announcement::PER_ACCOUNT_LIMIT, :announcement, account: author)
+
+        expect(Fabricate.build(:announcement, account: author)).to_not be_valid
+      end
+
+      it 'does not count unpublished announcements towards the limit' do
+        Fabricate.times(Announcement::PER_ACCOUNT_LIMIT, :announcement, account: author).each(&:unpublish!)
+
+        expect(Fabricate.build(:announcement, account: author)).to be_valid
+      end
+
+      it 'does not limit server-wide announcements' do
+        Fabricate.times(Announcement::PER_ACCOUNT_LIMIT, :announcement)
+
+        expect(Fabricate.build(:announcement)).to be_valid
+      end
+    end
+  end
 end

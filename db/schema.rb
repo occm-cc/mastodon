@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_16_161747) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_06_000002) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -303,6 +303,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_16_161747) do
   end
 
   create_table "announcements", force: :cascade do |t|
+    t.bigint "account_id"
     t.boolean "all_day", default: false, null: false
     t.datetime "created_at", precision: nil, null: false
     t.datetime "ends_at", precision: nil
@@ -314,6 +315,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_16_161747) do
     t.bigint "status_ids", array: true
     t.text "text", default: "", null: false
     t.datetime "updated_at", precision: nil, null: false
+    t.index ["account_id"], name: "index_announcements_on_account_id"
   end
 
   create_table "annual_report_statuses_per_account_counts", force: :cascade do |t|
@@ -1665,6 +1667,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_16_161747) do
   add_foreign_key "announcement_reactions", "accounts", on_delete: :cascade
   add_foreign_key "announcement_reactions", "announcements", on_delete: :cascade
   add_foreign_key "announcement_reactions", "custom_emojis", on_delete: :cascade
+  add_foreign_key "announcements", "accounts", on_delete: :cascade
   add_foreign_key "appeals", "account_warnings", on_delete: :cascade
   add_foreign_key "appeals", "accounts", column: "approved_by_account_id", on_delete: :nullify
   add_foreign_key "appeals", "accounts", column: "rejected_by_account_id", on_delete: :nullify

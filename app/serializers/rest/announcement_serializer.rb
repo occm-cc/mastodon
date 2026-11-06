@@ -8,6 +8,9 @@ class REST::AnnouncementSerializer < ActiveModel::Serializer
 
   attribute :read, if: :current_user?
 
+  # Author of an account announcement; nil for server-wide announcements
+  belongs_to :account, serializer: REST::AccountSerializer
+
   has_many :mentions
   has_many :statuses, serializer: REST::StatusSerializer
   has_many :tags, serializer: REST::StatusSerializer::TagSerializer

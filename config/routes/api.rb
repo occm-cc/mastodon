@@ -99,6 +99,8 @@ namespace :api, format: false do
       end
     end
 
+    resources :account_announcements, only: [:index, :show, :create, :update, :destroy]
+
     resources :conversations, only: [:index, :destroy] do
       member do
         post :read

@@ -341,13 +341,13 @@ export const Notifications: React.FC<{
                   >
                     {shouldShowAnnouncements ? (
                       <FormattedMessage
-                        id='notifications.hide_server_announcements'
-                        defaultMessage='Hide server announcements'
+                        id='notifications.hide_announcements'
+                        defaultMessage='Hide announcements'
                       />
                     ) : (
                       <FormattedMessage
-                        id='notifications.show_server_announcements'
-                        defaultMessage='Show server announcements'
+                        id='notifications.show_announcements'
+                        defaultMessage='Show announcements'
                       />
                     )}
                   </MenuItem>

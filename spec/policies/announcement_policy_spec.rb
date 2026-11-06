@@ -45,4 +45,17 @@ RSpec.describe AnnouncementPolicy do
       end
     end
   end
+
+  context 'with an account announcement' do
+    let(:announcement) { Fabricate(:announcement, account: Fabricate(:account)) }
+
+    permissions :update?, :destroy?, :distribute? do
+      it { is_expected.to_not permit(admin, announcement) }
+    end
+
+    permissions :unpublish? do
+      it { is_expected.to permit(admin, announcement) }
+      it { is_expected.to_not permit(john, announcement) }
+    end
+  end
 end

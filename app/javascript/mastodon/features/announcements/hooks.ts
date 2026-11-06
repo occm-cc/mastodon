@@ -9,41 +9,85 @@ import {
   fetchAnnouncements,
   showAnnouncements,
 } from '@/mastodon/actions/announcements';
-import type { ApiAnnouncementJSON } from '@/mastodon/api_types/announcements';
+import type {
+  AnnouncementScope,
+  ApiAnnouncementJSON,
+} from '@/mastodon/api_types/announcements';
+import type { RootState } from '@/mastodon/store';
 import { useAppDispatch, useAppSelector } from '@/mastodon/store';
 import { isRedesignEnabled } from '@/mastodon/utils/environment';
 
-type AnnouncementItem = ImmutableRecord<ApiAnnouncementJSON>;
+type AnnouncementItem = ImmutableRecord<
+  Omit<ApiAnnouncementJSON, 'account'> & { account_id: string | null }
+>;
 
 type AnnouncementsState = ImmutableRecord<{
   items: ImmutableList<AnnouncementItem>;
   isLoading: boolean;
   show: boolean;
+  showServer: boolean;
+  showAccount: boolean;
 }>;
 
+const SHOW_KEYS = {
+  all: 'show',
+  server: 'showServer',
+  account: 'showAccount',
+} as const;
+
+export function isInAnnouncementScope(
+  accountId: string | null | undefined,
+  scope: AnnouncementScope,
+) {
+  if (scope === 'server') {
+    return !accountId;
+  } else if (scope === 'account') {
+    return !!accountId;
+  }
+
+  return true;
+}
+
+const selectItems = (state: RootState) =>
+  (state.announcements as AnnouncementsState).get('items');
+
+function useScopedAnnouncementCounts(scope: AnnouncementScope) {
+  const count = useAppSelector((state) =>
+    selectItems(state).count((item) =>
+      isInAnnouncementScope(item.get('account_id'), scope),
+    ),
+  );
+  const unreadCount = useAppSelector((state) =>
+    selectItems(state).count(
+      (item) =>
+        !item.get('read') &&
+        isInAnnouncementScope(item.get('account_id'), scope),
+    ),
+  );
+  const shouldShow = useAppSelector((state) =>
+    (state.announcements as AnnouncementsState).get(SHOW_KEYS[scope]),
+  );
+
+  return { count, unreadCount, shouldShow };
+}
+
+/**
+ * Announcement counts for one scope. `all` combines server-wide announcements
+ * with those of followed accounts, as shown on the notifications page.
+ */
 export function useHasAnnouncements({
   fetch = true,
-}: { fetch?: boolean } = {}) {
+  scope = 'all',
+}: { fetch?: boolean; scope?: AnnouncementScope } = {}) {
   const dispatch = useAppDispatch();
-  const hasAnnouncements = useAppSelector(
-    (state) =>
-      !(state.announcements as AnnouncementsState).get('items').isEmpty(),
-  );
-  const shouldShowAnnouncements = useAppSelector((state) =>
-    (state.announcements as AnnouncementsState).get('show'),
-  );
-  const unreadAnnouncementCount = useAppSelector((state) =>
-    (state.announcements as AnnouncementsState)
-      .get('items')
-      .count((item) => !item.get('read')),
-  );
-  const hasUnreadAnnouncements = !!unreadAnnouncementCount;
+  const { count, unreadCount, shouldShow } = useScopedAnnouncementCounts(scope);
+  const hasUnreadAnnouncements = !!unreadCount;
 
   useEffect(() => {
     if (hasUnreadAnnouncements && isRedesignEnabled()) {
-      dispatch(showAnnouncements());
+      dispatch(showAnnouncements(scope));
     }
-  }, [hasUnreadAnnouncements, dispatch]);
+  }, [hasUnreadAnnouncements, scope, dispatch]);
 
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -58,9 +102,9 @@ export function useHasAnnouncements({
   }, [fetch, dispatch]);
 
   return {
-    hasAnnouncements,
+    hasAnnouncements: count > 0,
     hasUnreadAnnouncements,
-    shouldShowAnnouncements,
-    unreadAnnouncementCount,
+    shouldShowAnnouncements: shouldShow,
+    unreadAnnouncementCount: unreadCount,
   };
 }

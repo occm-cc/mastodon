@@ -1,6 +1,10 @@
 .announcements-list__item{ id: dom_id(announcement) }
-  = link_to edit_admin_announcement_path(announcement), class: 'announcements-list__item__title' do
-    = truncate(announcement.text)
+  - if can?(:update, announcement)
+    = link_to edit_admin_announcement_path(announcement), class: 'announcements-list__item__title' do
+      = truncate(announcement.text)
+  - else
+    .announcements-list__item__title
+      = truncate(announcement.text)
 
   .announcements-list__item__action-bar
     .announcements-list__item__meta
@@ -8,14 +12,16 @@
         = t('admin.announcements.scheduled_for', time: l(announcement.scheduled_at))
       - else
         = l(announcement.created_at)
+      - if announcement.account.present?
+        ·
+        = t('admin.announcements.posted_by_html', account: link_to("@#{announcement.account.acct}", admin_account_path(announcement.account_id)))
 
     .announcements-list__item__actions
       - if can?(:distribute, announcement)
         = table_link_to 'mail', t('admin.terms_of_service.notify_users'), admin_announcement_preview_path(announcement)
-      - if can?(:update, announcement)
-        - if announcement.published?
-          = table_link_to 'toggle_off', t('admin.announcements.unpublish'), unpublish_admin_announcement_path(announcement), method: :post, data: { confirm: t('admin.accounts.are_you_sure') }
-        - else
-          = table_link_to 'toggle_on', t('admin.announcements.publish'), publish_admin_announcement_path(announcement), method: :post, data: { confirm: t('admin.accounts.are_you_sure') }
+      - if announcement.published? && can?(:unpublish, announcement)
+        = table_link_to 'toggle_off', t('admin.announcements.unpublish'), unpublish_admin_announcement_path(announcement), method: :post, data: { confirm: t('admin.accounts.are_you_sure') }
+      - elsif !announcement.published? && can?(:update, announcement)
+        = table_link_to 'toggle_on', t('admin.announcements.publish'), publish_admin_announcement_path(announcement), method: :post, data: { confirm: t('admin.accounts.are_you_sure') }
 
       = table_link_to 'delete', t('generic.delete'), admin_announcement_path(announcement), method: :delete, data: { confirm: t('admin.accounts.are_you_sure') } if can?(:destroy, announcement)

@@ -27,6 +27,7 @@ import StatusListContainer from '../ui/containers/status_list_container';
 
 import { ColumnSettings } from './components/column_settings';
 import { CriticalUpdateBanner } from './components/critical_update_banner';
+import { HomeAnnouncementButtons, HomeAnnouncements } from './components/announcements';
 import { AnnualReportTimeline } from '../annual_report/timeline';
 import { isRedesignEnabled } from '@/mastodon/utils/environment';
 import { ColumnHeader } from '@/mastodon/components/column_header';
@@ -157,7 +158,9 @@ class HomeTimeline extends PureComponent {
             withBackButton={multiColumn && !pinned && 'auto'}
             withUnreadMarker={hasUnread}
             extraButtons={
-              <HomeColumnSettings>
+              <>
+                {signedIn && <HomeAnnouncementButtons />}
+                <HomeColumnSettings>
                 {multiColumn &&
                   <MultiColumnMenuItems
                     withDivider
@@ -166,7 +169,8 @@ class HomeTimeline extends PureComponent {
                     onMove={this.handleMove}
                   />
                 }
-              </HomeColumnSettings>
+                </HomeColumnSettings>
+              </>
             }
           />
         ) : (
@@ -186,6 +190,8 @@ class HomeTimeline extends PureComponent {
             <ColumnSettings />
           </LegacyColumnHeader>
         )}
+
+        {signedIn && isRedesignEnabled() && <HomeAnnouncements />}
 
         {signedIn && !multiColumn && isRedesignEnabled() && isBirdUiEnabled() && <BirdUiComposer />}
 

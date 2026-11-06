@@ -2,13 +2,10 @@
 
 class UnpublishAnnouncementWorker
   include Sidekiq::Worker
-  include Redisable
 
-  def perform(announcement_id)
-    payload = { event: :'announcement.delete', payload: announcement_id.to_s }.to_json
-
-    FeedManager.instance.with_active_accounts do |account|
-      redis.publish("timeline:#{account.id}", payload) if redis.exists?("subscribed:timeline:#{account.id}")
-    end
+  # The announcement may already be deleted, so the author is passed along
+  # to know who received it. A nil author means a server-wide announcement.
+  def perform(announcement_id, author_account_id = nil)
+    AnnouncementStreamer.new(author_account_id).publish(:'announcement.delete', announcement_id.to_s)
   end
 end

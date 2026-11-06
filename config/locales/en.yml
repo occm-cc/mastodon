@@ -381,6 +381,11 @@ en:
       new:
         create: Create announcement
         title: New announcement
+      origin:
+        account: Follower announcements
+        server: Server announcements
+        title: Origin
+      posted_by_html: Posted by %{account}
       preview:
         disclaimer: As users cannot opt out of them, email notifications should be limited to important announcements such as personal data breach or server closure notifications.
         explanation_html: 'The email will be sent to <strong>%{display_count} users</strong>. The following text will be included in the e-mail:'
@@ -999,6 +1004,7 @@ en:
         other: "%{count} users"
       categories:
         administration: Administration
+        community: Community
         devops: DevOps
         email: Email
         invites: Invites
@@ -1033,6 +1039,8 @@ en:
         manage_email_subscriptions_description: Allow users with this permission to enable the email newsletter feature for their account
         manage_federation: Manage Federation
         manage_federation_description: Allows users to block or allow federation with other domains, and control deliverability
+        manage_follower_announcements: Publish Follower Announcements
+        manage_follower_announcements_description: Allows users to publish announcements that are shown to their followers
         manage_invites: Manage Invites
         manage_invites_description: Allows users to browse and deactivate invite links
         manage_reports: Manage Reports
@@ -2421,6 +2429,15 @@ en:
     account: Account
     account_settings: Account settings
     aliases: Account aliases
+    announcements:
+      edit:
+        title: Edit announcement
+      errors:
+        limit_reached: You can have at most %{count} active or scheduled announcements
+      hint: Announcements are shown to your followers on this server. You can have up to %{count} active or scheduled announcements.
+      new:
+        title: New announcement
+      title: Follower announcements
     appearance: Appearance
     authorized_apps: Authorized apps
     back: Back to Mastodon

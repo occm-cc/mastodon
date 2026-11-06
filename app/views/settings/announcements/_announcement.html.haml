@@ -1,0 +1,18 @@
+.announcements-list__item{ id: dom_id(announcement) }
+  = link_to edit_settings_announcement_path(announcement), class: 'announcements-list__item__title' do
+    = truncate(announcement.text)
+
+  .announcements-list__item__action-bar
+    .announcements-list__item__meta
+      - if announcement.scheduled_at.present?
+        = t('admin.announcements.scheduled_for', time: l(announcement.scheduled_at))
+      - else
+        = l(announcement.created_at)
+
+    .announcements-list__item__actions
+      - if announcement.published?
+        = table_link_to 'toggle_off', t('admin.announcements.unpublish'), unpublish_settings_announcement_path(announcement), method: :post, data: { confirm: t('admin.accounts.are_you_sure') }
+      - else
+        = table_link_to 'toggle_on', t('admin.announcements.publish'), publish_settings_announcement_path(announcement), method: :post, data: { confirm: t('admin.accounts.are_you_sure') }
+
+      = table_link_to 'delete', t('generic.delete'), settings_announcement_path(announcement), method: :delete, data: { confirm: t('admin.accounts.are_you_sure') }

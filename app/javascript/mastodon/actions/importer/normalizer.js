@@ -153,6 +153,10 @@ export function normalizeAnnouncement(announcement) {
 
   normalAnnouncement.contentHtml = normalAnnouncement.content;
 
+  // Accounts are imported into the accounts store separately; only keep a reference
+  normalAnnouncement.account_id = announcement.account?.id ?? null;
+  delete normalAnnouncement.account;
+
   if (normalAnnouncement.emojis) {
     importCustomEmoji(normalAnnouncement.emojis);
   }

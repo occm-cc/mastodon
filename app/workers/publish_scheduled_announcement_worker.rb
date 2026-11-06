@@ -2,7 +2,6 @@
 
 class PublishScheduledAnnouncementWorker
   include Sidekiq::Worker
-  include Redisable
 
   def perform(announcement_id)
     @announcement = Announcement.find(announcement_id)
@@ -11,12 +10,11 @@ class PublishScheduledAnnouncementWorker
 
     @announcement.publish! unless @announcement.published?
 
-    payload = InlineRenderer.render(@announcement, nil, :announcement)
-    payload = { event: :announcement, payload: payload }.to_json
+    return unless @announcement.author_can_publish?
 
-    FeedManager.instance.with_active_accounts do |account|
-      redis.publish("timeline:#{account.id}", payload) if redis.exists?("subscribed:timeline:#{account.id}")
-    end
+    payload = InlineRenderer.render(@announcement, nil, :announcement)
+
+    AnnouncementStreamer.new(@announcement.account_id).publish(:announcement, payload)
   end
 
   private

@@ -3,16 +3,24 @@ import { useEffect, useState } from 'react';
 
 import { FormattedDate, FormattedMessage } from 'react-intl';
 
+import { Link } from 'react-router-dom';
+
 import { dismissAnnouncement } from '@/mastodon/actions/announcements';
 import type { ApiAnnouncementJSON } from '@/mastodon/api_types/announcements';
+import { Avatar } from '@/mastodon/components/avatar';
+import { DisplayName } from '@/mastodon/components/display_name';
 import { AnimateEmojiProvider } from '@/mastodon/components/emoji/context';
 import { EmojiHTML } from '@/mastodon/components/emoji/html';
+import { useAccount } from '@/mastodon/hooks/useAccount';
 import { useAppDispatch } from '@/mastodon/store';
 
+import classes from './announcement.module.scss';
 import { ReactionsBar } from './reactions';
 
-export interface IAnnouncement extends ApiAnnouncementJSON {
+export interface IAnnouncement extends Omit<ApiAnnouncementJSON, 'account'> {
   contentHtml: string;
+  /** Author of an account announcement, `null` for server-wide ones */
+  account_id: string | null;
 }
 
 interface AnnouncementProps {
@@ -50,10 +58,14 @@ export const Announcement: FC<AnnouncementProps> = ({
   return (
     <AnimateEmojiProvider>
       <strong className='announcements__range'>
-        <FormattedMessage
-          id='announcement.announcement'
-          defaultMessage='Announcement'
-        />
+        {announcement.account_id ? (
+          <AnnouncementAuthor accountId={announcement.account_id} />
+        ) : (
+          <FormattedMessage
+            id='announcement.announcement'
+            defaultMessage='Announcement'
+          />
+        )}
         <span>
           {' · '}
           <Timestamp announcement={announcement} />
@@ -73,6 +85,30 @@ export const Announcement: FC<AnnouncementProps> = ({
         <div className='reactions-bar reactions-bar--empty' />
       )}
     </AnimateEmojiProvider>
+  );
+};
+
+const AnnouncementAuthor: FC<{ accountId: string }> = ({ accountId }) => {
+  const account = useAccount(accountId);
+
+  if (!account) {
+    return (
+      <FormattedMessage
+        id='announcement.announcement'
+        defaultMessage='Announcement'
+      />
+    );
+  }
+
+  return (
+    <Link to={`/@${account.acct}`} className={classes.author}>
+      <Avatar account={account} size={20} />
+      <FormattedMessage
+        id='announcement.account_announcement'
+        defaultMessage='Announcement from {name}'
+        values={{ name: <DisplayName account={account} variant='simple' /> }}
+      />
+    </Link>
   );
 };
 

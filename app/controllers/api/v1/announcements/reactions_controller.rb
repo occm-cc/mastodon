@@ -29,6 +29,7 @@ class Api::V1::Announcements::ReactionsController < Api::BaseController
   end
 
   def set_announcement
-    @announcement = Announcement.published.find(params[:announcement_id])
+    @announcement = Announcement.visible_to(current_account).find(params[:announcement_id])
+    raise ActiveRecord::RecordNotFound unless @announcement.author_can_publish?
   end
 end

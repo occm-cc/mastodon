@@ -72,5 +72,11 @@ namespace :settings do
   resources :aliases, only: [:index, :create, :destroy]
   resources :sessions, only: [:destroy]
   resources :featured_tags, only: [:index, :create, :destroy]
+  resources :announcements, except: [:show] do
+    member do
+      post :publish
+      post :unpublish
+    end
+  end
   resources :login_activities, only: [:index]
 end
