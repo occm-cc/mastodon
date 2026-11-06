@@ -13,7 +13,7 @@ import {
 } from 'mastodon/actions/pending_mentions';
 import { Icon } from 'mastodon/components/icon';
 import { NotSignedInIndicator } from 'mastodon/components/not_signed_in_indicator';
-import { StatusQuoteManager } from 'mastodon/components/status/legacy/quoted';
+import { Status } from 'mastodon/components/status';
 import { useIdentity } from 'mastodon/identity_context';
 import { useAppDispatch, useAppSelector } from 'mastodon/store';
 
@@ -50,7 +50,7 @@ const PendingMentionItem: React.FC<{
         </span>
       </h2>
 
-      <StatusQuoteManager
+      <Status
         id={statusId}
         contextType='pending-mentions'
         onDismissPendingMention={handleDismiss}

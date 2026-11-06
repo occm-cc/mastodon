@@ -9,6 +9,7 @@ import { accountFactoryImmutable } from '@/testing/factories';
 import { cleanup, fireEvent, render, screen } from '@/testing/rendering';
 
 import { BirdUiSidebar } from '../../ui/components/columns_area/bird_ui_sidebar';
+import type * as BreakpointModule from '../../ui/hooks/useBreakpoint';
 import { ComposeButton } from '../trigger';
 
 import { BirdUiComposer } from './bird_ui_composer';
@@ -27,10 +28,14 @@ vi.mock('@/mastodon/features/discovery_panel/footer_links', () => ({
   FooterLinks: () => null,
 }));
 vi.mock('@/mastodon/components/avatar', () => ({ Avatar: () => null }));
-vi.mock('@/mastodon/features/ui/hooks/useBreakpoint', () => ({
-  useBreakpoint: (breakpoint: string) =>
-    breakpoint === 'sidebar' ? mocks.isNarrow : mocks.isMobile,
-}));
+vi.mock(
+  '@/mastodon/features/ui/hooks/useBreakpoint',
+  async (importOriginal) => ({
+    ...(await importOriginal<typeof BreakpointModule>()),
+    useBreakpoint: (breakpoint: string) =>
+      breakpoint === 'sidebar' ? mocks.isNarrow : mocks.isMobile,
+  }),
+);
 vi.mock('@/mastodon/hooks/useScrollSensor', () => ({
   useScrollSensor: () => ({ sensor: null, isInViewport: true }),
 }));
