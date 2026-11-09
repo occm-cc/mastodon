@@ -18,6 +18,12 @@
   min-width: 0;
 }
 
+// The composer above Home is the only place to write a post there, so give
+// it twice the default textarea height.
+.root:not(.sidebar) textarea {
+  min-height: 6lh;
+}
+
 .sidebar {
   box-sizing: border-box;
   grid-template-columns: minmax(0, 1fr);
