@@ -14,6 +14,7 @@ import '@testing-library/jest-dom';
 const mocks = vi.hoisted(() => ({
   dispatch: vi.fn(),
   unreadCount: 3,
+  composerPosition: 'sidebar',
   fetchUnreadCount: vi.fn(() => ({ type: 'FETCH_DM_UNREAD' })),
 }));
 
@@ -29,7 +30,12 @@ vi.mock('@/mastodon/store', async (importOriginal) => {
       return selector(
         state
           .set('dm', { ...state.dm, unreadCount: mocks.unreadCount })
-          .set('meta', state.meta.set('me', '123'))
+          .set(
+            'meta',
+            state.meta
+              .set('me', '123')
+              .set('composer_position', mocks.composerPosition),
+          )
           .set(
             'accounts',
             state.accounts.set(
@@ -96,6 +102,7 @@ describe('Redesign navigation custom features', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mocks.unreadCount = 3;
+    mocks.composerPosition = 'sidebar';
     document.documentElement.style.removeProperty('--bird-ui-redesign');
   });
 
@@ -141,6 +148,7 @@ describe('Redesign navigation custom features', () => {
     (birdUi) => {
       if (birdUi) {
         document.documentElement.style.setProperty('--bird-ui-redesign', '1');
+        mocks.composerPosition = 'popup';
       }
       render(<RedesignNavigationPanel />);
 
@@ -153,6 +161,14 @@ describe('Redesign navigation custom features', () => {
       }
     },
   );
+
+  it('hides the New Post button while the Bird UI sidebar composer is shown', () => {
+    document.documentElement.style.setProperty('--bird-ui-redesign', '1');
+    mocks.composerPosition = 'sidebar';
+    render(<RedesignNavigationPanel />);
+
+    expect(screen.queryByRole('button', { name: 'New Post' })).toBeNull();
+  });
 
   it('also removes Public Feeds from signed-out Bird UI navigation', () => {
     document.documentElement.style.setProperty('--bird-ui-redesign', '1');

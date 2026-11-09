@@ -280,7 +280,8 @@ export const RedesignNavigationPanel: React.FC<{
             )}
             {!birdUi && <PendingMentionsLink />}
             <AccountSwitcher renderTrigger={renderAccountSwitchLink} />
-            {birdUi && newPostButton}
+            {/* The sidebar composer is always visible, so the button would do nothing. */}
+            {birdUi && composerPlacement !== 'sidebar' && newPostButton}
 
             {isAdmin && (
               <NavigationLink
