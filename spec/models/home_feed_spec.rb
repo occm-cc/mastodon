@@ -11,7 +11,9 @@ RSpec.describe HomeFeed do
     before do
       Fabricate(:status, account: account, id: 1)
       Fabricate(:status, account: account, id: 2, reblog: Fabricate(:status))
-      Fabricate(:status, account: account, id: 3, visibility: :direct)
+      Fabricate(:status, account: account, id: 3, visibility: :direct).tap do |status|
+        Fabricate(:mention, status: status, account: Fabricate(:account))
+      end
       Fabricate(:status, account: account, id: 4)
       Fabricate(:status, account: account, id: 10)
     end
@@ -58,6 +60,21 @@ RSpec.describe HomeFeed do
         expect(described_class.new(account, { exclude_direct: true }).get(2, nil, nil, 1).map(&:id)).to eq [4, 2]
         expect(described_class.new(account, { exclude_reblogs: true }).get(2, nil, nil, 0).map(&:id)).to eq [3, 1]
         expect(described_class.new(account, { exclude_direct: true, exclude_reblogs: true }).get(2, nil, nil, 0).map(&:id)).to eq [4, 1]
+      end
+    end
+
+    context 'when the feed contains a private mention without recipients' do
+      before do
+        Fabricate(:status, account: account, id: 5, visibility: :direct)
+        Fabricate(:status, account: Fabricate(:account), id: 6, visibility: :direct)
+        redis.zadd(
+          FeedManager.instance.key(:home, account.id),
+          [[6, 6], [5, 5], [4, 4], [3, 3]]
+        )
+      end
+
+      it 'keeps only the own self-only private mention when excluding direct messages' do
+        expect(described_class.new(account, { exclude_direct: true }).get(10).map(&:id)).to eq [5, 4]
       end
     end
 

@@ -180,6 +180,20 @@ RSpec.describe AccountStatusesFilter do
         expect(results_reblog_of_ids).to_not be_empty
       end
 
+      context 'when rejecting direct messages' do
+        let(:params) { { exclude_direct: true } }
+
+        it 'keeps private mentions without recipients, which only the author can see' do
+          self_only = status!(:direct)
+          self_mention = status_with_mention!(:direct, account)
+          with_recipient = status_with_mention!(:direct)
+
+          expect(subject)
+            .to include(self_only, self_mention)
+            .and not_include(with_recipient)
+        end
+      end
+
       it_behaves_like 'filter params'
     end
 

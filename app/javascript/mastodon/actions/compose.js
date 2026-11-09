@@ -311,7 +311,10 @@ export function submitCompose(successCallback) {
         dispatch(importFetchedStatus({ ...response.data }));
       }
 
-      if (statusId === null && response.data.visibility !== 'direct') {
+      const isSelfOnlyDirect = response.data.visibility === 'direct'
+        && response.data.mentions.every(mention => mention.id === response.data.account.id);
+
+      if (statusId === null && (response.data.visibility !== 'direct' || isSelfOnlyDirect)) {
         insertIfOnline('home');
       }
 

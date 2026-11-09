@@ -37,7 +37,7 @@ class AccountStatusesFilter
     if anonymous?
       account.protected_account? ? Status.none : account.statuses.distributable_visibility
     elsif author?
-      exclude_direct? ? account.statuses.where(visibility: %i(public unlisted private)) : account.statuses.all # NOTE: #merge! does not work without the #all
+      exclude_direct? ? account.statuses.list_eligible_visibility.or(account.statuses.self_only_direct_visibility) : account.statuses.all # NOTE: #merge! does not work without the #all
     elsif blocked? || protected_account_access_denied?
       Status.none
     else

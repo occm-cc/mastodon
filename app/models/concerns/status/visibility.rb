@@ -13,6 +13,16 @@ module Status::Visibility
     scope :list_eligible_visibility, -> { where(visibility: %i(public unlisted private)) }
     scope :not_direct_visibility, -> { where.not(visibility: :direct) }
 
+    # Private mentions without any recipient besides the author are only
+    # visible to the author, who uses them as notes or drafts.
+    scope :self_only_direct_visibility, lambda {
+      where(visibility: :direct).where.not(
+        Mention.where(Mention.arel_table[:status_id].eq(Status.arel_table[:id]))
+               .where(Mention.arel_table[:account_id].not_eq(Status.arel_table[:account_id]))
+               .arel.exists
+      )
+    }
+
     validates :visibility, exclusion: { in: %w(direct limited) }, if: :reblog?
 
     before_validation :set_visibility, unless: :visibility?

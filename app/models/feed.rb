@@ -24,7 +24,7 @@ class Feed
     scope = Status.all
 
     # Apply specified filters
-    scope.merge!(Status.where.not(visibility: :direct)) if @options[:exclude_direct]
+    scope.merge!(exclude_direct_scope) if @options[:exclude_direct]
     scope.merge!(Status.where(reblog_of_id: nil)) if @options[:exclude_reblogs]
     scope.merge!(Status.where.missing(:quote)) if @options[:exclude_quotes]
     scope.merge!(Status.where(in_reply_to_id: nil).or(Status.where(in_reply_to_id: @id))) if @options[:exclude_replies] # TODO: beware
@@ -47,6 +47,12 @@ class Feed
       # We need to do some filtering *and* do it in the correct order
       Status.where(id: scope.reorder(id: :asc).where(id: ids).limit(limit))
     end
+  end
+
+  def exclude_direct_scope
+    return Status.not_direct_visibility unless @type == :home
+
+    Status.not_direct_visibility.or(Status.where(account_id: @id).self_only_direct_visibility)
   end
 
   def key
