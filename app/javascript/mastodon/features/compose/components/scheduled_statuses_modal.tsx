@@ -17,7 +17,7 @@ import {
   apiGetScheduledStatuses,
 } from '@/mastodon/api/scheduled_statuses';
 import type { ApiScheduledStatusJSON } from '@/mastodon/api_types/scheduled_statuses';
-import { Button, IconButton } from '@/mastodon/components/button/redesign';
+import { Button, IconButton } from '@/mastodon/components/button';
 import { Callout } from '@/mastodon/components/callout/redesign';
 import { CircularProgress } from '@/mastodon/components/circular_progress';
 import { Checkbox } from '@/mastodon/components/form_fields/checkbox_field';

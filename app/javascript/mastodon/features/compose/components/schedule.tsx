@@ -5,7 +5,7 @@ import { FormattedMessage, useIntl } from 'react-intl';
 import { CalendarCheckIcon } from '@phosphor-icons/react';
 
 import { openModal } from '@/mastodon/actions/modal';
-import { Button, IconButton } from '@/mastodon/components/button/redesign';
+import { Button, IconButton } from '@/mastodon/components/button';
 import { useAppDispatch, useAppSelector } from '@/mastodon/store';
 
 import classes from './schedule.module.scss';

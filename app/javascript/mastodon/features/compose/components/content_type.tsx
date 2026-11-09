@@ -6,7 +6,7 @@ import { CodeIcon, MarkdownLogoIcon, TextAaIcon } from '@phosphor-icons/react';
 
 import { setComposeContentType } from '@/mastodon/actions/compose_typed';
 import type { ApiStatusContentType } from '@/mastodon/api_types/statuses';
-import { IconButton } from '@/mastodon/components/button/redesign';
+import { IconButton } from '@/mastodon/components/button';
 import {
   Menu,
   MenuItemGroup,

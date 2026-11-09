@@ -6,7 +6,7 @@ import { MegaphoneIcon, UserSoundIcon } from '@phosphor-icons/react';
 
 import { toggleShowAnnouncements } from '@/mastodon/actions/announcements';
 import type { AnnouncementScope } from '@/mastodon/api_types/announcements';
-import { ToggleIconButton } from '@/mastodon/components/button/redesign';
+import { ToggleIconButton } from '@/mastodon/components/button';
 import { Announcements } from '@/mastodon/features/announcements';
 import { useHasAnnouncements } from '@/mastodon/features/announcements/hooks';
 import { useAppDispatch } from '@/mastodon/store';

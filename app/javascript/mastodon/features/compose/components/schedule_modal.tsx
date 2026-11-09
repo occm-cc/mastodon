@@ -9,7 +9,7 @@ import {
   scheduledMessages,
   setComposeSchedule,
 } from '@/mastodon/actions/scheduled_statuses';
-import { Button, IconButton } from '@/mastodon/components/button/redesign';
+import { Button, IconButton } from '@/mastodon/components/button';
 import { SelectField } from '@/mastodon/components/form_fields/select_field';
 import { TextInputField } from '@/mastodon/components/form_fields/text_input_field';
 import { Icon } from '@/mastodon/components/icon';
