@@ -194,6 +194,15 @@ html:root {
     --fg: var(--color-accent);
   }
 
+  // Upstream drops the body indentation in multi-column feeds because its
+  // avatar stays inside the header row. The avatar is taken out of flow above,
+  // so keep the body beside it there as well.
+  .layout-multiple-columns
+    ._comp_status__variantFeed
+    ._comp_status__mainWrapper {
+    padding-inline-start: var(--first-col-width);
+  }
+
   ._comp_status__variantFeed .status__action-bar__button-wrapper {
     // The menu trigger is placed at the top right of the post. Keep this
     // empty wrapper out of the action row's space distribution.

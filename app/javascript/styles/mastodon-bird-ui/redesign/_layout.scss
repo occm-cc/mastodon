@@ -86,8 +86,28 @@ html:root {
     --multi-column-gap: 0px;
   }
 
+  // Columns overflow horizontally on narrower screens, and opening a page
+  // scrolls to the last column. Keep the navigation in view meanwhile.
+  ._comp_columns_area_styles_multi_column__navigationWrapper {
+    position: sticky;
+    inset-inline-start: 0;
+    z-index: 11; // Above sticky column headers (10)
+    background: var(--color-bg);
+    border-inline-end: 1px solid var(--color-border);
+  }
+
   .layout-multiple-columns [data-column-root] {
     border-inline-end: 1px solid var(--color-border);
+  }
+
+  // The narrower Bird UI navigation leaves room for four 300px columns on
+  // common laptop widths, so they fit without scrolling sideways.
+  .layout-multiple-columns ._comp_column__root {
+    width: clamp(
+      300px,
+      (var(--available-width) / 4 - var(--multi-column-gap)),
+      400px
+    );
   }
 
   ._comp_column_header__root {
