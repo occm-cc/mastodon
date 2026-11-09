@@ -11,10 +11,8 @@
   .follow_requests-unlocked_explanation a,
   .column-header__back-button,
   .link-button,
-  .reply-indicator__content a.unhandled-link,
   .status__content a.unhandled-link,
   .column-header > .column-header__back-button,
-  .reply-indicator__content a,
   .status__content a,
   .column-link--transparent.active,
   .status__content__read-more-button,
@@ -22,13 +20,7 @@
     color: var(--color-accent);
   }
 
-  // Toggles
-  .react-toggle .react-toggle-track {
-    background-color: var(--color-bg);
-  }
-
   // Accented background colors
-  .react-toggle--checked .react-toggle-track,
   .language-dropdown__dropdown__results__item.active,
   .icon-with-badge__badge,
   .button {
@@ -76,8 +68,7 @@
   }
 
   // Accented border colors
-  .notification.unread::before,
-  .status__wrapper.unread::before {
+  .notification.unread::before {
     border-color: var(--color-accent);
     display: none;
   }

@@ -1,12 +1,6 @@
 // Status header, action bar, display name
 .layout-single-column,
 .layout-multiple-columns {
-  // Main panel column
-  .columns-area__panels__main > div {
-    border-left: 1px solid var(--color-border);
-    border-right: 1px solid var(--color-border);
-  }
-
   // Status header
   .status .status__info {
     align-items: flex-start;

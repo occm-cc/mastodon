@@ -68,7 +68,7 @@
   .media-modal__overlay .picture-in-picture__footer .icon-button::after {
     background-color: rgba(96, 105, 132, 15%);
     border-radius: 50%;
-    content: "";
+    content: '';
     height: 34px;
     left: 0;
     opacity: 0;
@@ -115,7 +115,6 @@
   }
 
   // Improve modal icon size and accessibility
-  .image-loader .icon,
   .media-modal__navigation .icon {
     color: var(--color-light-text);
     height: 32px;

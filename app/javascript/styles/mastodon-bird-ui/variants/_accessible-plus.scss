@@ -1,11 +1,10 @@
 // Mastodon Bird UI - Accessible Plus variant
 // v4.6.0-alpha.3-2026-01-24 file-based theme system
 // See: https://github.com/ronilaukkarinen/mastodon-bird-ui/issues/177
-@use "accessible-fonts";
+@use 'accessible-fonts';
 
 :root {
   // Override Mastodon 4.6.0+ semantic tokens for accessible theme
-  // stylelint-disable plugin/no-unused-custom-properties
   --color-bg-primary: #000;
   --color-text-brand: #0a9ff9;
   --color-text-brand-soft: #3db8ff;
@@ -13,7 +12,6 @@
   --color-bg-brand-base: #0a9ff9;
   --color-bg-brand-base-hover: #0889d9;
   --color-bg-brand-soft: #0a9ff926;
-  --color-bg-brand-softer: #0a9ff91a;
 
   // Legacy variables for backward compatibility
   --color-accent: #0a9ff9;
@@ -32,7 +30,6 @@
   --color-column-link-hover: #ffffff36;
   --color-border: #343638;
   --color-light-purple: #fff;
-  --color-thread-line: #979b9f;
   --font-size: 22px;
   --font-size-smaller: 20px;
   --font-size-mid: 21px;
@@ -49,14 +46,9 @@
   --icon-boost-status: url("data:image/svg+xml, %3Csvg version='1.0' xmlns='http://www.w3.org/2000/svg' width='21' height='21' viewBox='0 0 136 136'%3E%3Cpath fill='%23ffffff' d='M51 23.8c0 .4 2.4 3.1 5.3 6l5.3 5.2h34.6l3.4 3.4 3.4 3.4v47.4l-6.7-6.1-6.8-6.1-4 4-4 4 13.8 13.7 13.7 13.8L122.5 99c7.4-7.4 13.5-13.7 13.5-14-.1-.3-1.7-2.3-3.6-4.4l-3.5-4-6.8 6.8-6.9 6.9-.4-25.4c-.3-23.8-.4-25.7-2.5-29.4-2.7-5.1-5.7-7.9-11.3-10.4-4.1-1.9-6.5-2.1-27.2-2.1-12.6 0-22.8.4-22.8.8zM13 37.5-.4 51l3.8 3.9 3.9 4 6.6-6.1 6.6-6 .5 24.4c.5 26.3.7 27.2 6.6 33.2 6 5.9 6.8 6.1 33.2 6.4 13.3.2 24.2-.1 24.2-.5 0-.5-2.2-3-4.8-5.6l-4.8-4.7-15.9-.1c-17.7 0-21.7-.9-24.9-5.2-2-2.7-2.1-4.2-2.3-26.5l-.2-23.6 6.7 6.7C42.5 55 46 58 46.6 58c.5 0 2.5-1.6 4.4-3.5l3.4-3.5L41 37.5C33.6 30.1 27.3 24 27 24c-.3 0-6.6 6.1-14 13.5z'/%3E%3C/svg%3E%0A");
   --icon-boost-notification-filter-bar: url("data:image/svg+xml, %3Csvg version='1.0' xmlns='http://www.w3.org/2000/svg' width='21' height='21' viewBox='0 0 136 136'%3E%3Cpath fill='%23ffffff' d='M51 23.8c0 .4 2.4 3.1 5.3 6l5.3 5.2h34.6l3.4 3.4 3.4 3.4v47.4l-6.7-6.1-6.8-6.1-4 4-4 4 13.8 13.7 13.7 13.8L122.5 99c7.4-7.4 13.5-13.7 13.5-14-.1-.3-1.7-2.3-3.6-4.4l-3.5-4-6.8 6.8-6.9 6.9-.4-25.4c-.3-23.8-.4-25.7-2.5-29.4-2.7-5.1-5.7-7.9-11.3-10.4-4.1-1.9-6.5-2.1-27.2-2.1-12.6 0-22.8.4-22.8.8zM13 37.5-.4 51l3.8 3.9 3.9 4 6.6-6.1 6.6-6 .5 24.4c.5 26.3.7 27.2 6.6 33.2 6 5.9 6.8 6.1 33.2 6.4 13.3.2 24.2-.1 24.2-.5 0-.5-2.2-3-4.8-5.6l-4.8-4.7-15.9-.1c-17.7 0-21.7-.9-24.9-5.2-2-2.7-2.1-4.2-2.3-26.5l-.2-23.6 6.7 6.7C42.5 55 46 58 46.6 58c.5 0 2.5-1.6 4.4-3.5l3.4-3.5L41 37.5C33.6 30.1 27.3 24 27 24c-.3 0-6.6 6.1-14 13.5z'/%3E%3C/svg%3E%0A");
   --icon-reply: url("data:image/svg+xml, %3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='18' height='18' fill='%23ffffff' aria-hidden='true'%3E%3Cg%3E%3Cpath d='M1.751 10c0-4.42 3.584-8 8.005-8h4.366c4.49 0 8.129 3.64 8.129 8.13 0 2.96-1.607 5.68-4.196 7.11l-8.054 4.46v-3.69h-.067c-4.49.1-8.183-3.51-8.183-8.01zm8.005-6c-3.317 0-6.005 2.69-6.005 6 0 3.37 2.77 6.08 6.138 6.01l.351-.01h1.761v2.3l5.087-2.81c1.951-1.08 3.163-3.13 3.163-5.36 0-3.39-2.744-6.13-6.129-6.13H9.756z'%3E%3C/path%3E%3C/g%3E%3C/svg%3E");
-  --icon-reply-detailed-status-action-bar: url("data:image/svg+xml, %3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='18' height='18' fill='%23ffffff' aria-hidden='true'%3E%3Cg%3E%3Cpath d='M1.751 10c0-4.42 3.584-8 8.005-8h4.366c4.49 0 8.129 3.64 8.129 8.13 0 2.96-1.607 5.68-4.196 7.11l-8.054 4.46v-3.69h-.067c-4.49.1-8.183-3.51-8.183-8.01zm8.005-6c-3.317 0-6.005 2.69-6.005 6 0 3.37 2.77 6.08 6.138 6.01l.351-.01h1.761v2.3l5.087-2.81c1.951-1.08 3.163-3.13 3.163-5.36 0-3.39-2.744-6.13-6.129-6.13H9.756z'%3E%3C/path%3E%3C/g%3E%3C/svg%3E");
-  --icon-bookmark-detailed-status-action-bar: url("data:image/svg+xml, %3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='20' height='20' fill='%23ffffff' aria-hidden='true'%3E%3Cg%3E%3Cpath d='M4 4.5C4 3.12 5.119 2 6.5 2h11C18.881 2 20 3.12 20 4.5v18.44l-8-5.71-8 5.71V4.5zM6.5 4c-.276 0-.5.22-.5.5v14.56l6-4.29 6 4.29V4.5c0-.28-.224-.5-.5-.5h-11z'%3E%3C/path%3E%3C/g%3E%3C/svg%3E");
-  --icon-bookmark-detailed-status-action-bar-hover: url("data:image/svg+xml, %3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='20' height='20' fill='%23F91880' aria-hidden='true'%3E%3Cg%3E%3Cpath d='M4 4.5C4 3.12 5.119 2 6.5 2h11C18.881 2 20 3.12 20 4.5v18.44l-8-5.71-8 5.71V4.5zM6.5 4c-.276 0-.5.22-.5.5v14.56l6-4.29 6 4.29V4.5c0-.28-.224-.5-.5-.5h-11z'%3E%3C/path%3E%3C/g%3E%3C/svg%3E");
   --icon-heart: url("data:image/svg+xml, %0A%3Csvg viewBox='0 0 24 24' color='inherit' width='20' height='20' xmlns='http://www.w3.org/2000/svg' %3E%3Cpath fill='%23ffffff' d='M16.5 3C19.538 3 22 5.5 22 9c0 7-7.5 11-10 12.5C9.5 20 2 16 2 9c0-3.5 2.5-6 5.5-6C9.36 3 11 4 12 5c1-1 2.64-2 4.5-2zm-3.566 15.604a26.953 26.953 0 0 0 2.42-1.701C18.335 14.533 20 11.943 20 9c0-2.36-1.537-4-3.5-4c-1.076 0-2.24.57-3.086 1.414L12 7.828l-1.414-1.414C9.74 5.57 8.576 5 7.5 5C5.56 5 4 6.656 4 9c0 2.944 1.666 5.533 4.645 7.903c.745.592 1.54 1.145 2.421 1.7c.299.189.595.37.934.572c.339-.202.635-.383.934-.571z'/%3E%3C/svg%3E");
   --icon-home-notification: url('data:image/svg+xml, %0A%3Csvg xmlns="http://www.w3.org/2000/svg" class="ionicon" viewBox="0 0 512 512"%3E%3Ctitle%3EHome%3C/title%3E%3Cpath d="M80 212v236a16 16 0 0016 16h96V328a24 24 0 0124-24h80a24 24 0 0124 24v136h96a16 16 0 0016-16V212" fill="none" stroke="%23ffffff" stroke-linecap="round" stroke-linejoin="round" stroke-width="38"/%3E%3Cpath d="M480 256L266.89 52c-5-5.28-16.69-5.34-21.78 0L32 256M400 179V64h-48v69" fill="none" stroke="%23ffffff" stroke-linecap="round" stroke-linejoin="round" stroke-width="38"/%3E%3C/svg%3E');
 
-  .edit-indicator__content .emojione,
-  .reply-indicator__content .emojione,
   .status__content .emojione {
     height: 32px;
     width: 32px;
@@ -64,7 +56,7 @@
 
   ._annual_report_announcement__wrapper h2,
   ._annual_report_announcement__wrapper p,
-  [role="dialog"] textarea,
+  [role='dialog'] textarea,
   time:not(.invisible),
   span:not(.invisible),
   li:not(.invisible) {
@@ -99,33 +91,16 @@
   }
 }
 
-//  Fix columns in content warnings with bigger fonts
-body
-  .columns-area__panels__pane--compositional
-  .compose-form
-  .spoiler-input__input,
-body .content-warning {
-  grid-template-columns: minmax(0, 3fr) minmax(90px, 180px) !important;
-}
-
 //  Min width fix
 .layout-single-column .column-link > i {
   min-width: 0 !important;
 }
 
 //  Define smaller font sizes
-.account__domain-pill,
 .navigation-bar .account__display-name .display-name__account,
 .trends__item__name > span,
-.account__header__account-note textarea,
 .dropdown-button {
   font-size: var(--font-size-smaller) !important;
-}
-
-//  Keep footer version information smallest to take less space
-.link-footer,
-.link-footer * {
-  font-size: 15px !important;
 }
 
 //  Define mid font sizes
@@ -145,8 +120,12 @@ body .content-warning {
   }
 }
 
-.layout-single-column ._comp_account_header__bioButtonsWrapper dl[class*="fieldList"],
-.layout-multiple-columns ._comp_account_header__bioButtonsWrapper dl[class*="fieldList"] {
+.layout-single-column
+  ._comp_account_header__bioButtonsWrapper
+  dl[class*='fieldList'],
+.layout-multiple-columns
+  ._comp_account_header__bioButtonsWrapper
+  dl[class*='fieldList'] {
   row-gap: 16px;
 }
 
@@ -157,31 +136,9 @@ body .content-warning {
 }
 
 //  Custom for mementomori.social
-.status__content__text[lang="fi"].translate
+.status__content__text[lang='fi'].translate
   ~ .status__content__read-more-button {
   display: none;
-}
-
-.layout-single-column .compose-form .autosuggest-textarea__textarea {
-  height: auto !important;
-  max-height: 20vh !important;
-}
-
-//  Add background color for the compose form
-//  stylelint-disable-next-line no-duplicate-selectors
-.layout-multiple-columns .compose-form .compose-form__autosuggest-wrapper,
-.layout-multiple-columns .compose-form .compose-form__buttons-wrapper,
-.layout-single-column .compose-form .compose-form__autosuggest-wrapper,
-.layout-single-column .compose-form .compose-form__buttons-wrapper {
-  background-color: var(--color-mud);
-  border-color: var(--color-mud);
-  padding-top: 0;
-}
-
-//  Fixes to bottom row when there's a background
-.layout-multiple-columns .compose-form .compose-form__buttons-wrapper,
-.layout-single-column .compose-form .compose-form__buttons-wrapper {
-  padding-bottom: calc(var(--gap-default) / 2);
 }
 
 //  Advanced view accessibility improvements based no the feedback by @mustikkasoppa@mementomori.social
@@ -247,9 +204,6 @@ body .content-warning {
 
 //  More visible button borders
 .account .account__relationship > .button,
-._comp_account_header__barWrapper__buttons .button,
-._comp_account_header__barWrapper__buttons .icon-button,
-.column-inline-form button,
 .explore__suggestions .account-card__actions__button button,
 .notification .account__relationship > .button,
 .notification__report__actions .button {

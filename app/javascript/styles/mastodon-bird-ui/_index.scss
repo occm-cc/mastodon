@@ -6,7 +6,6 @@
 @use 'variables/tokens';
 @use 'variables/variables-base';
 @use 'variables/variables-high-contrast';
-@use 'variables/variables-ipad-landscape';
 @use 'variables/variables-mobile';
 @use 'components/search';
 @use 'components/ui';
@@ -27,7 +26,6 @@
 @use 'components/status';
 @use 'components/transparent-panels';
 @use 'components/avatars';
-@use 'components/hashtag-bar';
 @use 'components/status-layout';
 @use 'components/status-content-spacing';
 @use 'components/media';
@@ -100,7 +98,6 @@
 
 // Components
 @use 'components/error';
-@use 'components/tabs-bar';
 @use 'components/account-avatar';
 @use 'components/button';
 @use 'components/picture-in-picture';
@@ -116,6 +113,11 @@
 // Advanced web interface
 @use 'layouts/advanced-web-interface';
 
-// Mastodon 5 uses CSS Modules and a new semantic palette. Keep this bridge
-// last so the legacy Bird UI rules do not undo the redesign layout.
-@use 'redesign';
+// Styles for the CSS Module components and the semantic palette. These load
+// last so they take precedence over the global class rules above.
+@use 'modules/tokens' as modules-tokens;
+@use 'modules/layout' as modules-layout;
+@use 'modules/navigation' as modules-navigation;
+@use 'modules/status' as modules-status;
+@use 'modules/surfaces' as modules-surfaces;
+@use 'modules/theme-colors' as modules-theme-colors;

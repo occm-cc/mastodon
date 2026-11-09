@@ -2,12 +2,10 @@
 .layout-single-column,
 .layout-multiple-columns {
   // @source https://github.com/mastodon/mastodon/issues/22158#issuecomment-1353661031 */
-  .notification-ungrouped--direct,
-  .detailed-status-direct {
+  .notification-ungrouped--direct {
     position: relative;
   }
 
-  .notification-ungrouped--mention.notification-grouped--direct::after,
   .notification-ungrouped--mention.notification-ungrouped--direct::after {
     border-left: 20px solid transparent;
     border-top: 20px solid var(--color-accent);
@@ -21,16 +19,6 @@
     // Sit on the post card, below the spacing left by the hidden header
     top: var(--space-4);
     width: 0;
-  }
-
-  // Indicator for private mentions when grouped notifications are enabled in 4.3.0
-  .notification-ungrouped--direct .status__wrapper-direct::after,
-  .notification-ungrouped--direct .detailed-status-direct::after {
-    display: none;
-  }
-
-  .notification .status__wrapper-direct::after {
-    top: -40px;
   }
 
   // Private message conversations

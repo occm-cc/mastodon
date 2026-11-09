@@ -5,7 +5,7 @@
 // both the closed field and the open popup match the theme. Not scoped to the
 // web app columns because the settings pages live under .admin-wrapper instead.
 
-// Do not use --color-bg-overlay here: the redesign tokens map it to the
+// Do not use --color-bg-overlay here: modules/_tokens.scss maps it to the
 // foreground colour (it is a scrim colour), which made the field and its options
 // black-on-black in light themes and white-on-white in dark themes
 // (mastodon/mastodon#37332).

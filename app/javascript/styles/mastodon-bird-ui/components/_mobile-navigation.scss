@@ -36,9 +36,7 @@
   //  Speed up animation in the new mobile slideout navigation for v4.4.0-beta.1
   &.columns-area__panels__pane__inner,
   &.ui::after,
-  &.ui__header,
-  &.tabs-bar__wrapper,
-  &.scroll-down .tabs-bar__portal {
+  &.ui__header {
     transition-duration: 100ms;
     transition-timing-function: linear;
   }
@@ -55,19 +53,6 @@
   //  Fix indent for the new navigation panel, v4.4.0-beta.2
   .navigation-panel__list-panel__items {
     padding-inline-start: 40px;
-  }
-
-  @media screen and (width >= 760px) {
-    .columns-area__panels__pane--compositional
-      .columns-area__panels__pane__inner {
-      position: static;
-    }
-
-    .columns-area__panels__pane--compositional
-      .columns-area__panels__pane__inner,
-    .compose-panel {
-      width: 100% !important;
-    }
   }
 
   @media screen and (width <= 759px) {

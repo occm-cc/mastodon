@@ -7,9 +7,4 @@
     background-color: var(--color-destructive);
     border-color: var(--color-destructive);
   }
-
-  // Fix character counter color when it's over the limit
-  .character-counter.character-counter--over {
-    color: var(--color-destructive);
-  }
 }

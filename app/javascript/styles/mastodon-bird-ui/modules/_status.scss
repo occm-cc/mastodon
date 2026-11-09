@@ -124,9 +124,8 @@ html:root {
   }
 
   ._comp_status__root {
-    // Legacy Bird UI indented attachments by the avatar width. The redesign
-    // already places them in the content column, so that margin would indent
-    // every image twice and crop its right edge.
+    // Attachments already sit in the content column, so an extra avatar-width
+    // margin would indent every image twice and crop its right edge.
     .media-gallery,
     .video-player,
     .audio-player,

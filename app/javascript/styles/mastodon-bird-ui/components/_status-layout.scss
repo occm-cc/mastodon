@@ -2,8 +2,6 @@
 .layout-single-column,
 .layout-multiple-columns {
   // Status update tinted to right
-  .status:not(.status--in-thread) .hashtag-bar,
-  .status__content--collapsed + .status__content__read-more-button,
   .status:not(.status--in-thread) .status__action-bar,
   .status:not(.status--in-thread) .attachment-list,
   .status:not(.status--in-thread) .status__content {
@@ -34,32 +32,24 @@
   }
 
   // Rtl version
-  [dir="rtl"] .status__action-bar,
-  [dir="rtl"] .attachment-list,
-  [dir="rtl"] .status__content__read-more-button,
-  [dir="rtl"] .status .status__content {
+  [dir='rtl'] .status__action-bar,
+  [dir='rtl'] .attachment-list,
+  [dir='rtl'] .status__content__read-more-button,
+  [dir='rtl'] .status .status__content {
     padding-left: 0;
     padding-right: calc(var(--size-avatar) + var(--gap-default));
   }
 
-  // Reset padding from attachment-list on reply indicator
-  .reply-indicator .attachment-list {
-    padding-left: 0;
-  }
-
-  .status__action-bar button,
-  .detailed-status__action-bar button {
+  .status__action-bar button {
     border-radius: 50%;
   }
 
-  .detailed-status__action-bar .icon-button[disabled],
   .status__action-bar .icon-button[disabled] {
     opacity: 0.5;
     pointer-events: none;
   }
 
   // Grouped notification exceptions, pr30440 2024-07-11
-  .notification-ungrouped .status .hashtag-bar,
   .notification-ungrouped .status .status__content,
   .notification-ungrouped .status .status__action-bar {
     padding-left: var(--gap-default);
@@ -72,8 +62,7 @@
 
   // We don't need to show our own account when we know our own account is being mentioned
   .notification-ungrouped.notification-ungrouped--mention
-    .notification-ungrouped__header,
-  .notification-group .notification-group__embedded-status__account {
+    .notification-ungrouped__header {
     display: none;
   }
 

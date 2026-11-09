@@ -19,36 +19,18 @@
   }
 
   // More subtle box-shadow for dropdown-menu
-  .search-popout,
   .search__popout,
   .dropdown-menu {
     box-shadow: 2px 4px 16px rgb(0 0 0 / 1%);
   }
 
   // Autosuggest box shadow reset
-  .search-popout,
   .search__popout,
   .dropdown-menu,
   .emoji-picker-dropdown__menu,
-  .compose-form .compose-form__warning,
-  .privacy-dropdown.active .privacy-dropdown__value,
   .privacy-dropdown__dropdown,
-  .language-dropdown__dropdown,
-  .compose-form .autosuggest-textarea__suggestions {
+  .language-dropdown__dropdown {
     box-shadow: none;
-  }
-
-  // Composer form warnings
-  .compose-form .compose-form__warning {
-    background-color: var(--color-dark);
-    border-color: var(--color-dark);
-    color: var(--color-light-text);
-  }
-
-  // Content warning placeholder
-  .compose-form .autosuggest-textarea__textarea::placeholder,
-  .compose-form .spoiler-input__input::placeholder {
-    color: var(--color-dim);
   }
 
   // Border colors
@@ -63,25 +45,20 @@
   .dropdown-menu__container__header,
   .compare-history-modal .report-modal__target,
   .account__section-headline,
-  .detailed-status__action-bar,
   .column-back-button,
   .column-header,
   .audio-player,
   .video-player,
   .media-gallery,
-  .compose-form .spoiler-input__input,
   .compose-form__autosuggest-wrapper,
   .compose-form__poll-wrapper,
   .compose-form__poll-wrapper select,
-  .poll__option input[type="text"],
+  .poll__option input[type='text'],
   .report-dialog-modal__textarea,
-  .search__input,
-  .setting-text,
   .dropdown-menu__separator,
   .status,
   .emoji-mart-search input,
-  .conversation,
-  .setting-text__wrapper {
+  .conversation {
     border-color: var(--color-border);
   }
 }

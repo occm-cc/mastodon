@@ -2,7 +2,7 @@
 // The colour names are listed under the default theme in config/themes.yml and
 // end up in html[data-theme-color]. They use a `bird_` prefix so they never
 // match the core Mastodon colours (e.g. `pink`), which also tint backgrounds.
-// Every brand token in the redesign tokens derives from --color-accent, so
+// Every brand token in modules/_tokens.scss derives from --color-accent, so
 // overriding it here recolours links, buttons, hashtags and focus rings.
 $bird-theme-colors: (
   'bird_blue': #1d9bf0,

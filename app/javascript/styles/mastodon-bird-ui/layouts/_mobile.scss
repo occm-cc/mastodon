@@ -8,12 +8,6 @@
     }
   }
 
-  @media screen and (height <= 980px) {
-    .navigation-panel .column-link.column-link--optional {
-      display: none;
-    }
-  }
-
   @media screen and (height < 1080px) {
     // Compact navigation items so more fit on shorter laptop screens. Scoped
     // under .navigation-panel so it outranks the equal-specificity desktop
@@ -23,6 +17,7 @@
     // so this compact rule never actually applied there.
     .navigation-panel .column-link {
       --gap-column-link: 7px;
+
       font-size: 17px;
     }
   }
@@ -30,18 +25,12 @@
   @media screen and (height < 830px) {
     // Drop the trends panel to 2 items to save vertical space; 4 items
     // still fit on heights down to 830px.
-    .getting-started__trends .trends__item:nth-of-type(n+3) {
+    .getting-started__trends .trends__item:nth-of-type(n + 3) {
       display: none;
     }
   }
 
   @media screen and (width >= 760px) {
-    // Hide the space between Lists and the actual lists
-    .list-panel > hr,
-    .list-panel + hr {
-      display: none;
-    }
-
     ._comp_account_header__avatarWrapper .account__avatar {
       // It's inlined so we have to use !important
       height: 133.5px !important;
@@ -100,6 +89,7 @@
       .navigation-panel__list-panel__items
       .column-link {
       --gap-column-link: 8px;
+
       font-size: 16px;
     }
 
@@ -110,75 +100,61 @@
       margin-left: 25px;
     }
 
-    // Hide lists if there's not enough space on desktop vertically
-    .list-panel {
-      opacity: 0;
-      order: 22;
-      transition: all 200ms;
-    }
-
-    .list-panel:focus,
-    .list-panel:hover,
-    .column-link[href="/lists"]:focus ~ .list-panel,
-    .column-link[href="/lists"]:hover ~ .list-panel {
-      opacity: 1;
-    }
-
     // Order of the side nav items
-    .column-link[href="/home"] {
+    .column-link[href='/home'] {
       order: 2;
     }
 
-    .column-link[href="/notifications"] {
+    .column-link[href='/notifications'] {
       order: 3;
     }
 
-    .column-link[href="/explore"] {
+    .column-link[href='/explore'] {
       order: 4;
     }
 
-    .column-link[href="/public/local"] {
+    .column-link[href='/public/local'] {
       order: 5;
     }
 
-    .column-link[href="/public"] {
+    .column-link[href='/public'] {
       order: 6;
     }
 
-    .column-link[href="/conversations"] {
+    .column-link[href='/conversations'] {
       order: 7;
     }
 
-    .column-link[href="/follow_requests"] {
+    .column-link[href='/follow_requests'] {
       order: 8;
     }
 
-    .column-link[href="/bookmarks"] {
+    .column-link[href='/bookmarks'] {
       order: 9;
     }
 
-    .column-link[href="/favourites"] {
+    .column-link[href='/favourites'] {
       order: 10;
     }
 
-    .column-link[href="/search"] {
+    .column-link[href='/search'] {
       order: 11;
     }
 
     .navigation-panel__list-panel,
-    .column-link[href="/lists"] {
+    .column-link[href='/lists'] {
       order: 16;
     }
 
-    .column-link[href="/admin/dashboard"] {
+    .column-link[href='/admin/dashboard'] {
       order: 11;
     }
 
-    .column-link[href="/admin/reports"] {
+    .column-link[href='/admin/reports'] {
       order: 12;
     }
 
-    .column-link[href="/settings/preferences"] {
+    .column-link[href='/settings/preferences'] {
       order: 11;
     }
 
@@ -215,11 +191,6 @@
       // It's inlined so we have to use !important
       width: auto !important;
     }
-
-    // Fix list links if they are too short
-    .list-panel .column-link {
-      display: flex;
-    }
   }
 
   // If a hover device
@@ -246,36 +217,8 @@
       border-left: 0;
     }
 
-    .app-body:not(.layout-multiple-columns) .ui__header .ui__header__logo {
-      margin-left: 3px;
-    }
-
-    .app-body:not(.layout-multiple-columns):not(
-        :has(.ui .ui__header__links > .button[href="/auth/sign_in"])
-      )
-      .tabs-bar__wrapper {
-      z-index: 3;
-    }
-
-    .app-body:not(.layout-multiple-columns):has(
-        .ui .ui__header__links > .button[href="/auth/sign_in"]
-      )
-      .tabs-bar__wrapper
-      .column-back-button,
-    .app-body:not(.layout-multiple-columns):has(
-        .ui .ui__header__links > .button[href="/auth/sign_in"]
-      )
-      .tabs-bar__wrapper
-      .column-header > * {
-      display: none;
-    }
-
     .app-body .column-header__icon {
       display: none;
-    }
-
-    .app-body:not(.layout-multiple-columns) .columns-area__panels {
-      z-index: 2;
     }
 
     // Set a backdrop blur background to both top bars
@@ -283,23 +226,6 @@
       background-color: var(--color-bg-90);
       height: 55px;
       z-index: 5;
-    }
-
-    .app-body:not(.layout-multiple-columns):has(.column-header)
-      .tabs-bar__wrapper::after {
-      background-color: var(--color-bg-90);
-      content: "";
-      height: 49px;
-      left: 0;
-      position: absolute;
-      top: 0;
-      width: 100%;
-      z-index: 0;
-    }
-
-    .ui:has([href="/auth/sign_in"]) .tabs-bar__wrapper::after,
-    .ui:has(.compose-form__submit) .tabs-bar__wrapper::after {
-      display: none;
     }
 
     .column-header__collapsible {
@@ -313,14 +239,6 @@
     .app-body:not(.layout-multiple-columns)
       .column-header__collapsible:not(.collapsed) {
       border-bottom: 0;
-    }
-  }
-
-  // Hide extra border from mobile in 4.6.0-alpha.3
-  @media (width <= 760px) {
-    .columns-area__panels__main,
-    .columns-area__panels__main > div {
-      border-left: 0 !important;
     }
   }
 }

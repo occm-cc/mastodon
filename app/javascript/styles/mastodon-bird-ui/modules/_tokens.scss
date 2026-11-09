@@ -15,7 +15,6 @@
   --color-mention: var(--color-accent);
   --color-green: #00ba7c;
   --color-red: #f91880;
-  --color-thread-line: var(--color-border);
 }
 
 @mixin light {
@@ -26,7 +25,6 @@
   --color-dark: #f7f9f9;
   --color-column-link-hover: rgb(15 20 25 / 10%);
   --color-focusable-toot: rgb(15 20 25 / 3%);
-  --color-thread-line: #cfd9de;
 }
 
 html:root {
@@ -41,9 +39,7 @@ html:root {
   --color-bg-desktop: var(--color-bg);
   --color-bg-primary: var(--color-bg);
   --color-bg-secondary: var(--color-dark);
-  --color-bg-secondary-solid: var(--color-dark);
   --color-bg-tertiary: var(--color-column-link-hover);
-  --color-bg-elevated: var(--color-bg);
   --color-bg-highlight: var(--color-column-link-hover);
   --color-bg-inverted: var(--color-fg);
   --color-bg-overlay: var(--color-fg);
@@ -59,11 +55,6 @@ html:root {
     var(--color-accent) 15%,
     transparent
   );
-  --color-bg-brand-softer: color-mix(
-    in srgb,
-    var(--color-accent) 10%,
-    transparent
-  );
   --color-bg-brand-softest: color-mix(
     in srgb,
     var(--color-accent) 5%,
@@ -73,15 +64,12 @@ html:root {
   --color-text-secondary: var(--color-dim);
   --color-text-tertiary: var(--color-dim);
   --color-text-inverted: var(--color-bg);
-  --color-text-on-inverted: var(--color-bg);
   --color-text-brand: var(--color-accent);
   --color-text-brand-soft: var(--color-accent);
   --color-text-on-brand-base: #fff;
   --color-text-status-links: var(--color-accent);
   --color-border-primary: var(--color-border);
   --color-border-brand: var(--color-accent);
-  --color-border-on-bg-secondary: var(--color-border);
-  --color-border-on-bg-brand-softer: var(--color-border);
   --color-text-bookmark-highlight: var(--color-accent);
   --color-text-favourite-highlight: var(--color-red);
   --color-text-success: var(--color-green);

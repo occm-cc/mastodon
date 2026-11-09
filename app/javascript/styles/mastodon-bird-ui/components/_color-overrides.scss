@@ -6,7 +6,6 @@
   .conversation--unread,
   .notification.unread:hover,
   .notification.unread,
-  .status__wrapper.unread,
   .notification-group.notification-group--unread {
     background-color: var(--color-dark);
   }
@@ -23,12 +22,9 @@
   }
 
   // Things like notification status update text that should be dim
-  .notification .status-link.mention:not(.hashtag):not(.mention),
+  .notification .status-link.mention:not(.hashtag, .mention),
   .notification .status-link.hashtag,
   .notification .status-link.mention:not(.hashtag),
-  .compose-form .autosuggest-textarea__textarea::placeholder,
-  .compose-form .icon-button,
-  .compose-form .spoiler-input__input::placeholder,
   .compose-form__poll-wrapper .button.button-secondary,
   .language-dropdown__dropdown__results__item__common-name,
   .report-dialog-modal__textarea::placeholder,
@@ -36,11 +32,6 @@
   .muted .poll,
   .status .status__relative-time,
   .status .status__visibility-icon,
-  .block-modal__action-bar > div,
-  .boost-modal__action-bar > div,
-  .confirmation-modal__action-bar > div,
-  .mute-modal__action-bar > div,
-  .search-popout > h4,
   .search__popout > h4,
   .status-check-box__status .detailed-status__display-name,
   .report-dialog-modal .poll__option.dialog-option > .poll__option__text,
@@ -49,7 +40,6 @@
   .dropdown-menu__container__header,
   .sign-in-banner p,
   .navigation-bar > a,
-  .character-counter,
   .text-icon-button,
   .empty-column-indicator,
   .follow_requests-unlocked_explanation,
@@ -62,23 +52,13 @@
   .setting-text-label,
   ._comp_account_header__bioButtonsWrapper ._comp_account_header__fieldList dt,
   ._comp_account_header__bioButtonsWrapper ._comp_account_header__fieldList dd,
-  .link-footer p,
-  ._comp_account_header__bioButtonsWrapper__links a,
   .trends__item__current,
   .emoji-mart-anchor,
   .emoji-mart,
   .emoji-mart-anchors,
-  .reply-indicator .display-name *,
   .status__display-name,
   .status__prepend .status__display-name strong,
   .status__prepend,
-  .compose-form .compose-form__modifiers,
-  .compose-form .autosuggest-textarea__textarea,
-  .compose-form .spoiler-input__input,
-  .autosuggest-textarea__suggestions,
-  .compose-form .autosuggest-account .display-name__account,
-  .compose-panel .compose-form__autosuggest-wrapper,
-  .compose-form .compose-form__buttons-wrapper,
   .account__section-headline a,
   .account__section-headline button,
   .notification__filter-bar a,
@@ -88,7 +68,6 @@
   .notification__message .icon-user-plus,
   .notification__message .icon-home,
   .notification__message .icon-retweet,
-  .link-footer p a,
   .trends__item__name,
   .muted .status__content,
   .muted .status__content a,
@@ -113,41 +92,6 @@
   .navigation-bar,
   .navigation-bar strong {
     color: var(--color-topaz);
-  }
-
-  // CW button
-  .reply-indicator__content .status__content__spoiler-link,
-  .status__content__spoiler-link {
-    background-color: var(--color-dark);
-    color: var(--color-light-purple);
-    font-weight: var(--font-weight-semibold);
-
-    // Need to override forced styles
-    margin-left: calc(var(--gap-default) / 2) !important;
-    vertical-align: baseline;
-  }
-
-  .reply-indicator__content .status__content__spoiler-link:focus,
-  .reply-indicator__content .status__content__spoiler-link:hover,
-  .status__content .status__content__spoiler-link:focus,
-  .status__content .status__content__spoiler-link:hover {
-    background-color: var(--color-dark);
-    color: var(--color-lighter-purple);
-  }
-
-  // CW button in notifications
-  .notification .reply-indicator__content .status__content__spoiler-link,
-  .notification .status__content__spoiler-link {
-    background-color: var(--color-dark);
-    color: var(--color-dim);
-  }
-
-  .notification .reply-indicator__content .status__content__spoiler-link:focus,
-  .notification .reply-indicator__content .status__content__spoiler-link:hover,
-  .notification .status__content .status__content__spoiler-link:focus,
-  .notification .status__content .status__content__spoiler-link:hover {
-    background-color: var(--color-dark);
-    color: var(--color-dim);
   }
 
   // Light purple things
@@ -176,19 +120,11 @@
   .privacy-dropdown__option:hover .privacy-dropdown__option__content,
   .privacy-dropdown__option:focus .privacy-dropdown__option__content,
   .status__info .display-name strong.display-name__html,
-  .reply-indicator .display-name strong.display-name__html,
   .notification__message,
   .getting-started__trends h4 a,
   .trends__item__name a,
   .emoji-mart-search input,
   .language-dropdown__dropdown__results__item,
-  .reply-indicator__content,
-  .compose-form .compose-form__modifiers:focus,
-  .compose-form .autosuggest-textarea__textarea,
-  .compose-form .spoiler-input__input:focus,
-  .compose-panel .compose-form__autosuggest-wrapper:focus,
-  .compose-form .compose-form__buttons-wrapper:focus,
-  .autosuggest-textarea .autosuggest-textarea__textarea:focus,
   .account__section-headline a.active,
   .account__section-headline button.active,
   .notification__filter-bar a.active,

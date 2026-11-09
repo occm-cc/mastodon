@@ -2,8 +2,8 @@
 .layout-single-column,
 .layout-multiple-columns {
   // Avatar
-  .status__avatar[style="width: 46px; height: 46px;"],
-  .account__avatar[style="width: 46px; height: 46px;"],
+  .status__avatar[style='width: 46px; height: 46px;'],
+  .account__avatar[style='width: 46px; height: 46px;'],
   .status__avatar {
     // Need to override inline styles
     height: var(--size-avatar) !important;
@@ -33,9 +33,7 @@
   }
 
   // Things that should not have border
-  .column-inline-form,
   .column > .scrollable,
-  .error-column,
   .getting-started,
   .regeneration-indicator,
   .column-header {
@@ -72,10 +70,6 @@
   }
 
   // Focusable toot and other hilighted items
-  .compose-form .autosuggest-textarea__suggestions__item.selected,
-  .compose-form .autosuggest-textarea__suggestions__item:active,
-  .compose-form .autosuggest-textarea__suggestions__item:focus,
-  .compose-form .autosuggest-textarea__suggestions__item:hover,
   .focusable:focus {
     background: var(--color-focusable-toot);
   }
@@ -83,15 +77,13 @@
   // Search panel that opens when focusing Search or paste URL field
   .explore__search-header .search__popout,
   .compose-form__poll-wrapper option,
-  .search__popout,
-  .search-popout {
+  .search__popout {
     background-color: var(--color-dark);
     border-color: var(--color-dark);
     color: var(--color-dim);
   }
 
-  .search__popout em,
-  .search-popout em {
+  .search__popout em {
     color: var(--color-light-text);
   }
 }

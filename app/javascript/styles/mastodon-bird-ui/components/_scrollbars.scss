@@ -5,7 +5,6 @@
   .drawer__inner::-webkit-scrollbar,
   textarea::-webkit-scrollbar,
   .autosuggest-textarea__textarea::-webkit-scrollbar,
-  .reply-indicator::-webkit-scrollbar,
   &::-webkit-scrollbar {
     height: 6px;
     width: 6px;
@@ -14,7 +13,6 @@
   *::-webkit-scrollbar-thumb,
   textarea::-webkit-scrollbar-thumb,
   .autosuggest-textarea__textarea::-webkit-scrollbar-thumb,
-  .reply-indicator::-webkit-scrollbar-thumb,
   &::-webkit-scrollbar-thumb {
     background-color: var(--color-border);
     border: 0 solid var(--color-border);
@@ -24,7 +22,6 @@
   *::-webkit-scrollbar-thumb:hover,
   textarea::-webkit-scrollbar-thumb:hover,
   .autosuggest-textarea__textarea::-webkit-scrollbar-thumb:hover,
-  .reply-indicator::-webkit-scrollbar-thumb:hover,
   &::-webkit-scrollbar-thumb:hover {
     background-color: var(--color-light-purple);
   }
@@ -32,7 +29,6 @@
   *::-webkit-scrollbar-thumb:active,
   textarea::-webkit-scrollbar-thumb:active,
   .autosuggest-textarea__textarea::-webkit-scrollbar-thumb:active,
-  .reply-indicator::-webkit-scrollbar-thumb:active,
   &::-webkit-scrollbar-thumb:active {
     background-color: var(--color-black-coral);
   }
@@ -40,7 +36,6 @@
   *::-webkit-scrollbar-track,
   textarea::-webkit-scrollbar-track,
   .autosuggest-textarea__textarea::-webkit-scrollbar-track,
-  .reply-indicator::-webkit-scrollbar-track,
   &::-webkit-scrollbar-track {
     background-color: var(--color-bg);
     border: 0 solid var(--color-border);
@@ -49,14 +44,12 @@
 
   textarea::-webkit-scrollbar-track:hover,
   .autosuggest-textarea__textarea::-webkit-scrollbar-track:hover,
-  .reply-indicator::-webkit-scrollbar-track:hover,
   &::-webkit-scrollbar-track:hover {
     background-color: var(--color-bg);
   }
 
   textarea::-webkit-scrollbar-track:active,
   .autosuggest-textarea__textarea::-webkit-scrollbar-track:active,
-  .reply-indicator::-webkit-scrollbar-track:active,
   &::-webkit-scrollbar-track:active {
     background-color: var(--color-bg);
   }
@@ -64,7 +57,6 @@
   .drawer__inner::-webkit-scrollbar-corner,
   textarea::-webkit-scrollbar-corner,
   .autosuggest-textarea__textarea::-webkit-scrollbar-corner,
-  .reply-indicator::-webkit-scrollbar-corner,
   &::-webkit-scrollbar-corner {
     background-color: transparent;
   }

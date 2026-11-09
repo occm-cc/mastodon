@@ -20,17 +20,7 @@
   }
 
   // Things that should have the mid font-size
-  ._comp_account_header__bioButtonsWrapper__links,
-  .columns-area__panels__pane--compositional
-    .account__header__account-note
-    textarea,
-  ._comp_account_header__bio,
-  .columns-area__panels__pane--compositional
-    .compose-form
-    .autosuggest-textarea__textarea,
-  .columns-area__panels__pane--compositional
-    .compose-form
-    .spoiler-input__input {
+  ._comp_account_header__bio {
     font-size: var(--font-size-mid);
     line-height: var(--line-height-mid);
   }
@@ -40,17 +30,12 @@
     line-height: 18px;
   }
 
-  // Things that will have even smaller font size
-  .account__header__account-note label {
-    font-size: var(--font-size-12);
-  }
-
   // Apply font size variable so accessible themes scale these elements
   .display-name__html {
     font-size: var(--font-size);
   }
 
-  [class*="_comp_form_fields_form_field_wrapper__wrapper"] {
+  [class*='_comp_form_fields_form_field_wrapper__wrapper'] {
     font-size: var(--font-size);
   }
 

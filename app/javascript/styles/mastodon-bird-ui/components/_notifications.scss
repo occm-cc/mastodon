@@ -1,12 +1,6 @@
 // Notifications
 .layout-single-column,
 .layout-multiple-columns {
-  // "Your lists" view
-  .column-subheading ~ article {
-    padding-left: var(--gap-default);
-    padding-right: var(--gap-default);
-  }
-
   // Notifications
   .notification-group,
   .notification__message {
@@ -122,8 +116,6 @@
   .notification.notification-follow .display-name,
   .notification.notification-admin-sign-up .display-name + span,
   .notification.notification-follow .display-name + span,
-  .notification-group--favourite .status__wrapper-direct .status__prepend,
-  .notification.notification-favourite .status__wrapper-direct .status__prepend,
   .notification.notification-reblog .display-name,
   .notification-group--favourite .display-name,
   .notification.notification-favourite .display-name {
@@ -181,15 +173,6 @@
 
   .status__prepend {
     padding-left: calc(var(--size-avatar) + 2px);
-  }
-
-  // In-thread reply prepends already get core's --thread-margin
-  // (https://github.com/mastodon/mastodon/pull/39521), so drop our padding there
-  // to avoid doubling the indent. Since #39554 core only adds that margin to
-  // .status__wrapper--in-thread replies, we must match the same scope, otherwise
-  // non-in-thread reply prepends lose both and hug the left edge.
-  .status__wrapper-reply.status__wrapper--in-thread .status__prepend {
-    padding-left: 0;
   }
 
   .notification.notification-update .account__display-name,
