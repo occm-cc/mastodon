@@ -12,10 +12,15 @@ import classes from '../styles.module.scss';
 import { selectComposeAttachments } from './selectors';
 
 const selectComposeAttachmentsWithoutAlt = createAppSelector(
-  [selectComposeAttachments],
-  (attachments) => ({
+  [
+    selectComposeAttachments,
+    (state) => !!state.meta.get('missing_alt_text_modal'),
+  ],
+  (attachments, missingAltTextModal) => ({
     count: attachments.length,
-    missingAlt: attachments.some((attachment) => !attachment.description),
+    missingAlt:
+      missingAltTextModal &&
+      attachments.some((attachment) => !attachment.description),
   }),
 );
 

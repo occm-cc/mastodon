@@ -15,7 +15,6 @@ import type {
 } from '@/mastodon/api_types/announcements';
 import type { RootState } from '@/mastodon/store';
 import { useAppDispatch, useAppSelector } from '@/mastodon/store';
-import { isRedesignEnabled } from '@/mastodon/utils/environment';
 
 type AnnouncementItem = ImmutableRecord<
   Omit<ApiAnnouncementJSON, 'account'> & { account_id: string | null }
@@ -84,7 +83,7 @@ export function useHasAnnouncements({
   const hasUnreadAnnouncements = !!unreadCount;
 
   useEffect(() => {
-    if (hasUnreadAnnouncements && isRedesignEnabled()) {
+    if (hasUnreadAnnouncements) {
       dispatch(showAnnouncements(scope));
     }
   }, [hasUnreadAnnouncements, scope, dispatch]);
