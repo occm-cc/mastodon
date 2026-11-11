@@ -1,9 +1,8 @@
-// The native <select> options popup paints the field's own background colour, so
-// the translucent --color-bg-secondary that core gives selects renders as a
-// white, unreadable popup under the Bird UI themes (#188). Use the solid primary
-// surface (dark in dark themes, white in light) with readable primary text so
-// both the closed field and the open popup match the theme. Not scoped to the
-// web app columns because the settings pages live under .admin-wrapper instead.
+// Native <select> popups need an opaque background to keep options readable
+// (#188, mastodon/mastodon#41491). Core uses --color-bg-highlight-solid; keep
+// Bird UI's primary surface and text so both the field and its options match
+// the theme. Settings pages live under .admin-wrapper, so this also applies
+// outside the web app columns.
 
 // Do not use --color-bg-overlay here: modules/_tokens.scss maps it to the
 // foreground colour (it is a scrim colour), which made the field and its options

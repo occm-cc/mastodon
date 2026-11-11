@@ -1,293 +1,259 @@
-// Task 10.5: Logo link-target test
-// Validates: Requirements 4.4
+import type { RecordOf } from 'immutable';
 
-import { render, screen } from '@testing-library/react';
+import type * as DmActions from '@/mastodon/actions/dm';
+import type * as PermissionsModule from '@/mastodon/permissions';
+import type * as StoreModule from '@/mastodon/store';
+import { accountFactoryImmutable } from '@/testing/factories';
+import { act, fireEvent, render, screen, within } from '@/testing/rendering';
 
-// Now import the component
-import { NavigationPanel } from './index';
+import { RedesignNavigationPanel } from '.';
+import { RedesignMobileNavigation } from './mobile_nav';
 
 import '@testing-library/jest-dom';
 
-// Mock react-router-dom: Link renders an <a> with href from `to` prop
-vi.mock('react-router-dom', () => ({
-  Link: ({
-    to,
-    children,
-    ...props
-  }: {
-    to: string;
-    children: React.ReactNode;
-    [key: string]: unknown;
-  }) => (
-    <a href={to} {...props}>
-      {children}
-    </a>
-  ),
-  useLocation: () => ({ pathname: '/' }),
+const mocks = vi.hoisted(() => ({
+  dispatch: vi.fn(),
+  unreadCount: 3,
+  composerPosition: 'sidebar',
+  fetchUnreadCount: vi.fn(() => ({ type: 'FETCH_DM_UNREAD' })),
 }));
 
-// Mock react-intl
-vi.mock('react-intl', () => ({
-  defineMessages: (msgs: Record<string, unknown>) => msgs,
-  useIntl: () => ({
-    formatMessage: (msg: { defaultMessage?: string; id?: string }) =>
-      msg.defaultMessage ?? msg.id ?? '',
-  }),
+vi.mock('@/mastodon/store', async (importOriginal) => {
+  const actual = await importOriginal<typeof StoreModule>();
+  return {
+    ...actual,
+    useAppDispatch: () => mocks.dispatch,
+    useAppSelector: (
+      selector: (state: ReturnType<typeof actual.store.getState>) => unknown,
+    ) => {
+      const state = actual.store.getState() as RecordOf<StoreModule.RootState>;
+      return selector(
+        state
+          .set('dm', { ...state.dm, unreadCount: mocks.unreadCount })
+          .set(
+            'meta',
+            state.meta
+              .set('me', '123')
+              .set('composer_position', mocks.composerPosition),
+          )
+          .set(
+            'accounts',
+            state.accounts.set(
+              '123',
+              accountFactoryImmutable({ id: '123', acct: 'alice' }),
+            ),
+          ),
+      );
+    },
+  };
+});
+
+vi.mock('@/mastodon/actions/dm', async (importOriginal) => ({
+  ...(await importOriginal<typeof DmActions>()),
+  fetchUnreadCount: mocks.fetchUnreadCount,
 }));
 
-// Mock initial_state
-vi.mock('mastodon/initial_state', () => ({
-  initialState: { features: [] },
-  me: 'user-1',
-  autoPlayGif: false,
-  localLiveFeedAccess: 0,
-  remoteLiveFeedAccess: 0,
-  trendsEnabled: false,
-  transientSingleColumn: false,
-}));
-
-vi.mock('mastodon/is_mobile', () => ({
-  transientSingleColumn: false,
-}));
-
-// Mock identity_context
-vi.mock('mastodon/identity_context', () => ({
-  useIdentity: () => ({
-    signedIn: true,
-    permissions: 0,
-    disabledAccountId: null,
-  }),
-}));
-
-// Mock the hooks/useAccount
-const { mockUseAccount } = vi.hoisted(() => ({ mockUseAccount: vi.fn() }));
 vi.mock('@/mastodon/hooks/useAccount', () => ({
-  useAccount: mockUseAccount,
+  useAccount: () => accountFactoryImmutable({ id: '123', acct: 'alice' }),
 }));
 
-// Mock useBreakpoint
-vi.mock('mastodon/features/ui/hooks/useBreakpoint', () => ({
+vi.mock('@/mastodon/hooks/useScrollSensor', () => ({
+  useScrollSensor: () => ({ sensor: null, isInViewport: true }),
+}));
+
+vi.mock('@/mastodon/features/ui/hooks/useBreakpoint', () => ({
   useBreakpoint: () => false,
 }));
 
-// Mock useAppSelector and useAppDispatch
-vi.mock('mastodon/store', () => ({
-  useAppSelector: () => 0,
-  useAppDispatch: () => () => undefined,
+vi.mock('../announcements/hooks', () => ({
+  useHasAnnouncements: () => ({ unreadAnnouncementCount: 0 }),
 }));
 
-// Mock permissions
-vi.mock('mastodon/permissions', () => ({
-  canViewFeed: () => false,
+vi.mock('@/mastodon/features/compose/trigger', () => ({
+  ComposeButton: () => null,
 }));
 
-// Mock selectors
-vi.mock('mastodon/selectors/notifications', () => ({
-  selectUnreadNotificationGroupsCount: () => 0,
+vi.mock('@/mastodon/utils/multi_account_db', () => ({
+  loadAllEntries: () => Promise.resolve({}),
+  loadEncryptedToken: () => Promise.resolve(null),
 }));
 
-// Mock actions
-vi.mock('mastodon/actions/accounts', () => ({
-  fetchFollowRequests: () => ({ type: 'NOOP' }),
+vi.mock('@/mastodon/features/multi_account/callback_handler', () => ({
+  initializeCallbackHandler: vi.fn(),
+  cleanupCallbackHandler: vi.fn(),
 }));
 
-vi.mock('mastodon/actions/navigation', () => ({
-  openNavigation: () => ({ type: 'NOOP' }),
-  closeNavigation: () => ({ type: 'NOOP' }),
+vi.mock('@/mastodon/permissions', async (importOriginal) => ({
+  ...(await importOriginal<typeof PermissionsModule>()),
+  canViewFeed: () => true,
 }));
 
-// Mock the NavigationLogo component with two modes
-let navigationLogoMode: 'custom' | 'default' = 'default';
-vi.mock('./components/navigation_logo', () => ({
-  NavigationLogo: () => {
-    if (navigationLogoMode === 'custom') {
-      return (
-        <img
-          src='https://example.com/logo.png'
-          alt='Custom Logo'
-          className='logo logo--custom'
-        />
-      );
-    }
-    return <div data-testid='wordmark-logo'>WordmarkLogo</div>;
-  },
+vi.mock('@/mastodon/components/menu/card', () => ({
+  PopoverMenuCard: ({
+    children,
+    isOpen,
+  }: {
+    children: React.ReactNode;
+    isOpen: boolean;
+  }) => <div hidden={!isOpen}>{children}</div>,
 }));
 
-// Mock other child components to avoid import errors
-vi.mock('@/mastodon/components/search', () => ({
-  Search: () => null,
-}));
-
-vi.mock('mastodon/features/ui/components/account_switcher', () => ({
-  AccountSwitcher: () => null,
-}));
-
-vi.mock('mastodon/features/ui/components/column_link', () => ({
-  ColumnLink: () => null,
-}));
-
-vi.mock('mastodon/features/ui/components/skip_links', () => ({
-  getNavigationSkipLinkId: () => 'skip-link-target-nav',
-}));
-
-vi.mock('mastodon/components/account', () => ({
-  Account: () => null,
-}));
-
-vi.mock('mastodon/components/icon', () => ({
-  Icon: () => null,
-  iconWeight: (icon: unknown) => icon,
-}));
-
-vi.mock('mastodon/components/icon_with_badge', () => ({
-  IconWithBadge: () => null,
-}));
-
-vi.mock('../annual_report/nav_item', () => ({
-  AnnualReportNavItem: () => null,
-}));
-
-vi.mock('./components/disabled_account_banner', () => ({
-  DisabledAccountBanner: () => null,
-}));
-
-vi.mock('./components/followed_tags_panel', () => ({
-  FollowedTagsPanel: () => null,
-}));
-
-vi.mock('./components/list_panel', () => ({
-  ListPanel: () => null,
-}));
-
-vi.mock('./components/more_link', () => ({
-  MoreLink: () => null,
-}));
-
-vi.mock('./components/sign_in_banner', () => ({
-  SignInBanner: () => null,
-}));
-
-vi.mock('./components/trends', () => ({
-  Trends: () => null,
-}));
-
-// Mock SVG imports
-vi.mock('@/material-icons/400-24px/add.svg?react', () => ({
-  default: () => null,
-}));
-vi.mock('@/material-icons/400-24px/alternate_email.svg?react', () => ({
-  default: () => null,
-}));
-vi.mock('@/material-icons/400-24px/bookmarks-fill.svg?react', () => ({
-  default: () => null,
-}));
-vi.mock('@/material-icons/400-24px/bookmarks.svg?react', () => ({
-  default: () => null,
-}));
-vi.mock('@/material-icons/400-24px/category-fill.svg?react', () => ({
-  default: () => null,
-}));
-vi.mock('@/material-icons/400-24px/category.svg?react', () => ({
-  default: () => null,
-}));
-vi.mock('@/material-icons/400-24px/chat_bubble-fill.svg?react', () => ({
-  default: () => null,
-}));
-vi.mock('@/material-icons/400-24px/chat_bubble.svg?react', () => ({
-  default: () => null,
-}));
-vi.mock('@/material-icons/400-24px/home-fill.svg?react', () => ({
-  default: () => null,
-}));
-vi.mock('@/material-icons/400-24px/home.svg?react', () => ({
-  default: () => null,
-}));
-vi.mock('@/material-icons/400-24px/info.svg?react', () => ({
-  default: () => null,
-}));
-vi.mock('@/material-icons/400-24px/notifications-fill.svg?react', () => ({
-  default: () => null,
-}));
-vi.mock('@/material-icons/400-24px/notifications.svg?react', () => ({
-  default: () => null,
-}));
-vi.mock('@/material-icons/400-24px/person_add-fill.svg?react', () => ({
-  default: () => null,
-}));
-vi.mock('@/material-icons/400-24px/person_add.svg?react', () => ({
-  default: () => null,
-}));
-vi.mock('@/material-icons/400-24px/public.svg?react', () => ({
-  default: () => null,
-}));
-vi.mock('@/material-icons/400-24px/settings.svg?react', () => ({
-  default: () => null,
-}));
-vi.mock('@/material-icons/400-24px/star-fill.svg?react', () => ({
-  default: () => null,
-}));
-vi.mock('@/material-icons/400-24px/star.svg?react', () => ({
-  default: () => null,
-}));
-vi.mock('@/material-icons/400-24px/swap_horiz.svg?react', () => ({
-  default: () => null,
-}));
-vi.mock('@/material-icons/400-24px/trending_up.svg?react', () => ({
-  default: () => null,
-}));
-
-// Mock classnames and spring/gesture libs
-vi.mock('classnames', () => ({
-  default: (...args: unknown[]) => args.filter(Boolean).join(' '),
-}));
-vi.mock('@react-spring/web', () => ({
-  animated: { div: 'div' },
-  useSpring: () => [{ x: 0 }, { start: vi.fn() }],
-}));
-vi.mock('@use-gesture/react', () => ({
-  useDrag: () => () => ({}),
-}));
-
-describe('Task 10.5: Logo link targets "/" in both custom and default logo modes', () => {
+describe('Redesign navigation custom features', () => {
   beforeEach(() => {
-    mockUseAccount.mockReturnValue({
-      acct: 'testuser',
-      custom_logo_enabled: false,
-      custom_logo: '',
-      custom_logo_static: '',
-      custom_logo_description: '',
+    vi.clearAllMocks();
+    mocks.unreadCount = 3;
+    mocks.composerPosition = 'sidebar';
+    document.documentElement.style.removeProperty('--bird-ui-redesign');
+  });
+
+  afterEach(async () => {
+    document.documentElement.style.removeProperty('--bird-ui-redesign');
+    await act(async () => {
+      await Promise.resolve();
     });
   });
 
-  it('renders logo link with href="/" when custom logo is disabled (default WordmarkLogo)', () => {
-    navigationLogoMode = 'default';
+  it.each(['static', 'slide-out'] as const)(
+    'uses the Twitter menu order for Bird UI in %s mode',
+    (mode) => {
+      document.documentElement.style.setProperty('--bird-ui-redesign', '1');
+      const { container } = render(<RedesignNavigationPanel mode={mode} />);
+      const links = container.querySelectorAll('nav > ul > li > a');
+      expect(
+        Array.from(links)
+          .slice(0, 6)
+          .map((link) => link.getAttribute('href')),
+      ).toEqual([
+        '/home',
+        '/search',
+        '/notifications',
+        '/pending-mentions',
+        '/direct_message',
+        '/bookmarks',
+      ]);
+      expect(screen.getByRole('link', { name: 'Chat 3' })).toHaveAttribute(
+        'href',
+        '/direct_message',
+      );
+      expect(screen.getByRole('link', { name: 'Bookmarks' })).toHaveAttribute(
+        'href',
+        '/bookmarks',
+      );
+      expect(container.querySelector('a[href^="/public"]')).toBeNull();
+    },
+  );
 
-    render(<NavigationPanel />);
+  it.each([false, true])(
+    'shows one New Post button in the expected location with Bird UI %s',
+    (birdUi) => {
+      if (birdUi) {
+        document.documentElement.style.setProperty('--bird-ui-redesign', '1');
+        mocks.composerPosition = 'popup';
+      }
+      render(<RedesignNavigationPanel />);
 
-    const logoLink = screen.getByTestId('wordmark-logo').closest('a');
-    expect(logoLink).toBeInTheDocument();
-    expect(logoLink).toHaveAttribute('href', '/');
+      const button = screen.getByRole('button', { name: 'New Post' });
+      if (birdUi) {
+        expect(button.closest('li')?.parentElement?.tagName).toBe('UL');
+        expect(button.closest('footer')).toBeNull();
+      } else {
+        expect(button.closest('footer')).not.toBeNull();
+      }
+    },
+  );
+
+  it('hides the New Post button while the Bird UI sidebar composer is shown', () => {
+    document.documentElement.style.setProperty('--bird-ui-redesign', '1');
+    mocks.composerPosition = 'sidebar';
+    render(<RedesignNavigationPanel />);
+
+    expect(screen.queryByRole('button', { name: 'New Post' })).toBeNull();
   });
 
-  it('renders logo link with href="/" when custom logo is enabled', () => {
-    navigationLogoMode = 'custom';
-
-    render(<NavigationPanel />);
-
-    const logoImg = screen.getByRole('img', { name: 'Custom Logo' });
-    const logoLink = logoImg.closest('a');
-    expect(logoLink).toBeInTheDocument();
-    expect(logoLink).toHaveAttribute('href', '/');
+  it('also removes Public Feeds from signed-out Bird UI navigation', () => {
+    document.documentElement.style.setProperty('--bird-ui-redesign', '1');
+    const { container } = render(<RedesignNavigationPanel />, {
+      signedIn: false,
+    });
+    expect(container.querySelector('a[href^="/public"]')).toBeNull();
   });
 
-  it('logo link has the correct CSS class and skip-link id', () => {
-    navigationLogoMode = 'default';
+  it('links the desktop DM button to chat rooms and shows the unread count', () => {
+    render(<RedesignNavigationPanel />);
 
-    render(<NavigationPanel />);
+    const dmLink = screen.getByRole('link', { name: 'DM 3' });
+    expect(dmLink).toHaveAttribute('href', '/direct_message');
+    expect(within(dmLink).getByText('3')).toBeInTheDocument();
+    expect(mocks.fetchUnreadCount).toHaveBeenCalled();
+    expect(
+      screen.getByRole('link', { name: 'Awaiting reply' }),
+    ).toHaveAttribute('href', '/pending-mentions');
+  });
 
-    const logoLink = screen.getByTestId('wordmark-logo').closest('a');
-    expect(logoLink).toHaveClass('column-link');
-    expect(logoLink).toHaveClass('column-link--logo');
-    expect(logoLink).toHaveAttribute('id', 'skip-link-target-nav');
+  it('opens account management from the desktop navigation', async () => {
+    const { container } = render(<RedesignNavigationPanel />);
+    const switchButton = screen.getByRole('button', {
+      name: 'Switch accounts',
+    });
+    expect(switchButton.closest('li')?.parentElement?.tagName).toBe('UL');
+    expect(container.querySelector('ul > div.account-switcher')).toBeNull();
+
+    fireEvent.click(switchButton);
+    expect(
+      await screen.findByRole('dialog', { name: 'Account management' }),
+    ).toBeInTheDocument();
+    fireEvent.keyDown(document, { key: 'Escape' });
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  });
+
+  it('keeps private mentions in the desktop account menu', () => {
+    render(<RedesignNavigationPanel />);
+    fireEvent.click(screen.getByRole('button', { name: 'Account settings' }));
+
+    expect(
+      screen.getByRole('link', { name: 'Private mentions' }),
+    ).toHaveAttribute('href', '/conversations');
+  });
+
+  it('restores DM, private mentions, pending mentions, and switching on mobile', async () => {
+    render(<RedesignMobileNavigation />);
+    expect(screen.getByRole('link', { name: 'DM' })).toHaveAttribute(
+      'href',
+      '/direct_message',
+    );
+    fireEvent.click(screen.getByRole('button', { name: 'Account settings' }));
+
+    expect(
+      screen.getByRole('menuitem', { name: 'Private mentions' }),
+    ).toHaveAttribute('href', '/conversations');
+    expect(
+      screen.getByRole('menuitem', { name: 'Awaiting reply' }),
+    ).toHaveAttribute('href', '/pending-mentions');
+    fireEvent.click(screen.getByRole('menuitem', { name: 'Switch accounts' }));
+    expect(
+      await screen.findByRole('dialog', { name: 'Account management' }),
+    ).toBeInTheDocument();
+  });
+
+  it('keeps account switching and pending mentions accessible in the slide-out menu', () => {
+    render(<RedesignNavigationPanel mode='slide-out' />);
+    expect(
+      screen.getByRole('link', { name: 'Awaiting reply' }),
+    ).toHaveAttribute('href', '/pending-mentions');
+    expect(
+      screen.getByRole('button', { name: 'Switch accounts' }),
+    ).toBeInTheDocument();
+  });
+
+  it('does not fetch DM counts or expose account actions when signed out', () => {
+    render(<RedesignNavigationPanel />, { signedIn: false });
+    expect(mocks.fetchUnreadCount).not.toHaveBeenCalled();
+    expect(screen.queryByRole('link', { name: /^DM/ })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: 'Switch accounts' }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('link', { name: 'Awaiting reply' }),
+    ).not.toBeInTheDocument();
   });
 });

@@ -1,205 +1,117 @@
-import { useEffect, useRef } from 'react';
+import { useCallback, useEffect } from 'react';
 
-import { defineMessages, useIntl } from 'react-intl';
+import { defineMessages, FormattedMessage, useIntl } from 'react-intl';
 
-import classNames from 'classnames';
-import { Link, useLocation } from 'react-router-dom';
+import { useRouteMatch } from 'react-router';
 
 import type { Map as ImmutableMap } from 'immutable';
 
-import { animated, useSpring } from '@react-spring/web';
-import { useDrag } from '@use-gesture/react';
+import {
+  PenNibIcon,
+  HouseIcon,
+  MagnifyingGlassIcon,
+  RssSimpleIcon,
+  BellIcon,
+  ChatCircleDotsIcon,
+  BookmarkSimpleIcon,
+  PlusIcon,
+  InfoIcon,
+  ChatCircleIcon,
+  ArrowsLeftRightIcon,
+  GavelIcon,
+  ShieldStarIcon,
+} from '@phosphor-icons/react';
 
-import { Search } from '@/mastodon/components/search';
+import FediIcon from '@/images/icons/icon_fediverse.svg?react';
+import { fetchFollowRequests } from '@/mastodon/actions/accounts';
+import { fetchUnreadCount } from '@/mastodon/actions/dm';
+import { fetchLists } from '@/mastodon/actions/lists';
+import { closeNavigation } from '@/mastodon/actions/navigation';
+import { fetchFollowedHashtags } from '@/mastodon/actions/tags_typed';
+import { Button } from '@/mastodon/components/button';
+import { Callout } from '@/mastodon/components/callout/redesign';
+import { FOCUS_TARGET } from '@/mastodon/components/navigation_focus_target';
+import { selectComposeType } from '@/mastodon/features/compose/components/selectors';
+import { useComposerPlacement } from '@/mastodon/features/compose/useComposerPlacement';
+import { useScrollSensor } from '@/mastodon/hooks/useScrollSensor';
+import { useIdentity } from '@/mastodon/identity_context';
 import {
-  StatusBookmarkActiveIcon,
-  StatusBookmarkIcon,
-  StatusLikeActiveIcon,
-  StatusLikeIcon,
-} from '@/mastodon/components/status/icons';
-import { useAccount } from '@/mastodon/hooks/useAccount';
-import AddIcon from '@/material-icons/400-24px/add.svg?react';
-import AlternateEmailActiveIcon from '@/material-icons/400-24px/alternate_email-fill.svg?react';
-import AlternateEmailIcon from '@/material-icons/400-24px/alternate_email.svg?react';
-import CollectionsActiveIcon from '@/material-icons/400-24px/category-fill.svg?react';
-import CollectionsIcon from '@/material-icons/400-24px/category.svg?react';
-import ChatBubbleActiveIcon from '@/material-icons/400-24px/chat_bubble-fill.svg?react';
-import ChatBubbleIcon from '@/material-icons/400-24px/chat_bubble.svg?react';
-import HomeActiveIcon from '@/material-icons/400-24px/home-fill.svg?react';
-import HomeIcon from '@/material-icons/400-24px/home.svg?react';
-import InfoIcon from '@/material-icons/400-24px/info.svg?react';
-import NotificationsActiveIcon from '@/material-icons/400-24px/notifications-fill.svg?react';
-import NotificationsIcon from '@/material-icons/400-24px/notifications.svg?react';
-import PersonAddActiveIcon from '@/material-icons/400-24px/person_add-fill.svg?react';
-import PersonAddIcon from '@/material-icons/400-24px/person_add.svg?react';
-import PublicIcon from '@/material-icons/400-24px/public.svg?react';
-import SettingsIcon from '@/material-icons/400-24px/settings.svg?react';
-import SwapHorizIcon from '@/material-icons/400-24px/swap_horiz.svg?react';
-import TrendingUpIcon from '@/material-icons/400-24px/trending_up.svg?react';
-import { fetchFollowRequests } from 'mastodon/actions/accounts';
-import { fetchUnreadCount } from 'mastodon/actions/dm';
-import { openNavigation, closeNavigation } from 'mastodon/actions/navigation';
-import { Account } from 'mastodon/components/account';
-import { Icon } from 'mastodon/components/icon';
-import { IconWithBadge } from 'mastodon/components/icon_with_badge';
-import { AccountSwitcher } from 'mastodon/features/ui/components/account_switcher';
-import { ColumnLink } from 'mastodon/features/ui/components/column_link';
-import { getNavigationSkipLinkId } from 'mastodon/features/ui/components/skip_links';
-import { useBreakpoint } from 'mastodon/features/ui/hooks/useBreakpoint';
-import { useIdentity } from 'mastodon/identity_context';
-import {
+  disabledAccountId,
   localLiveFeedAccess,
   remoteLiveFeedAccess,
   trendsEnabled,
-  me,
-} from 'mastodon/initial_state';
-import { transientSingleColumn } from 'mastodon/is_mobile';
-import { canViewFeed } from 'mastodon/permissions';
-import { selectUnreadNotificationGroupsCount } from 'mastodon/selectors/notifications';
-import { useAppSelector, useAppDispatch } from 'mastodon/store';
+} from '@/mastodon/initial_state';
+import { transientSingleColumn } from '@/mastodon/is_mobile';
+import {
+  canManageReports,
+  canViewAdminDashboard,
+  canViewFeed,
+} from '@/mastodon/permissions';
+import {
+  openNewComposer,
+  requestComposerFocus,
+} from '@/mastodon/reducers/slices/composer';
+import { getOrderedLists } from '@/mastodon/selectors/lists';
+import { selectUnreadNotificationGroupsCount } from '@/mastodon/selectors/notifications';
+import { useAppDispatch, useAppSelector } from '@/mastodon/store';
+import { isBirdUiEnabled } from '@/mastodon/utils/bird_ui';
+import { invokeVirtualIosKeyboard } from '@/mastodon/utils/invoke_virtual_ios_keyboard';
 
-import { AnnualReportNavItem } from '../annual_report/nav_item';
+import { useHasAnnouncements } from '../announcements/hooks';
+import { FooterLinks } from '../discovery_panel/footer_links';
+import { AccountSwitcher } from '../ui/components/account_switcher';
 
-import { DisabledAccountBanner } from './components/disabled_account_banner';
-import { FollowedTagsPanel } from './components/followed_tags_panel';
-import { ListPanel } from './components/list_panel';
-import { MoreLink } from './components/more_link';
-import { NavigationLogo } from './components/navigation_logo';
-import { SignInBanner } from './components/sign_in_banner';
-import { Trends } from './components/trends';
+import { NavigationAccountCardAndMenu } from './account_card_and_menu';
+import { NavigationFooterLinks } from './footer_links';
+import { NavigationHeader } from './header';
+import { ListSection } from './list_section';
+import { DisabledAccountBanner, LoggedOutInfo } from './logged_out_info';
+import { NavigationLink } from './navigation_link';
+import classes from './styles.module.scss';
 
 const messages = defineMessages({
-  home: { id: 'tabs_bar.home', defaultMessage: 'Home' },
-  notifications: {
-    id: 'tabs_bar.notifications',
-    defaultMessage: 'Notifications',
-  },
-  explore: { id: 'explore.title', defaultMessage: 'Trending' },
-  firehose: { id: 'column.firehose', defaultMessage: 'Live feeds' },
-  firehose_singular: {
-    id: 'column.firehose_singular',
-    defaultMessage: 'Live feed',
-  },
   main: {
     id: 'navigation_bar.main',
     defaultMessage: 'Main',
     description:
       'Label for the main navigation; should not contain the word "navigation".',
   },
-  direct: { id: 'navigation_bar.direct', defaultMessage: 'Private mentions' },
-  dm: { id: 'navigation_bar.dm', defaultMessage: 'DM' },
-  favourites: { id: 'navigation_bar.favourites', defaultMessage: 'Favorites' },
-  bookmarks: { id: 'navigation_bar.bookmarks', defaultMessage: 'Bookmarks' },
-  collections: {
-    id: 'navigation_bar.collections',
-    defaultMessage: 'Collections',
-  },
-  preferences: {
-    id: 'navigation_bar.preferences',
-    defaultMessage: 'Preferences',
-  },
-  followsAndFollowers: {
-    id: 'navigation_bar.follows_and_followers',
-    defaultMessage: 'Follows and followers',
-  },
-  about: { id: 'navigation_bar.about', defaultMessage: 'About' },
-  search: { id: 'navigation_bar.search', defaultMessage: 'Search' },
-  searchTrends: {
-    id: 'navigation_bar.search_trends',
-    defaultMessage: 'Search / Trending',
-  },
-  advancedInterface: {
-    id: 'navigation_bar.advanced_interface',
-    defaultMessage: 'Open in advanced web interface',
-  },
-  openedInClassicInterface: {
-    id: 'navigation_bar.opened_in_classic_interface',
-    defaultMessage:
-      'Posts, accounts, and other specific pages are opened by default in the classic web interface.',
-  },
-  followRequests: {
-    id: 'navigation_bar.follow_requests',
-    defaultMessage: 'Follow requests',
-  },
-  pendingMentions: {
-    id: 'navigation_bar.pending_mentions',
-    defaultMessage: 'Awaiting reply',
-  },
-  logout: { id: 'navigation_bar.logout', defaultMessage: 'Logout' },
-  compose: { id: 'tabs_bar.publish', defaultMessage: 'New Post' },
-  accountSwitch: {
-    id: 'navigation_panel.account_switch',
-    defaultMessage: 'Switch accounts',
-  },
 });
 
-const NotificationsLink = () => {
-  const count = useAppSelector(selectUnreadNotificationGroupsCount);
-  const intl = useIntl();
-
-  return (
-    <ColumnLink
-      key='notifications'
-      transparent
-      to='/notifications'
-      icon={
-        <IconWithBadge
-          id='bell'
-          icon={NotificationsIcon}
-          count={count}
-          className='column-link__icon'
-        />
-      }
-      activeIcon={
-        <IconWithBadge
-          id='bell'
-          icon={NotificationsActiveIcon}
-          count={count}
-          className='column-link__icon'
-        />
-      }
-      text={intl.formatMessage(messages.notifications)}
-    />
-  );
-};
-
-const DmLink = () => {
-  const count = useAppSelector((state) => state.dm.unreadCount);
+function useCustomFeeds() {
   const dispatch = useAppDispatch();
-  const intl = useIntl();
+  const { signedIn } = useIdentity();
+  const customFeeds = useAppSelector((state) => getOrderedLists(state));
 
   useEffect(() => {
-    dispatch(fetchUnreadCount());
-  }, [dispatch]);
+    if (signedIn) {
+      void dispatch(fetchLists());
+    }
+  }, [dispatch, signedIn]);
 
-  return (
-    <ColumnLink
-      transparent
-      to='/direct_message'
-      icon={
-        <IconWithBadge
-          id='at'
-          icon={AlternateEmailIcon}
-          count={count}
-          className='column-link__icon'
-        />
-      }
-      activeIcon={
-        <IconWithBadge
-          id='at'
-          icon={AlternateEmailActiveIcon}
-          count={count}
-          className='column-link__icon'
-        />
-      }
-      text={intl.formatMessage(messages.dm)}
-    />
-  );
-};
+  return {
+    customFeeds,
+  };
+}
 
-const FollowRequestsLink: React.FC = () => {
-  const intl = useIntl();
-  const count = useAppSelector(
+function useFollowedHashtags() {
+  const dispatch = useAppDispatch();
+  const { signedIn } = useIdentity();
+  const { tags, stale } = useAppSelector((state) => state.followedTags);
+
+  useEffect(() => {
+    if (stale && signedIn) {
+      void dispatch(fetchFollowedHashtags());
+    }
+  }, [dispatch, stale, signedIn]);
+
+  return { followedHashtags: tags };
+}
+
+export function useFollowRequestsCount({
+  fetch = true,
+}: { fetch?: boolean } = {}) {
+  const followRequestsCount = useAppSelector(
     (state) =>
       (
         state.user_lists.getIn(['follow_requests', 'items']) as
@@ -210,421 +122,474 @@ const FollowRequestsLink: React.FC = () => {
   const dispatch = useAppDispatch();
 
   useEffect(() => {
-    dispatch(fetchFollowRequests());
-  }, [dispatch]);
+    if (fetch) {
+      dispatch(fetchFollowRequests());
+    }
+  }, [dispatch, fetch]);
 
-  if (count === 0) {
-    return null;
-  }
+  return followRequestsCount;
+}
+
+export function useNotificationsCount() {
+  const unreadNotificationsCount = useAppSelector(
+    selectUnreadNotificationGroupsCount,
+  );
+  const { signedIn } = useIdentity();
+  const followRequestsCount = useFollowRequestsCount({ fetch: signedIn });
+
+  const { unreadAnnouncementCount } = useHasAnnouncements({ fetch: signedIn });
 
   return (
-    <ColumnLink
-      transparent
-      to='/follow_requests'
-      icon={
-        <IconWithBadge
-          id='user-plus'
-          icon={PersonAddIcon}
-          count={count}
-          className='column-link__icon'
-        />
-      }
-      activeIcon={
-        <IconWithBadge
-          id='user-plus'
-          icon={PersonAddActiveIcon}
-          count={count}
-          className='column-link__icon'
-        />
-      }
-      text={intl.formatMessage(messages.followRequests)}
+    unreadNotificationsCount + followRequestsCount + unreadAnnouncementCount
+  );
+}
+
+export function useDmUnreadCount() {
+  const dispatch = useAppDispatch();
+  const { signedIn } = useIdentity();
+  const count = useAppSelector((state) => state.dm.unreadCount);
+
+  useEffect(() => {
+    if (signedIn) {
+      dispatch(fetchUnreadCount());
+    }
+  }, [dispatch, signedIn]);
+
+  return count;
+}
+
+const renderAccountSwitchLink = ({
+  openManage,
+}: {
+  openManage: () => void;
+}) => (
+  <NavigationLink
+    as='button'
+    iconComponent={ArrowsLeftRightIcon}
+    onClick={openManage}
+    aria-haspopup='dialog'
+  >
+    <FormattedMessage
+      id='navigation_panel.account_switch'
+      defaultMessage='Switch accounts'
     />
-  );
-};
+  </NavigationLink>
+);
 
-const ProfileCard: React.FC = () => {
-  if (!me) {
-    return null;
-  }
-
-  return (
-    <div className='navigation-bar'>
-      <Account id={me} minimal size={36} />
-    </div>
-  );
-};
-
-const isFirehoseActive = (
+const isFediverseFeedsLinkActive = (
   match: unknown,
   { pathname }: { pathname: string },
 ) => {
   return !!match || pathname.startsWith('/public');
 };
 
-const MENU_WIDTH = 284;
+const MAX_HASHTAG_COUNT = 5;
 
-export const NavigationPanel: React.FC<{ multiColumn?: boolean }> = ({
-  multiColumn = false,
-}) => {
+export const RedesignNavigationPanel: React.FC<{
+  siteName?: string;
+  /**
+   * In 'slide-out' mode (used on smaller viewport sizes), some
+   * menu items are hidden and the design is tweaked slightly
+   */
+  mode?: 'static' | 'slide-out';
+  multiColumn?: boolean;
+}> = ({ siteName, mode = 'static', multiColumn }) => {
   const intl = useIntl();
-  const { signedIn, permissions, disabledAccountId } = useIdentity();
-  const location = useLocation();
-  const showSearch = useBreakpoint('full') && !multiColumn;
-  const account = useAccount(me);
+  const dispatch = useAppDispatch();
+  const { signedIn, permissions } = useIdentity();
+  const notificationsCount = useNotificationsCount();
+  const dmUnreadCount = useDmUnreadCount();
+  const birdUi = isBirdUiEnabled();
+  const isHome = !!useRouteMatch({
+    path: ['/home', '/timelines/home'],
+    exact: true,
+  });
+  const composeType = useAppSelector(selectComposeType);
+  const isEditing = useAppSelector((state) => !!state.compose.get('id'));
+  const composerPlacement = useComposerPlacement();
 
-  let banner: React.ReactNode;
+  const isManager = canManageReports(permissions);
+  const isAdmin = canViewAdminDashboard(permissions);
 
-  if (transientSingleColumn) {
-    banner = (
-      <div className='switch-to-advanced'>
-        {intl.formatMessage(messages.openedInClassicInterface)}{' '}
-        <a
-          href={`/deck${location.pathname}`}
-          className='switch-to-advanced__toggle'
-        >
-          {intl.formatMessage(messages.advancedInterface)}
-        </a>
-      </div>
-    );
-  }
+  const openComposer = useCallback(() => {
+    dispatch(closeNavigation());
+    if (
+      (composerPlacement === 'sidebar' ||
+        (composerPlacement === 'top' && isHome)) &&
+      composeType === 'post' &&
+      !isEditing
+    ) {
+      dispatch(requestComposerFocus());
+    } else {
+      dispatch(openNewComposer({ type: 'post' }));
+    }
+  }, [dispatch, composerPlacement, isHome, composeType, isEditing]);
+
+  const { customFeeds } = useCustomFeeds();
+  const { followedHashtags } = useFollowedHashtags();
+
+  const newPostButton = (
+    <li>
+      <Button
+        leadingIcon={PenNibIcon}
+        onClick={openComposer}
+        variant='solid'
+        color='accent'
+        size='md'
+        className={classes.newPostButton}
+      >
+        <FormattedMessage id='tabs_bar.publish' defaultMessage='New Post' />
+      </Button>
+    </li>
+  );
+
+  const { sensor: topSensor, isInViewport: isScrolledToTop } = useScrollSensor({
+    placement: 'top',
+    tolerance: 2,
+  });
+  const { sensor: bottomSensor, isInViewport: isScrolledToBottom } =
+    useScrollSensor({
+      placement: 'bottom',
+    });
 
   return (
     <nav
-      className='navigation-panel'
+      className={classes.root}
+      data-mode={mode}
+      data-scrollable={!isScrolledToTop || !isScrolledToBottom}
       aria-label={intl.formatMessage(messages.main)}
     >
-      <div className='navigation-panel__logo'>
-        <Link
-          to='/'
-          className='column-link column-link--logo'
-          id={getNavigationSkipLinkId()}
-        >
-          <NavigationLogo />
-        </Link>
-      </div>
-
-      {showSearch && <Search singleColumn />}
-
-      {!multiColumn && <ProfileCard />}
-
-      {banner && <div className='navigation-panel__banner'>{banner}</div>}
-
-      <ul className='navigation-panel__menu'>
-        {signedIn && (
-          <>
-            {!multiColumn && (
-              <li>
-                <ColumnLink
-                  to={{ pathname: '/publish', state: { focusTarget: false } }}
-                  icon='plus'
-                  iconComponent={AddIcon}
-                  activeIconComponent={AddIcon}
-                  text={intl.formatMessage(messages.compose)}
-                  className='button navigation-panel__compose-button'
-                />
-              </li>
+      {topSensor}
+      <NavigationHeader siteName={siteName} isStuck={!isScrolledToTop} />
+      {signedIn && (
+        <>
+          {transientSingleColumn && <TransientSingleColumnCallout />}
+          <ul className={classes.list}>
+            <NavigationLink to='/home' iconComponent={HouseIcon}>
+              <FormattedMessage id='tabs_bar.home' defaultMessage='Home' />
+            </NavigationLink>
+            <ExploreLink birdUi={birdUi} />
+            {birdUi ? (
+              <NavigationActions
+                birdUi
+                notificationsCount={notificationsCount}
+                dmUnreadCount={dmUnreadCount}
+              />
+            ) : (
+              <PublicFeedsLink />
             )}
-            <li>
-              <ColumnLink
-                transparent
-                to='/home'
-                icon='home'
-                iconComponent={HomeIcon}
-                activeIconComponent={HomeActiveIcon}
-                text={intl.formatMessage(messages.home)}
-              />
-            </li>
-          </>
-        )}
+            {!birdUi && <PendingMentionsLink />}
+            <AccountSwitcher renderTrigger={renderAccountSwitchLink} />
+            {/* The sidebar composer is always visible, so the button would do nothing. */}
+            {birdUi && composerPlacement !== 'sidebar' && newPostButton}
 
-        {trendsEnabled && (
-          <li>
-            <ColumnLink
-              transparent
-              to='/explore'
-              icon='explore'
-              iconComponent={TrendingUpIcon}
-              text={intl.formatMessage(messages.explore)}
-            />
-          </li>
-        )}
+            {isAdmin && (
+              <NavigationLink
+                as='a'
+                href='/admin/dashboard'
+                iconComponent={GavelIcon}
+              >
+                <FormattedMessage
+                  id='navigation_bar.administration'
+                  defaultMessage='Administration'
+                />
+              </NavigationLink>
+            )}
 
-        {(canViewFeed(signedIn, permissions, localLiveFeedAccess) ||
-          canViewFeed(signedIn, permissions, remoteLiveFeedAccess)) && (
-          <li>
-            <ColumnLink
-              transparent
-              to={
-                canViewFeed(signedIn, permissions, localLiveFeedAccess)
-                  ? '/public/local'
-                  : '/public/remote'
+            {isManager && (
+              <NavigationLink
+                as='a'
+                href='/admin/reports'
+                iconComponent={ShieldStarIcon}
+              >
+                <FormattedMessage
+                  id='navigation_bar.moderation'
+                  defaultMessage='Moderation'
+                />
+              </NavigationLink>
+            )}
+
+            <ListSection
+              id='custom-feeds'
+              title={
+                <FormattedMessage
+                  id='tabs_bar.custom_feeds'
+                  defaultMessage='Custom Feeds'
+                />
               }
-              icon='globe'
-              iconComponent={PublicIcon}
-              isActive={isFirehoseActive}
-              text={intl.formatMessage(
-                canViewFeed(signedIn, permissions, localLiveFeedAccess) &&
-                  canViewFeed(signedIn, permissions, remoteLiveFeedAccess)
-                  ? messages.firehose
-                  : messages.firehose_singular,
-              )}
-            />
-          </li>
-        )}
+            >
+              <NavigationLink
+                key='new'
+                to='/lists/new'
+                iconComponent={PlusIcon}
+              >
+                <FormattedMessage
+                  id='tabs_bar.create_custom_feed'
+                  defaultMessage='Create Feed'
+                />
+              </NavigationLink>
+              {customFeeds.map((feed) => (
+                <NavigationLink
+                  key={feed.id}
+                  to={`/lists/${feed.id}`}
+                  iconComponent={RssSimpleIcon}
+                >
+                  {feed.title}
+                </NavigationLink>
+              ))}
+            </ListSection>
 
-        {signedIn && (
-          <>
-            <li>
-              <NotificationsLink />
-            </li>
-
-            <li>
-              <ColumnLink
-                transparent
-                to='/pending-mentions'
-                icon='chat_bubble'
-                iconComponent={ChatBubbleIcon}
-                activeIconComponent={ChatBubbleActiveIcon}
-                text={intl.formatMessage(messages.pendingMentions)}
-              />
-            </li>
-
-            <li>
-              <FollowRequestsLink />
-            </li>
-
-            <li>
-              <AnnualReportNavItem />
-            </li>
-
-            <li role='separator' />
-
-            <ListPanel />
-
-            <FollowedTagsPanel />
-
-            <li>
-              <AccountSwitcher
-                // eslint-disable-next-line react/jsx-no-bind
-                renderTrigger={({ openManage }) => (
-                  <button
-                    className='column-link column-link--transparent'
-                    type='button'
-                    onClick={openManage}
-                  >
-                    <Icon
-                      id='swap-horiz'
-                      icon={SwapHorizIcon}
-                      className='column-link__icon'
+            {followedHashtags.length > 0 && (
+              <ListSection
+                id='followed-hashtags'
+                title={
+                  <FormattedMessage
+                    id='tabs_bar.followed_hashtags'
+                    defaultMessage='Followed Hashtags'
+                  />
+                }
+              >
+                {followedHashtags.slice(0, MAX_HASHTAG_COUNT).map((tag) => (
+                  <NavigationLink key={tag.name} to={`/tags/${tag.name}`}>
+                    #{tag.name}
+                  </NavigationLink>
+                ))}
+                {followedHashtags.length > MAX_HASHTAG_COUNT && (
+                  <NavigationLink key='view-all' to='/followed_tags'>
+                    <FormattedMessage
+                      id='tabs_bar.followed_tags_view_all'
+                      defaultMessage='View all'
                     />
-                    <span>{intl.formatMessage(messages.accountSwitch)}</span>
-                  </button>
+                  </NavigationLink>
                 )}
+              </ListSection>
+            )}
+          </ul>
+
+          <footer className={classes.footer} data-stuck={!isScrolledToBottom}>
+            {!birdUi && (
+              <div className={classes.newPostButton}>
+                <Button
+                  leadingIcon={PenNibIcon}
+                  onClick={openComposer}
+                  variant='solid'
+                  color='accent'
+                  size='md'
+                >
+                  <FormattedMessage
+                    id='tabs_bar.publish'
+                    defaultMessage='New Post'
+                  />
+                </Button>
+              </div>
+            )}
+
+            {mode !== 'slide-out' && (
+              <>
+                {!birdUi && (
+                  <ul className={classes.footerNav}>
+                    <NavigationActions
+                      stacked
+                      notificationsCount={notificationsCount}
+                      dmUnreadCount={dmUnreadCount}
+                    />
+                  </ul>
+                )}
+                <NavigationAccountCardAndMenu />
+              </>
+            )}
+            {birdUi ? (
+              <NavigationFooterLinks multiColumn={multiColumn} />
+            ) : (
+              <FooterLinks context='navigation' multiColumn={multiColumn} />
+            )}
+          </footer>
+        </>
+      )}
+      {!signedIn && (
+        <>
+          <ul className={classes.list}>
+            <NavigationLink to='/about' iconComponent={InfoIcon}>
+              <FormattedMessage
+                id='footer.about_this_server'
+                defaultMessage='About'
               />
-            </li>
-
-            <li>
-              <ColumnLink
-                transparent
-                to='/favourites'
-                icon='star'
-                iconComponent={StatusLikeIcon}
-                activeIconComponent={StatusLikeActiveIcon}
-                text={intl.formatMessage(messages.favourites)}
-              />
-            </li>
-            <li>
-              <ColumnLink
-                transparent
-                to='/bookmarks'
-                icon='bookmarks'
-                iconComponent={StatusBookmarkIcon}
-                activeIconComponent={StatusBookmarkActiveIcon}
-                text={intl.formatMessage(messages.bookmarks)}
-              />
-            </li>
-            <li>
-              <ColumnLink
-                transparent
-                to={`/@${account?.acct}/collections`}
-                icon='collections'
-                iconComponent={CollectionsIcon}
-                activeIconComponent={CollectionsActiveIcon}
-                text={intl.formatMessage(messages.collections)}
-              />
-            </li>
-            <li>
-              <DmLink />
-            </li>
-
-            <li role='separator' />
-
-            <li>
-              <ColumnLink
-                transparent
-                href='/settings/preferences'
-                icon='cog'
-                iconComponent={SettingsIcon}
-                text={intl.formatMessage(messages.preferences)}
-              />
-            </li>
-
-            <li>
-              <MoreLink />
-            </li>
-          </>
-        )}
-
-        <li className='navigation-panel__legal'>
-          <ColumnLink
-            transparent
-            to='/about'
-            icon='ellipsis-h'
-            iconComponent={InfoIcon}
-            text={intl.formatMessage(messages.about)}
-          />
-        </li>
-
-        {!signedIn && (
-          <li className='navigation-panel__sign-in-banner'>
-            <hr />
-
-            {disabledAccountId ? <DisabledAccountBanner /> : <SignInBanner />}
-          </li>
-        )}
-      </ul>
-
-      <div className='flex-spacer' />
-
-      <Trends />
+            </NavigationLink>
+            <ExploreLink birdUi={birdUi} />
+            {!birdUi && <PublicFeedsLink />}
+          </ul>
+          <footer className={classes.footer} data-stuck={!isScrolledToBottom}>
+            {disabledAccountId ? <DisabledAccountBanner /> : <LoggedOutInfo />}
+            {birdUi ? (
+              <NavigationFooterLinks multiColumn={multiColumn} />
+            ) : (
+              <FooterLinks context='navigation' multiColumn={multiColumn} />
+            )}
+          </footer>
+        </>
+      )}
+      {bottomSensor}
     </nav>
   );
 };
 
-export const CollapsibleNavigationPanel: React.FC = () => {
-  const open = useAppSelector((state) => state.navigation.open);
-  const dispatch = useAppDispatch();
-  const openable = useBreakpoint('openable');
-  const location = useLocation();
-  const overlayRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    dispatch(closeNavigation());
-  }, [dispatch, location]);
-
-  useEffect(() => {
-    const handleDocumentClick = (e: MouseEvent) => {
-      if (overlayRef.current && e.target === overlayRef.current) {
-        dispatch(closeNavigation());
-      }
-    };
-
-    const handleDocumentKeyUp = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        dispatch(closeNavigation());
-      }
-    };
-
-    document.addEventListener('click', handleDocumentClick);
-    document.addEventListener('keyup', handleDocumentKeyUp);
-
-    return () => {
-      document.removeEventListener('click', handleDocumentClick);
-      document.removeEventListener('keyup', handleDocumentKeyUp);
-    };
-  }, [dispatch]);
-
-  const isLtrDir = getComputedStyle(document.body).direction !== 'rtl';
-
-  const OPEN_MENU_OFFSET = isLtrDir ? MENU_WIDTH : -MENU_WIDTH;
-
-  const [{ x }, spring] = useSpring(
-    () => ({
-      x: open ? 0 : OPEN_MENU_OFFSET,
-      onRest: {
-        x({ value }: { value: number }) {
-          if (value === 0) {
-            dispatch(openNavigation());
-          } else if (value === OPEN_MENU_OFFSET) {
-            dispatch(closeNavigation());
-          }
-        },
-      },
-    }),
-    [open],
-  );
-
-  const bind = useDrag(
-    ({
-      last,
-      offset: [xOffset],
-      velocity: [xVelocity],
-      direction: [xDirection],
-      cancel,
-    }) => {
-      const logicalXDirection = isLtrDir ? xDirection : -xDirection;
-      const logicalXOffset = isLtrDir ? xOffset : -xOffset;
-      const hasReachedDragThreshold = logicalXOffset < -70;
-
-      if (hasReachedDragThreshold) {
-        cancel();
-      }
-
-      if (last) {
-        const isAboveOpenThreshold = logicalXOffset > MENU_WIDTH / 2;
-        const isQuickFlick = xVelocity > 0.5 && logicalXDirection > 0;
-
-        if (isAboveOpenThreshold || isQuickFlick) {
-          void spring.start({ x: OPEN_MENU_OFFSET });
-        } else {
-          void spring.start({ x: 0 });
-        }
-      } else {
-        void spring.start({ x: xOffset, immediate: true });
-      }
-    },
-    {
-      from: () => [x.get(), 0],
-      axis: 'x',
-      filterTaps: true,
-      bounds: isLtrDir ? { left: 0 } : { right: 0 },
-      rubberband: true,
-      enabled: openable,
-    },
-  );
-
-  const previouslyFocusedElementRef = useRef<HTMLElement>(null);
-
-  useEffect(() => {
-    if (open) {
-      const firstLink = document.querySelector<HTMLAnchorElement>(
-        '.navigation-panel__menu .column-link',
-      );
-      previouslyFocusedElementRef.current =
-        document.activeElement as HTMLElement;
-      firstLink?.focus();
-    } else {
-      previouslyFocusedElementRef.current?.focus();
-    }
-  }, [open]);
-
-  const showOverlay = openable && open;
-
-  return (
-    <div
-      className={classNames(
-        'columns-area__panels__pane columns-area__panels__pane--start columns-area__panels__pane--navigational',
-        { 'columns-area__panels__pane--overlay': showOverlay },
-      )}
-      ref={overlayRef}
+const NavigationActions: React.FC<{
+  stacked?: boolean;
+  birdUi?: boolean;
+  notificationsCount: number;
+  dmUnreadCount: number;
+}> = ({ stacked, birdUi, notificationsCount, dmUnreadCount }) => (
+  <>
+    <NavigationLink
+      stacked={stacked}
+      to='/notifications'
+      iconComponent={BellIcon}
+      badgeCount={notificationsCount}
     >
-      <animated.div
-        className='columns-area__panels__pane__inner'
-        {...bind()}
-        style={openable ? { x } : undefined}
-      >
-        <NavigationPanel />
-      </animated.div>
-    </div>
+      <FormattedMessage
+        id='tabs_bar.notifications'
+        defaultMessage='Notifications'
+      />
+    </NavigationLink>
+    {birdUi && <PendingMentionsLink stacked={stacked} />}
+    <NavigationLink
+      stacked={stacked}
+      to='/direct_message'
+      iconComponent={ChatCircleDotsIcon}
+      badgeCount={dmUnreadCount}
+    >
+      {birdUi ? (
+        <FormattedMessage id='bird_ui.navigation.chat' defaultMessage='Chat' />
+      ) : (
+        <FormattedMessage id='navigation_bar.dm' defaultMessage='DM' />
+      )}
+    </NavigationLink>
+    <NavigationLink
+      stacked={stacked}
+      to='/bookmarks'
+      iconComponent={BookmarkSimpleIcon}
+    >
+      {birdUi ? (
+        <FormattedMessage
+          id='navigation_bar.bookmarks'
+          defaultMessage='Bookmarks'
+        />
+      ) : (
+        <FormattedMessage id='tabs_bar.saved' defaultMessage='Saved' />
+      )}
+    </NavigationLink>
+  </>
+);
+
+const PendingMentionsLink: React.FC<{ stacked?: boolean }> = ({ stacked }) => (
+  <NavigationLink
+    stacked={stacked}
+    to='/pending-mentions'
+    iconComponent={ChatCircleIcon}
+  >
+    <FormattedMessage
+      id='navigation_bar.pending_mentions'
+      defaultMessage='Awaiting reply'
+    />
+  </NavigationLink>
+);
+
+const ExploreLink: React.FC<{ birdUi?: boolean }> = ({ birdUi }) => {
+  return (
+    <NavigationLink
+      to={{
+        pathname: trendsEnabled ? '/explore' : '/search',
+        state: { focusTarget: FOCUS_TARGET.SEARCH },
+      }}
+      iconComponent={MagnifyingGlassIcon}
+      onClick={handleSearchLinkClick}
+    >
+      {birdUi ? (
+        <FormattedMessage
+          id='bird_ui.navigation.explore'
+          defaultMessage='Explore'
+        />
+      ) : trendsEnabled ? (
+        <FormattedMessage id='tabs_bar.explore' defaultMessage='Explore' />
+      ) : (
+        <FormattedMessage id='navigation_bar.search' defaultMessage='Search' />
+      )}
+    </NavigationLink>
   );
 };
+
+export function handleSearchLinkClick() {
+  const mainSearchInput = document.querySelector<HTMLInputElement>(
+    '[data-column-root] input[data-main-search]',
+  );
+
+  // Focus the main search input if we're already on the search page
+  if (mainSearchInput) {
+    mainSearchInput.focus();
+    return;
+  }
+
+  // Otherwise, the search element is not on screen yet and
+  // the page needs to be rendered first. In this case, we use
+  // `invokeVirtualIosKeyboard` to work around an iOS quirk that
+  // prevents the virtual keyboard from opening when an element wasn't
+  // focused synchronously.
+  invokeVirtualIosKeyboard();
+}
+
+const PublicFeedsLink: React.FC = () => {
+  const { signedIn, permissions } = useIdentity();
+
+  const canViewLocalFeed = canViewFeed(
+    signedIn,
+    permissions,
+    localLiveFeedAccess,
+  );
+  const canViewRemoteFeed = canViewFeed(
+    signedIn,
+    permissions,
+    remoteLiveFeedAccess,
+  );
+
+  if (!canViewLocalFeed && !canViewRemoteFeed) {
+    return null;
+  }
+
+  const canViewOnlyOneFeed = canViewLocalFeed !== canViewRemoteFeed;
+
+  return (
+    <NavigationLink
+      to={canViewLocalFeed ? '/public/local' : '/public/remote'}
+      iconComponent={FediIcon}
+      isActive={isFediverseFeedsLinkActive}
+    >
+      {canViewOnlyOneFeed ? (
+        <FormattedMessage
+          id='tabs_bar.public_feed'
+          defaultMessage='Public Feed'
+        />
+      ) : (
+        <FormattedMessage
+          id='tabs_bar.public_feeds'
+          defaultMessage='Public Feeds'
+        />
+      )}
+    </NavigationLink>
+  );
+};
+
+const TransientSingleColumnCallout: React.FC = () => (
+  <Callout className={classes.callout}>
+    <FormattedMessage
+      id='navigation_bar.opened_in_single_column_layout'
+      defaultMessage='Posts, profiles, and other pages are opened in the single-column layout by default.'
+    />
+    <br />
+    <a href={`/deck${location.pathname}`}>
+      <FormattedMessage
+        id='navigation_bar.advanced_interface'
+        defaultMessage='Open in advanced web interface'
+      />
+    </a>
+  </Callout>
+);

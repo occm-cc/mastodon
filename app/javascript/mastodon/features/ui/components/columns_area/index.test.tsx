@@ -26,11 +26,11 @@ vi.mock('mastodon/features/custom_homepage/components/footer', () => ({
   Footer: () => null,
 }));
 
-vi.mock('@/mastodon/features/navigation_panel/redesign', () => ({
+vi.mock('@/mastodon/features/navigation_panel', () => ({
   RedesignNavigationPanel: () => null,
 }));
 
-vi.mock('@/mastodon/features/navigation_panel/redesign/mobile_nav', () => ({
+vi.mock('@/mastodon/features/navigation_panel/mobile_nav', () => ({
   RedesignMobileNavigation: () => null,
 }));
 
@@ -38,7 +38,7 @@ vi.mock('@/mastodon/features/navigation_panel/components/trends', () => ({
   Trends: () => <div>Bird UI trends</div>,
 }));
 
-vi.mock('@/mastodon/features/navigation_panel/redesign/footer_links', () => ({
+vi.mock('@/mastodon/features/navigation_panel/footer_links', () => ({
   NavigationFooterLinks: () => null,
 }));
 vi.mock('@/mastodon/features/discovery_panel/footer_links', () => ({
