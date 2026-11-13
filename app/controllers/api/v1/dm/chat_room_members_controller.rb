@@ -1,7 +1,9 @@
 # frozen_string_literal: true
 
 class Api::V1::Dm::ChatRoomMembersController < Api::BaseController
+  include Redisable
   include DmChatRoomFinder
+
   before_action -> { doorkeeper_authorize! :write, :'write:dm' }
   before_action :require_user!
   before_action :set_chat_room
@@ -32,8 +34,9 @@ class Api::V1::Dm::ChatRoomMembersController < Api::BaseController
   def destroy
     raise Mastodon::NotPermittedError unless @chat_room.owner_account_id == current_account.id
 
-    membership = @chat_room.dm_chat_room_accounts.active.find(params[:id])
+    membership = @chat_room.dm_chat_room_accounts.active.find_by!(account_id: params[:id])
     membership.update!(left_at: Time.current)
+    redis.del("dm:unread:#{membership.account_id}")
 
     render_empty
   end
@@ -54,8 +57,8 @@ class Api::V1::Dm::ChatRoomMembersController < Api::BaseController
   end
 
   def validate_no_blocks!(account)
-    blocked = Block.where(account: current_account, target_account: account).exists? ||
-              Block.where(account: account, target_account: current_account).exists?
+    blocked = Block.exists?(account: current_account, target_account: account) ||
+      Block.exists?(account: account, target_account: current_account)
 
     raise Mastodon::NotPermittedError if blocked
   end

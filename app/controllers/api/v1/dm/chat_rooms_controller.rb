@@ -42,6 +42,7 @@ class Api::V1::Dm::ChatRoomsController < Api::BaseController
   def destroy
     membership = @chat_room.dm_chat_room_accounts.active.find_by!(account: current_account)
     membership.update!(left_at: Time.current)
+    redis.del("dm:unread:#{current_account.id}")
     render_empty
   end
 
@@ -73,10 +74,10 @@ class Api::V1::Dm::ChatRoomsController < Api::BaseController
 
   def paginated_chat_rooms
     DmChatRoom.active_for_account(current_account)
-              .includes(dm_chat_room_accounts: :account)
-              .includes(:owner_account)
-              .ordered
-              .to_a_paginated_by_id(limit_param(LIMIT), params_slice(:max_id, :since_id, :min_id))
+      .includes(dm_chat_room_accounts: :account)
+      .includes(:owner_account)
+      .ordered
+      .to_a_paginated_by_id(limit_param(LIMIT), params_slice(:max_id, :since_id, :min_id))
   end
 
   def chat_room_params
@@ -105,7 +106,7 @@ class Api::V1::Dm::ChatRoomsController < Api::BaseController
 
   def trigger_migration_if_needed
     if redis.exists?("dm:migrated:#{current_account.id}")
-      return
+      nil
     elsif redis.exists?("dm:migrating:#{current_account.id}")
       response.headers['X-DM-Migration-Status'] = 'in_progress'
     else
