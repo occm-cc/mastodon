@@ -66,6 +66,8 @@ a.nameLink {
 }
 
 .date {
+  @include mixins.click-area(var(--space-2));
+
   flex-shrink: 0;
 
   &:any-link {

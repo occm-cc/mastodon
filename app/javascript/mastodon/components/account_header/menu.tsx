@@ -3,7 +3,14 @@ import type { FC } from 'react';
 
 import { defineMessages, FormattedMessage, useIntl } from 'react-intl';
 
-import { DotsThreeIcon } from '@phosphor-icons/react';
+import {
+  DotsThreeIcon,
+  LinkIcon,
+  ProhibitIcon,
+  ShareNetworkIcon,
+  UserMinusIcon,
+  WarningOctagonIcon,
+} from '@phosphor-icons/react';
 
 import {
   followAccount,
@@ -45,11 +52,6 @@ import {
 } from '@/mastodon/permissions';
 import type { AppDispatch } from '@/mastodon/store';
 import { useAppDispatch, useAppSelector } from '@/mastodon/store';
-import BlockIcon from '@/material-icons/400-24px/block.svg?react';
-import LinkIcon from '@/material-icons/400-24px/link_2.svg?react';
-import PersonRemoveIcon from '@/material-icons/400-24px/person_remove.svg?react';
-import ReportIcon from '@/material-icons/400-24px/report.svg?react';
-import ShareIcon from '@/material-icons/400-24px/share.svg?react';
 
 export const AccountMenu: FC<{ accountId: string }> = ({ accountId }) => {
   const intl = useIntl();
@@ -261,7 +263,7 @@ function getMenuItems({
             url: account.url,
           });
         },
-        icon: ShareIcon,
+        icon: ShareNetworkIcon,
       });
     }
     items.push({
@@ -465,7 +467,7 @@ function getMenuItems({
         );
       },
       dangerous: true,
-      icon: PersonRemoveIcon,
+      icon: UserMinusIcon,
     });
   }
 
@@ -481,7 +483,7 @@ function getMenuItems({
       }
     },
     dangerous: true,
-    icon: BlockIcon,
+    icon: ProhibitIcon,
   });
 
   if (!account.suspended) {
@@ -491,7 +493,7 @@ function getMenuItems({
         dispatch(initReport(account));
       },
       dangerous: true,
-      icon: ReportIcon,
+      icon: WarningOctagonIcon,
     });
   }
 
@@ -513,7 +515,7 @@ function getMenuItems({
         }
       },
       dangerous: true,
-      icon: BlockIcon,
+      icon: ProhibitIcon,
       iconId: 'domain-block',
     });
   }

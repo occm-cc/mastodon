@@ -4,7 +4,7 @@ import { FormattedMessage, useIntl } from 'react-intl';
 
 import classNames from 'classnames';
 
-import { DotsThreeIcon, ShareFatIcon } from '@phosphor-icons/react';
+import { DotsThreeIcon, ShareNetworkIcon } from '@phosphor-icons/react';
 
 import { statusInteraction } from '@/mastodon/actions/interactions';
 import { fetchStatus } from '@/mastodon/actions/statuses';
@@ -153,7 +153,7 @@ export const StatusActionBar: React.FC<StatusActionBarProps> = ({
           data-status-action='share'
           size='sm'
           variant='ghost'
-          icon={ShareFatIcon}
+          icon={ShareNetworkIcon}
           onClick={handleShareClick}
         >
           <FormattedMessage id='status.share' defaultMessage='Share' />
