@@ -54,7 +54,7 @@ export const PrivateQuoteNotify = forwardRef<
       (state) => !!state.compose.get('scheduled_at'),
     );
     const handleConfirm = useCallback(() => {
-      dispatch(submitComposer());
+      dispatch(submitComposer({ force: true }));
       if (dismiss) {
         dispatch(
           changeSetting(['dismissed_banners', PRIVATE_QUOTE_MODAL_ID], true),

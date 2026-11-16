@@ -22,9 +22,6 @@ vi.mock('@/mastodon/features/navigation_panel/components/trends', () => ({
   Trends: () => null,
 }));
 vi.mock('@/mastodon/features/navigation_panel/footer_links', () => ({
-  NavigationFooterLinks: () => null,
-}));
-vi.mock('@/mastodon/features/discovery_panel/footer_links', () => ({
   FooterLinks: () => null,
 }));
 vi.mock('@/mastodon/components/avatar', () => ({ Avatar: () => null }));

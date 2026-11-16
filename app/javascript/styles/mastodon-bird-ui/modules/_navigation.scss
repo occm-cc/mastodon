@@ -12,15 +12,19 @@ html:root {
   ._feat_navigation_panel_header__root {
     padding: 14px 12px;
     margin-bottom: 0;
+
+    ._feat_navigation_panel_header__lockupLink {
+      margin-bottom: 0;
+    }
   }
 
-  ._feat_navigation_panel_header__serverName {
+  ._feat_navigation_panel_header__lockupName {
     font-family: var(--font-body);
     font-size: var(--font-size-heading);
     font-weight: 800;
   }
 
-  ._feat_navigation_panel_header__poweredBy {
+  ._feat_navigation_panel_header__lockupPoweredBy {
     font-size: 11px;
   }
 
@@ -38,7 +42,7 @@ html:root {
   }
 
   ._feat_navigation_panel_navigation_link__link:not(
-    ._feat_navigation_panel_navigation_link__linkMobile
+    ._feat_navigation_panel_navigation_link__linkMini
   ) {
     --icon-size: 26px;
     --border-radius: 9999px;
@@ -76,25 +80,6 @@ html:root {
     }
   }
 
-  ._feat_navigation_panel__footerNav {
-    display: flex;
-    flex-direction: column;
-    gap: 0;
-    margin-bottom: 16px;
-  }
-
-  ._feat_navigation_panel_navigation_link__linkStacked {
-    flex-direction: row;
-
-    ._feat_navigation_panel_navigation_link__label {
-      text-align: start;
-    }
-
-    ._feat_navigation_panel_navigation_link__badge {
-      position: static;
-    }
-  }
-
   ._feat_navigation_panel_navigation_link__badge {
     min-width: 18px;
     border-radius: 9999px;
@@ -123,7 +108,7 @@ html:root {
     padding-block: 8px;
   }
 
-  ._feat_navigation_panel_account_card_and_menu__root {
+  ._feat_navigation_panel_account_menu_items__root {
     border: 0;
     border-radius: 9999px;
     padding: 4px;
@@ -157,7 +142,7 @@ html:root {
     min-height: var(--mobile-bottom-nav-height);
   }
 
-  ._feat_navigation_panel_navigation_link__linkMobile {
+  ._feat_navigation_panel_navigation_link__linkMini {
     min-height: 52px;
     padding-block: 12px;
 
@@ -167,7 +152,10 @@ html:root {
   }
 
   @media (width >= 1200px) {
-    ._feat_navigation_panel__footer
+    ._comp_columns_area__root:has(> ._comp_columns_area__birdUiSidebar):not(
+        :has(.dm-page)
+      )
+      ._feat_navigation_panel__footer
       > ._feat_navigation_panel_footer_links__root {
       display: none;
     }

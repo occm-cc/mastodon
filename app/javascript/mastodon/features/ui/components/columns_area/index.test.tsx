@@ -27,11 +27,11 @@ vi.mock('mastodon/features/custom_homepage/components/footer', () => ({
 }));
 
 vi.mock('@/mastodon/features/navigation_panel', () => ({
-  RedesignNavigationPanel: () => null,
+  NavigationPanel: () => null,
 }));
 
 vi.mock('@/mastodon/features/navigation_panel/mobile_nav', () => ({
-  RedesignMobileNavigation: () => null,
+  MobileNavigation: () => null,
 }));
 
 vi.mock('@/mastodon/features/navigation_panel/components/trends', () => ({
@@ -39,9 +39,6 @@ vi.mock('@/mastodon/features/navigation_panel/components/trends', () => ({
 }));
 
 vi.mock('@/mastodon/features/navigation_panel/footer_links', () => ({
-  NavigationFooterLinks: () => null,
-}));
-vi.mock('@/mastodon/features/discovery_panel/footer_links', () => ({
   FooterLinks: () => null,
 }));
 
@@ -74,7 +71,7 @@ describe('ColumnsArea sidebars', () => {
     ).toHaveLength(1);
   });
 
-  it('keeps the upstream search experiment available for other themes', () => {
+  it('keeps the retired discovery sidebar out of other themes', () => {
     window.localStorage.setItem('experiments', 'layout-with-search');
 
     render(
@@ -84,8 +81,8 @@ describe('ColumnsArea sidebars', () => {
     );
 
     expect(
-      screen.getByRole('textbox', { name: 'Search sidebar' }),
-    ).toBeInTheDocument();
+      screen.queryByRole('textbox', { name: 'Search sidebar' }),
+    ).not.toBeInTheDocument();
     expect(screen.queryByText('Bird UI trends')).not.toBeInTheDocument();
   });
 

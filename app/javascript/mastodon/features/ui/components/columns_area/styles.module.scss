@@ -2,8 +2,7 @@
 
 .root {
   --main-column-max-width: 600px;
-  --navigation-width: 320px;
-  --search-column-width: 320px;
+  --navigation-width: 288px;
 
   // This grid definition is shared with the composer
   --columns-area-grid-columns: minmax(var(--navigation-width), 1fr)
@@ -53,8 +52,7 @@
   overflow-x: auto;
 }
 
-.navigationWrapper,
-.discoveryWrapper {
+.navigationWrapper {
   position: sticky;
   top: 0;
   z-index: 1;
@@ -81,15 +79,6 @@
   }
 }
 
-.discoveryWrapper {
-  max-width: var(--search-column-width);
-  padding: var(--space-5) var(--space-4) var(--space-6);
-
-  @media (width <= $no-gap-breakpoint) {
-    display: none;
-  }
-}
-
 .main {
   box-sizing: border-box;
   grid-column: 2;
@@ -112,7 +101,6 @@
 
 // The message list takes the place of the discovery sidebar on wide screens.
 .root:has(:global(.dm-page)) {
-  > .discoveryWrapper,
   > .birdUiSidebar {
     display: none;
   }

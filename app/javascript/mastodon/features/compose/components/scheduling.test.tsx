@@ -66,10 +66,14 @@ const reservation = (id = '900'): ApiScheduledStatusJSON => ({
   media_attachments: [],
 });
 
-function createStore(text = '') {
+function createStore(text = '', missingAltTextModal = false) {
   return configureStore({
     reducer: reducerWithInitialState({
-      meta: { me: '123', locale: 'ko' },
+      meta: {
+        me: '123',
+        locale: 'ko',
+        missing_alt_text_modal: missingAltTextModal,
+      },
       compose: {
         text,
         language: 'en',
@@ -249,6 +253,36 @@ describe('scheduled composition', () => {
     expect(store.getState().statuses).toBe(statuses);
     expect(store.getState().compose.get('text')).toBe('');
     expect(store.getState().compose.get('scheduled_at')).toBeNull();
+    expect(store.getState().composer.displayState).toBe('hidden');
+  });
+
+  it('submits a scheduled post after confirming missing alt text without redirecting to a published URL', async () => {
+    const store = createStore('', true);
+    const scheduled = reservation();
+    scheduled.media_attachments = [
+      mediaAttachmentFactoryAPI({ id: '77', type: 'image', description: '' }),
+    ];
+    store.dispatch(setComposeToScheduledStatus(scheduled));
+    mocks.request.mockResolvedValue({ data: scheduled });
+
+    store.dispatch(submitComposer({ redirectOnSuccess: true }));
+    expect(mocks.request).not.toHaveBeenCalled();
+    expect(store.getState().modal.stack.last()?.get('modalType')).toBe(
+      'CONFIRM_MISSING_ALT_TEXT',
+    );
+
+    store.dispatch(submitComposer({ force: true, redirectOnSuccess: true }));
+    await waitFor(() => {
+      expect(store.getState().compose.get('is_submitting')).toBe(false);
+    });
+    expect(mocks.request).toHaveBeenCalledOnce();
+    expect(mocks.request).toHaveBeenCalledWith(
+      expect.objectContaining({
+        url: '/api/v2/scheduled_statuses/900',
+        method: 'put',
+      }),
+    );
+    expect(store.getState().compose.get('text')).toBe('');
     expect(store.getState().composer.displayState).toBe('hidden');
   });
 

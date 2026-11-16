@@ -1,7 +1,7 @@
 import { Search } from '@/mastodon/components/search';
 import { BirdUiComposer } from '@/mastodon/features/compose/components/bird_ui_composer';
-import { FooterLinks } from '@/mastodon/features/discovery_panel/footer_links';
 import { Trends } from '@/mastodon/features/navigation_panel/components/trends';
+import { FooterLinks } from '@/mastodon/features/navigation_panel/footer_links';
 
 import classes from './styles.module.scss';
 
@@ -11,7 +11,7 @@ export const BirdUiSidebar: React.FC = () => (
     <BirdUiComposer placement='sidebar' />
     <Trends />
     <footer className={classes.birdUiSidebarFooter}>
-      <FooterLinks context='search' />
+      <FooterLinks />
     </footer>
   </div>
 );

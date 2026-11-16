@@ -10,16 +10,17 @@ import {
   PenNibIcon,
   HouseIcon,
   MagnifyingGlassIcon,
-  RssSimpleIcon,
   BellIcon,
   ChatCircleDotsIcon,
+  ChatCircleIcon,
+  ArrowsLeftRightIcon,
+  RssSimpleIcon,
   BookmarkSimpleIcon,
   PlusIcon,
   InfoIcon,
-  ChatCircleIcon,
-  ArrowsLeftRightIcon,
   GavelIcon,
   ShieldStarIcon,
+  CompassIcon,
 } from '@phosphor-icons/react';
 
 import FediIcon from '@/images/icons/icon_fediverse.svg?react';
@@ -31,8 +32,10 @@ import { fetchFollowedHashtags } from '@/mastodon/actions/tags_typed';
 import { Button } from '@/mastodon/components/button';
 import { Callout } from '@/mastodon/components/callout/redesign';
 import { FOCUS_TARGET } from '@/mastodon/components/navigation_focus_target';
+import { useHasAnnouncements } from '@/mastodon/features/announcements/hooks';
 import { selectComposeType } from '@/mastodon/features/compose/components/selectors';
 import { useComposerPlacement } from '@/mastodon/features/compose/useComposerPlacement';
+import { AccountSwitcher } from '@/mastodon/features/ui/components/account_switcher';
 import { useScrollSensor } from '@/mastodon/hooks/useScrollSensor';
 import { useIdentity } from '@/mastodon/identity_context';
 import {
@@ -57,12 +60,8 @@ import { useAppDispatch, useAppSelector } from '@/mastodon/store';
 import { isBirdUiEnabled } from '@/mastodon/utils/bird_ui';
 import { invokeVirtualIosKeyboard } from '@/mastodon/utils/invoke_virtual_ios_keyboard';
 
-import { useHasAnnouncements } from '../announcements/hooks';
-import { FooterLinks } from '../discovery_panel/footer_links';
-import { AccountSwitcher } from '../ui/components/account_switcher';
-
-import { NavigationAccountCardAndMenu } from './account_card_and_menu';
-import { NavigationFooterLinks } from './footer_links';
+import { NavigationAccountCardAndMenu } from './account_menu_items';
+import { FooterLinks } from './footer_links';
 import { NavigationHeader } from './header';
 import { ListSection } from './list_section';
 import { DisabledAccountBanner, LoggedOutInfo } from './logged_out_info';
@@ -165,7 +164,7 @@ const renderAccountSwitchLink = ({
 }) => (
   <NavigationLink
     as='button'
-    iconComponent={ArrowsLeftRightIcon}
+    icon={ArrowsLeftRightIcon}
     onClick={openManage}
     aria-haspopup='dialog'
   >
@@ -185,7 +184,7 @@ const isFediverseFeedsLinkActive = (
 
 const MAX_HASHTAG_COUNT = 5;
 
-export const RedesignNavigationPanel: React.FC<{
+export const NavigationPanel: React.FC<{
   siteName?: string;
   /**
    * In 'slide-out' mode (used on smaller viewport sizes), some
@@ -197,8 +196,6 @@ export const RedesignNavigationPanel: React.FC<{
   const intl = useIntl();
   const dispatch = useAppDispatch();
   const { signedIn, permissions } = useIdentity();
-  const notificationsCount = useNotificationsCount();
-  const dmUnreadCount = useDmUnreadCount();
   const birdUi = isBirdUiEnabled();
   const isHome = !!useRouteMatch({
     path: ['/home', '/timelines/home'],
@@ -260,54 +257,37 @@ export const RedesignNavigationPanel: React.FC<{
       aria-label={intl.formatMessage(messages.main)}
     >
       {topSensor}
-      <NavigationHeader siteName={siteName} isStuck={!isScrolledToTop} />
+      <NavigationHeader
+        siteName={siteName}
+        isStuck={!isScrolledToTop}
+        showActions={!birdUi}
+      />
       {signedIn && (
         <>
           {transientSingleColumn && <TransientSingleColumnCallout />}
           <ul className={classes.list}>
-            <NavigationLink to='/home' iconComponent={HouseIcon}>
-              <FormattedMessage id='tabs_bar.home' defaultMessage='Home' />
-            </NavigationLink>
+            {birdUi && (
+              <NavigationLink to='/home' icon={HouseIcon}>
+                <FormattedMessage id='tabs_bar.home' defaultMessage='Home' />
+              </NavigationLink>
+            )}
             <ExploreLink birdUi={birdUi} />
             {birdUi ? (
-              <NavigationActions
-                birdUi
-                notificationsCount={notificationsCount}
-                dmUnreadCount={dmUnreadCount}
-              />
+              <NavigationActions />
             ) : (
-              <PublicFeedsLink />
+              <>
+                <PublicFeedsLink />
+                <NavigationLink to='/bookmarks' icon={BookmarkSimpleIcon}>
+                  <FormattedMessage
+                    id='navigation_bar.saved_posts'
+                    defaultMessage='Saved Posts'
+                  />
+                </NavigationLink>
+                <PendingMentionsLink />
+              </>
             )}
-            {!birdUi && <PendingMentionsLink />}
             <AccountSwitcher renderTrigger={renderAccountSwitchLink} />
-            {/* The sidebar composer is always visible, so the button would do nothing. */}
             {birdUi && composerPlacement !== 'sidebar' && newPostButton}
-
-            {isAdmin && (
-              <NavigationLink
-                as='a'
-                href='/admin/dashboard'
-                iconComponent={GavelIcon}
-              >
-                <FormattedMessage
-                  id='navigation_bar.administration'
-                  defaultMessage='Administration'
-                />
-              </NavigationLink>
-            )}
-
-            {isManager && (
-              <NavigationLink
-                as='a'
-                href='/admin/reports'
-                iconComponent={ShieldStarIcon}
-              >
-                <FormattedMessage
-                  id='navigation_bar.moderation'
-                  defaultMessage='Moderation'
-                />
-              </NavigationLink>
-            )}
 
             <ListSection
               id='custom-feeds'
@@ -318,11 +298,7 @@ export const RedesignNavigationPanel: React.FC<{
                 />
               }
             >
-              <NavigationLink
-                key='new'
-                to='/lists/new'
-                iconComponent={PlusIcon}
-              >
+              <NavigationLink key='new' to='/lists/new' icon={PlusIcon}>
                 <FormattedMessage
                   id='tabs_bar.create_custom_feed'
                   defaultMessage='Create Feed'
@@ -332,7 +308,7 @@ export const RedesignNavigationPanel: React.FC<{
                 <NavigationLink
                   key={feed.id}
                   to={`/lists/${feed.id}`}
-                  iconComponent={RssSimpleIcon}
+                  icon={RssSimpleIcon}
                 >
                   {feed.title}
                 </NavigationLink>
@@ -364,52 +340,46 @@ export const RedesignNavigationPanel: React.FC<{
                 )}
               </ListSection>
             )}
+
+            {isAdmin && (
+              <NavigationLink
+                withDivider
+                as='a'
+                href='/admin/dashboard'
+                icon={GavelIcon}
+              >
+                <FormattedMessage
+                  id='navigation_bar.administration'
+                  defaultMessage='Administration'
+                />
+              </NavigationLink>
+            )}
+
+            {isManager && (
+              <NavigationLink
+                withDivider={!isAdmin}
+                as='a'
+                href='/admin/reports'
+                icon={ShieldStarIcon}
+              >
+                <FormattedMessage
+                  id='navigation_bar.moderation'
+                  defaultMessage='Moderation'
+                />
+              </NavigationLink>
+            )}
           </ul>
 
-          <footer className={classes.footer} data-stuck={!isScrolledToBottom}>
-            {!birdUi && (
-              <div className={classes.newPostButton}>
-                <Button
-                  leadingIcon={PenNibIcon}
-                  onClick={openComposer}
-                  variant='solid'
-                  color='accent'
-                  size='md'
-                >
-                  <FormattedMessage
-                    id='tabs_bar.publish'
-                    defaultMessage='New Post'
-                  />
-                </Button>
-              </div>
-            )}
-
-            {mode !== 'slide-out' && (
-              <>
-                {!birdUi && (
-                  <ul className={classes.footerNav}>
-                    <NavigationActions
-                      stacked
-                      notificationsCount={notificationsCount}
-                      dmUnreadCount={dmUnreadCount}
-                    />
-                  </ul>
-                )}
-                <NavigationAccountCardAndMenu />
-              </>
-            )}
-            {birdUi ? (
-              <NavigationFooterLinks multiColumn={multiColumn} />
-            ) : (
-              <FooterLinks context='navigation' multiColumn={multiColumn} />
-            )}
+          <footer className={classes.footer}>
+            {birdUi && mode !== 'slide-out' && <NavigationAccountCardAndMenu />}
+            <FooterLinks multiColumn={multiColumn} />
           </footer>
         </>
       )}
       {!signedIn && (
         <>
           <ul className={classes.list}>
-            <NavigationLink to='/about' iconComponent={InfoIcon}>
+            <NavigationLink to='/about' icon={InfoIcon}>
               <FormattedMessage
                 id='footer.about_this_server'
                 defaultMessage='About'
@@ -418,75 +388,57 @@ export const RedesignNavigationPanel: React.FC<{
             <ExploreLink birdUi={birdUi} />
             {!birdUi && <PublicFeedsLink />}
           </ul>
-          <footer className={classes.footer} data-stuck={!isScrolledToBottom}>
+          <footer className={classes.footer}>
             {disabledAccountId ? <DisabledAccountBanner /> : <LoggedOutInfo />}
-            {birdUi ? (
-              <NavigationFooterLinks multiColumn={multiColumn} />
-            ) : (
-              <FooterLinks context='navigation' multiColumn={multiColumn} />
-            )}
+            <FooterLinks multiColumn={multiColumn} />
           </footer>
         </>
       )}
+      <div
+        className={classes.bottomScrollFade}
+        data-stuck={!isScrolledToBottom}
+      />
       {bottomSensor}
     </nav>
   );
 };
 
-const NavigationActions: React.FC<{
-  stacked?: boolean;
-  birdUi?: boolean;
-  notificationsCount: number;
-  dmUnreadCount: number;
-}> = ({ stacked, birdUi, notificationsCount, dmUnreadCount }) => (
-  <>
-    <NavigationLink
-      stacked={stacked}
-      to='/notifications'
-      iconComponent={BellIcon}
-      badgeCount={notificationsCount}
-    >
-      <FormattedMessage
-        id='tabs_bar.notifications'
-        defaultMessage='Notifications'
-      />
-    </NavigationLink>
-    {birdUi && <PendingMentionsLink stacked={stacked} />}
-    <NavigationLink
-      stacked={stacked}
-      to='/direct_message'
-      iconComponent={ChatCircleDotsIcon}
-      badgeCount={dmUnreadCount}
-    >
-      {birdUi ? (
+const NavigationActions: React.FC = () => {
+  const notificationsCount = useNotificationsCount();
+  const dmUnreadCount = useDmUnreadCount();
+
+  return (
+    <>
+      <NavigationLink
+        to='/notifications'
+        icon={BellIcon}
+        badgeCount={notificationsCount}
+      >
+        <FormattedMessage
+          id='tabs_bar.notifications'
+          defaultMessage='Notifications'
+        />
+      </NavigationLink>
+      <PendingMentionsLink />
+      <NavigationLink
+        to='/direct_message'
+        icon={ChatCircleDotsIcon}
+        badgeCount={dmUnreadCount}
+      >
         <FormattedMessage id='bird_ui.navigation.chat' defaultMessage='Chat' />
-      ) : (
-        <FormattedMessage id='navigation_bar.dm' defaultMessage='DM' />
-      )}
-    </NavigationLink>
-    <NavigationLink
-      stacked={stacked}
-      to='/bookmarks'
-      iconComponent={BookmarkSimpleIcon}
-    >
-      {birdUi ? (
+      </NavigationLink>
+      <NavigationLink to='/bookmarks' icon={BookmarkSimpleIcon}>
         <FormattedMessage
           id='navigation_bar.bookmarks'
           defaultMessage='Bookmarks'
         />
-      ) : (
-        <FormattedMessage id='tabs_bar.saved' defaultMessage='Saved' />
-      )}
-    </NavigationLink>
-  </>
-);
+      </NavigationLink>
+    </>
+  );
+};
 
-const PendingMentionsLink: React.FC<{ stacked?: boolean }> = ({ stacked }) => (
-  <NavigationLink
-    stacked={stacked}
-    to='/pending-mentions'
-    iconComponent={ChatCircleIcon}
-  >
+const PendingMentionsLink: React.FC = () => (
+  <NavigationLink to='/pending-mentions' icon={ChatCircleIcon}>
     <FormattedMessage
       id='navigation_bar.pending_mentions'
       defaultMessage='Awaiting reply'
@@ -495,13 +447,15 @@ const PendingMentionsLink: React.FC<{ stacked?: boolean }> = ({ stacked }) => (
 );
 
 const ExploreLink: React.FC<{ birdUi?: boolean }> = ({ birdUi }) => {
+  if (!birdUi && !trendsEnabled) return null;
+
   return (
     <NavigationLink
       to={{
         pathname: trendsEnabled ? '/explore' : '/search',
         state: { focusTarget: FOCUS_TARGET.SEARCH },
       }}
-      iconComponent={MagnifyingGlassIcon}
+      icon={birdUi ? MagnifyingGlassIcon : CompassIcon}
       onClick={handleSearchLinkClick}
     >
       {birdUi ? (
@@ -560,7 +514,7 @@ const PublicFeedsLink: React.FC = () => {
   return (
     <NavigationLink
       to={canViewLocalFeed ? '/public/local' : '/public/remote'}
-      iconComponent={FediIcon}
+      icon={FediIcon}
       isActive={isFediverseFeedsLinkActive}
     >
       {canViewOnlyOneFeed ? (

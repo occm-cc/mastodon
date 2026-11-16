@@ -6,8 +6,8 @@ import type * as StoreModule from '@/mastodon/store';
 import { accountFactoryImmutable } from '@/testing/factories';
 import { act, fireEvent, render, screen, within } from '@/testing/rendering';
 
-import { RedesignNavigationPanel } from '.';
-import { RedesignMobileNavigation } from './mobile_nav';
+import { NavigationPanel } from '.';
+import { MobileNavigation } from './mobile_nav';
 
 import '@testing-library/jest-dom';
 
@@ -98,7 +98,7 @@ vi.mock('@/mastodon/components/menu/card', () => ({
   }) => <div hidden={!isOpen}>{children}</div>,
 }));
 
-describe('Redesign navigation custom features', () => {
+describe('Navigation custom features', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mocks.unreadCount = 3;
@@ -117,7 +117,7 @@ describe('Redesign navigation custom features', () => {
     'uses the Twitter menu order for Bird UI in %s mode',
     (mode) => {
       document.documentElement.style.setProperty('--bird-ui-redesign', '1');
-      const { container } = render(<RedesignNavigationPanel mode={mode} />);
+      const { container } = render(<NavigationPanel mode={mode} />);
       const links = container.querySelectorAll('nav > ul > li > a');
       expect(
         Array.from(links)
@@ -150,14 +150,14 @@ describe('Redesign navigation custom features', () => {
         document.documentElement.style.setProperty('--bird-ui-redesign', '1');
         mocks.composerPosition = 'popup';
       }
-      render(<RedesignNavigationPanel />);
+      render(<NavigationPanel />);
 
       const button = screen.getByRole('button', { name: 'New Post' });
       if (birdUi) {
         expect(button.closest('li')?.parentElement?.tagName).toBe('UL');
         expect(button.closest('footer')).toBeNull();
       } else {
-        expect(button.closest('footer')).not.toBeNull();
+        expect(button.closest('header')).not.toBeNull();
       }
     },
   );
@@ -165,21 +165,21 @@ describe('Redesign navigation custom features', () => {
   it('hides the New Post button while the Bird UI sidebar composer is shown', () => {
     document.documentElement.style.setProperty('--bird-ui-redesign', '1');
     mocks.composerPosition = 'sidebar';
-    render(<RedesignNavigationPanel />);
+    render(<NavigationPanel />);
 
     expect(screen.queryByRole('button', { name: 'New Post' })).toBeNull();
   });
 
   it('also removes Public Feeds from signed-out Bird UI navigation', () => {
     document.documentElement.style.setProperty('--bird-ui-redesign', '1');
-    const { container } = render(<RedesignNavigationPanel />, {
+    const { container } = render(<NavigationPanel />, {
       signedIn: false,
     });
     expect(container.querySelector('a[href^="/public"]')).toBeNull();
   });
 
   it('links the desktop DM button to chat rooms and shows the unread count', () => {
-    render(<RedesignNavigationPanel />);
+    render(<NavigationPanel />);
 
     const dmLink = screen.getByRole('link', { name: 'DM 3' });
     expect(dmLink).toHaveAttribute('href', '/direct_message');
@@ -191,7 +191,7 @@ describe('Redesign navigation custom features', () => {
   });
 
   it('opens account management from the desktop navigation', async () => {
-    const { container } = render(<RedesignNavigationPanel />);
+    const { container } = render(<NavigationPanel />);
     const switchButton = screen.getByRole('button', {
       name: 'Switch accounts',
     });
@@ -207,21 +207,22 @@ describe('Redesign navigation custom features', () => {
   });
 
   it('keeps private mentions in the desktop account menu', () => {
-    render(<RedesignNavigationPanel />);
-    fireEvent.click(screen.getByRole('button', { name: 'Account settings' }));
+    render(<NavigationPanel />);
+    fireEvent.click(screen.getByRole('button', { name: 'Account' }));
 
     expect(
-      screen.getByRole('link', { name: 'Private mentions' }),
+      screen.getByRole('menuitem', { name: 'Private mentions' }),
     ).toHaveAttribute('href', '/conversations');
   });
 
   it('restores DM, private mentions, pending mentions, and switching on mobile', async () => {
-    render(<RedesignMobileNavigation />);
+    render(<MobileNavigation />);
+    const mobileNav = within(screen.getByRole('navigation', { name: '' }));
     expect(screen.getByRole('link', { name: 'DM' })).toHaveAttribute(
       'href',
       '/direct_message',
     );
-    fireEvent.click(screen.getByRole('button', { name: 'Account settings' }));
+    fireEvent.click(mobileNav.getByRole('button', { name: 'Account' }));
 
     expect(
       screen.getByRole('menuitem', { name: 'Private mentions' }),
@@ -236,7 +237,7 @@ describe('Redesign navigation custom features', () => {
   });
 
   it('keeps account switching and pending mentions accessible in the slide-out menu', () => {
-    render(<RedesignNavigationPanel mode='slide-out' />);
+    render(<NavigationPanel mode='slide-out' />);
     expect(
       screen.getByRole('link', { name: 'Awaiting reply' }),
     ).toHaveAttribute('href', '/pending-mentions');
@@ -246,7 +247,7 @@ describe('Redesign navigation custom features', () => {
   });
 
   it('does not fetch DM counts or expose account actions when signed out', () => {
-    render(<RedesignNavigationPanel />, { signedIn: false });
+    render(<NavigationPanel />, { signedIn: false });
     expect(mocks.fetchUnreadCount).not.toHaveBeenCalled();
     expect(screen.queryByRole('link', { name: /^DM/ })).not.toBeInTheDocument();
     expect(

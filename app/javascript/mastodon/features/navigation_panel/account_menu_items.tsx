@@ -31,18 +31,18 @@ import {
 } from '@/mastodon/components/lockup';
 import {
   Menu,
+  MenuList,
+  MenuTrigger,
   MenuItem,
   MenuItemDivider,
   MenuItemGroup,
   MenuItemLink,
-  MenuList,
-  MenuTrigger,
 } from '@/mastodon/components/menu';
 import { useAccount } from '@/mastodon/hooks/useAccount';
 import { useIdentity } from '@/mastodon/identity_context';
 import { useAppDispatch } from '@/mastodon/store';
 
-import classes from './account_card_and_menu.module.scss';
+import classes from './account_menu_items.module.scss';
 
 export const NavigationAccountCardAndMenu: React.FC = () => {
   const { accountId } = useIdentity();
@@ -108,7 +108,7 @@ export const AccountMenuItems: React.FC<{
 
   return (
     <>
-      {context === 'mobile' && <ProfileMenuItem />}
+      <ProfileMenuItem />
 
       <MenuItemLink to={accountBasePath} exact icon={UserIcon}>
         <FormattedMessage
