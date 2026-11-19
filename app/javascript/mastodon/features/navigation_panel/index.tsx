@@ -1,10 +1,8 @@
-import { useCallback, useEffect } from 'react';
+import { useCallback } from 'react';
 
 import { defineMessages, FormattedMessage, useIntl } from 'react-intl';
 
 import { useRouteMatch } from 'react-router';
-
-import type { Map as ImmutableMap } from 'immutable';
 
 import {
   PenNibIcon,
@@ -23,46 +21,40 @@ import {
   CompassIcon,
 } from '@phosphor-icons/react';
 
-import FediIcon from '@/images/icons/icon_fediverse.svg?react';
-import { fetchFollowRequests } from '@/mastodon/actions/accounts';
-import { fetchUnreadCount } from '@/mastodon/actions/dm';
-import { fetchLists } from '@/mastodon/actions/lists';
-import { closeNavigation } from '@/mastodon/actions/navigation';
-import { fetchFollowedHashtags } from '@/mastodon/actions/tags_typed';
 import { Button } from '@/mastodon/components/button';
 import { Callout } from '@/mastodon/components/callout/redesign';
 import { FOCUS_TARGET } from '@/mastodon/components/navigation_focus_target';
-import { useHasAnnouncements } from '@/mastodon/features/announcements/hooks';
 import { selectComposeType } from '@/mastodon/features/compose/components/selectors';
 import { useComposerPlacement } from '@/mastodon/features/compose/useComposerPlacement';
 import { AccountSwitcher } from '@/mastodon/features/ui/components/account_switcher';
 import { useScrollSensor } from '@/mastodon/hooks/useScrollSensor';
 import { useIdentity } from '@/mastodon/identity_context';
-import {
-  disabledAccountId,
-  localLiveFeedAccess,
-  remoteLiveFeedAccess,
-  trendsEnabled,
-} from '@/mastodon/initial_state';
+import { disabledAccountId, trendsEnabled } from '@/mastodon/initial_state';
 import { transientSingleColumn } from '@/mastodon/is_mobile';
 import {
   canManageReports,
   canViewAdminDashboard,
-  canViewFeed,
 } from '@/mastodon/permissions';
 import {
   openNewComposer,
   requestComposerFocus,
 } from '@/mastodon/reducers/slices/composer';
-import { getOrderedLists } from '@/mastodon/selectors/lists';
-import { selectUnreadNotificationGroupsCount } from '@/mastodon/selectors/notifications';
+import { closeMobileMenu } from '@/mastodon/reducers/slices/navigation';
 import { useAppDispatch, useAppSelector } from '@/mastodon/store';
 import { isBirdUiEnabled } from '@/mastodon/utils/bird_ui';
 import { invokeVirtualIosKeyboard } from '@/mastodon/utils/invoke_virtual_ios_keyboard';
 
 import { NavigationAccountCardAndMenu } from './account_menu_items';
+import { CollapsedNavigationPanel } from './collapsed';
 import { FooterLinks } from './footer_links';
 import { NavigationHeader } from './header';
+import {
+  useCustomFeeds,
+  useFollowedHashtags,
+  usePublicFeedsLink,
+  useNotificationsCount,
+  useDmUnreadCount,
+} from './hooks';
 import { ListSection } from './list_section';
 import { DisabledAccountBanner, LoggedOutInfo } from './logged_out_info';
 import { NavigationLink } from './navigation_link';
@@ -76,86 +68,6 @@ const messages = defineMessages({
       'Label for the main navigation; should not contain the word "navigation".',
   },
 });
-
-function useCustomFeeds() {
-  const dispatch = useAppDispatch();
-  const { signedIn } = useIdentity();
-  const customFeeds = useAppSelector((state) => getOrderedLists(state));
-
-  useEffect(() => {
-    if (signedIn) {
-      void dispatch(fetchLists());
-    }
-  }, [dispatch, signedIn]);
-
-  return {
-    customFeeds,
-  };
-}
-
-function useFollowedHashtags() {
-  const dispatch = useAppDispatch();
-  const { signedIn } = useIdentity();
-  const { tags, stale } = useAppSelector((state) => state.followedTags);
-
-  useEffect(() => {
-    if (stale && signedIn) {
-      void dispatch(fetchFollowedHashtags());
-    }
-  }, [dispatch, stale, signedIn]);
-
-  return { followedHashtags: tags };
-}
-
-export function useFollowRequestsCount({
-  fetch = true,
-}: { fetch?: boolean } = {}) {
-  const followRequestsCount = useAppSelector(
-    (state) =>
-      (
-        state.user_lists.getIn(['follow_requests', 'items']) as
-          | ImmutableMap<string, unknown>
-          | undefined
-      )?.size ?? 0,
-  );
-  const dispatch = useAppDispatch();
-
-  useEffect(() => {
-    if (fetch) {
-      dispatch(fetchFollowRequests());
-    }
-  }, [dispatch, fetch]);
-
-  return followRequestsCount;
-}
-
-export function useNotificationsCount() {
-  const unreadNotificationsCount = useAppSelector(
-    selectUnreadNotificationGroupsCount,
-  );
-  const { signedIn } = useIdentity();
-  const followRequestsCount = useFollowRequestsCount({ fetch: signedIn });
-
-  const { unreadAnnouncementCount } = useHasAnnouncements({ fetch: signedIn });
-
-  return (
-    unreadNotificationsCount + followRequestsCount + unreadAnnouncementCount
-  );
-}
-
-export function useDmUnreadCount() {
-  const dispatch = useAppDispatch();
-  const { signedIn } = useIdentity();
-  const count = useAppSelector((state) => state.dm.unreadCount);
-
-  useEffect(() => {
-    if (signedIn) {
-      dispatch(fetchUnreadCount());
-    }
-  }, [dispatch, signedIn]);
-
-  return count;
-}
 
 const renderAccountSwitchLink = ({
   openManage,
@@ -175,24 +87,41 @@ const renderAccountSwitchLink = ({
   </NavigationLink>
 );
 
-const isFediverseFeedsLinkActive = (
-  match: unknown,
-  { pathname }: { pathname: string },
-) => {
-  return !!match || pathname.startsWith('/public');
-};
-
 const MAX_HASHTAG_COUNT = 5;
 
-export const NavigationPanel: React.FC<{
+interface NavigationPanelProps {
   siteName?: string;
   /**
-   * In 'slide-out' mode (used on smaller viewport sizes), some
-   * menu items are hidden and the design is tweaked slightly
+   * In 'slide-out' mode (used on mobile), some menu items
+   * are hidden and the design is tweaked slightly
    */
   mode?: 'static' | 'slide-out';
   multiColumn?: boolean;
-}> = ({ siteName, mode = 'static', multiColumn }) => {
+  collapsed?: boolean;
+  onToggleCollapsed?: () => void;
+}
+
+export const NavigationPanel: React.FC<NavigationPanelProps> = (props) => {
+  const { mode = 'static', multiColumn, collapsed, onToggleCollapsed } = props;
+
+  if (mode === 'static' && collapsed) {
+    return (
+      <CollapsedNavigationPanel
+        multiColumn={multiColumn}
+        onToggleCollapsed={onToggleCollapsed}
+      />
+    );
+  } else {
+    return <ExpandedNavigationPanel {...props} />;
+  }
+};
+
+const ExpandedNavigationPanel: React.FC<NavigationPanelProps> = ({
+  siteName,
+  mode = 'static',
+  multiColumn,
+  onToggleCollapsed,
+}) => {
   const intl = useIntl();
   const dispatch = useAppDispatch();
   const { signedIn, permissions } = useIdentity();
@@ -209,7 +138,7 @@ export const NavigationPanel: React.FC<{
   const isAdmin = canViewAdminDashboard(permissions);
 
   const openComposer = useCallback(() => {
-    dispatch(closeNavigation());
+    dispatch(closeMobileMenu());
     if (
       (composerPlacement === 'sidebar' ||
         (composerPlacement === 'top' && isHome)) &&
@@ -249,6 +178,17 @@ export const NavigationPanel: React.FC<{
       placement: 'bottom',
     });
 
+  const publicFeedsLink = usePublicFeedsLink();
+  const publicFeeds = publicFeedsLink && (
+    <NavigationLink
+      to={publicFeedsLink.link}
+      icon={publicFeedsLink.icon}
+      isActive={publicFeedsLink.isActive}
+    >
+      {publicFeedsLink.label}
+    </NavigationLink>
+  );
+
   return (
     <nav
       className={classes.root}
@@ -258,8 +198,11 @@ export const NavigationPanel: React.FC<{
     >
       {topSensor}
       <NavigationHeader
+        multiColumn={multiColumn}
         siteName={siteName}
         isStuck={!isScrolledToTop}
+        onToggleCollapsed={onToggleCollapsed}
+        mode={mode}
         showActions={!birdUi}
       />
       {signedIn && (
@@ -276,7 +219,7 @@ export const NavigationPanel: React.FC<{
               <NavigationActions />
             ) : (
               <>
-                <PublicFeedsLink />
+                {publicFeeds}
                 <NavigationLink to='/bookmarks' icon={BookmarkSimpleIcon}>
                   <FormattedMessage
                     id='navigation_bar.saved_posts'
@@ -386,7 +329,7 @@ export const NavigationPanel: React.FC<{
               />
             </NavigationLink>
             <ExploreLink birdUi={birdUi} />
-            {!birdUi && <PublicFeedsLink />}
+            {!birdUi && publicFeeds}
           </ul>
           <footer className={classes.footer}>
             {disabledAccountId ? <DisabledAccountBanner /> : <LoggedOutInfo />}
@@ -471,6 +414,21 @@ const ExploreLink: React.FC<{ birdUi?: boolean }> = ({ birdUi }) => {
     </NavigationLink>
   );
 };
+const TransientSingleColumnCallout: React.FC = () => (
+  <Callout className={classes.callout}>
+    <FormattedMessage
+      id='navigation_bar.opened_in_single_column_layout'
+      defaultMessage='Posts, profiles, and other pages are opened in the single-column layout by default.'
+    />
+    <br />
+    <a href={`/deck${location.pathname}`}>
+      <FormattedMessage
+        id='navigation_bar.advanced_interface'
+        defaultMessage='Open in advanced web interface'
+      />
+    </a>
+  </Callout>
+);
 
 export function handleSearchLinkClick() {
   const mainSearchInput = document.querySelector<HTMLInputElement>(
@@ -490,60 +448,3 @@ export function handleSearchLinkClick() {
   // focused synchronously.
   invokeVirtualIosKeyboard();
 }
-
-const PublicFeedsLink: React.FC = () => {
-  const { signedIn, permissions } = useIdentity();
-
-  const canViewLocalFeed = canViewFeed(
-    signedIn,
-    permissions,
-    localLiveFeedAccess,
-  );
-  const canViewRemoteFeed = canViewFeed(
-    signedIn,
-    permissions,
-    remoteLiveFeedAccess,
-  );
-
-  if (!canViewLocalFeed && !canViewRemoteFeed) {
-    return null;
-  }
-
-  const canViewOnlyOneFeed = canViewLocalFeed !== canViewRemoteFeed;
-
-  return (
-    <NavigationLink
-      to={canViewLocalFeed ? '/public/local' : '/public/remote'}
-      icon={FediIcon}
-      isActive={isFediverseFeedsLinkActive}
-    >
-      {canViewOnlyOneFeed ? (
-        <FormattedMessage
-          id='tabs_bar.public_feed'
-          defaultMessage='Public Feed'
-        />
-      ) : (
-        <FormattedMessage
-          id='tabs_bar.public_feeds'
-          defaultMessage='Public Feeds'
-        />
-      )}
-    </NavigationLink>
-  );
-};
-
-const TransientSingleColumnCallout: React.FC = () => (
-  <Callout className={classes.callout}>
-    <FormattedMessage
-      id='navigation_bar.opened_in_single_column_layout'
-      defaultMessage='Posts, profiles, and other pages are opened in the single-column layout by default.'
-    />
-    <br />
-    <a href={`/deck${location.pathname}`}>
-      <FormattedMessage
-        id='navigation_bar.advanced_interface'
-        defaultMessage='Open in advanced web interface'
-      />
-    </a>
-  </Callout>
-);

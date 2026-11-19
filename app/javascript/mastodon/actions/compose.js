@@ -236,6 +236,9 @@ export function submitCompose(successCallback) {
     const visibility = getState().getIn(['compose', 'privacy']);
     const apiPath = isScheduled ? '/api/v2/scheduled_statuses' : '/api/v1/statuses';
     const targetId = scheduledId || statusId;
+
+    const sensitive = !!getState().getIn(['compose', 'sensitive']) || !!getState().getIn(['compose', 'spoiler']);
+
     api().request({
       url: targetId ? `${apiPath}/${targetId}` : apiPath,
       method: targetId ? 'put' : 'post',
@@ -246,8 +249,8 @@ export function submitCompose(successCallback) {
         in_reply_to_id: getState().getIn(['compose', 'in_reply_to'], null),
         media_ids: media.map(item => item.get('id')),
         media_attributes,
-        sensitive: getState().getIn(['compose', 'sensitive']),
-        visibility: visibility,
+        sensitive,
+        visibility,
         poll: getState().getIn(['compose', 'poll'], null),
         language: statusId || scheduledId ? getState().getIn(['compose', 'language']) : postingLanguageForLocale(getState().getIn(['meta', 'locale'], 'en')),
         ...(isScheduled ? { scheduled_at: scheduledAt } : {}),

@@ -1,4 +1,4 @@
-import { openNavigation } from '@/mastodon/actions/navigation';
+import { openMobileMenu } from '@/mastodon/reducers/slices/navigation';
 import type * as StoreModule from '@/mastodon/store';
 import { cleanup, fireEvent, render, screen } from '@/testing/rendering';
 
@@ -56,6 +56,6 @@ describe('Pending mentions shared page header', () => {
     mocks.isMobile = true;
     render(<PendingMentions />);
     fireEvent.click(screen.getByRole('button', { name: 'Menu' }));
-    expect(mocks.dispatch).toHaveBeenCalledWith(openNavigation());
+    expect(mocks.dispatch).toHaveBeenCalledWith(openMobileMenu());
   });
 });

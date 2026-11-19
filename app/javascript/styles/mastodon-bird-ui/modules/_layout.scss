@@ -4,7 +4,7 @@
 // Keep selectors explicit; substring matching also catches unrelated modules.
 html:root {
   ._comp_columns_area__root:not(._comp_columns_area__rootMinimal) {
-    --navigation-width: 260px;
+    --main-navigation-width: 260px;
     --main-column-max-width: 600px;
     --composer-grid-column: 3;
     --bird-ui-sidebar-width: 350px;
@@ -14,15 +14,16 @@ html:root {
     gap: 0;
 
     @media (width >= mastodon.$mobile-menu-breakpoint) {
-      --columns-area-grid-columns: minmax(0, 1fr) 260px minmax(0, 600px)
-        minmax(0, 1fr);
+      --columns-area-grid-columns: minmax(0, 1fr) var(--sidebar-width)
+        minmax(0, 600px) minmax(0, 1fr);
 
       grid-template-columns: var(--columns-area-grid-columns);
     }
 
     @media (width >= 1200px) {
       // Keep the original 350px compose panel usable; its gutter is separate.
-      --columns-area-grid-columns: minmax(0, 1fr) 260px minmax(0, 600px)
+      --columns-area-grid-columns: minmax(0, 1fr) var(--sidebar-width)
+        minmax(0, 600px)
         calc(var(--bird-ui-sidebar-width) + var(--bird-ui-sidebar-gap))
         minmax(0, 1fr);
     }
@@ -32,8 +33,8 @@ html:root {
       .dm-page
     ) {
     @media (width >= 1175px) {
-      --columns-area-grid-columns: minmax(0, 1fr) 260px minmax(0, 950px)
-        minmax(0, 1fr);
+      --columns-area-grid-columns: minmax(0, 1fr) var(--sidebar-width)
+        minmax(0, 950px) minmax(0, 1fr);
     }
   }
 
@@ -82,16 +83,14 @@ html:root {
   }
 
   ._comp_columns_area_styles_multi_column__root {
-    --multi-column-navigation-width: 260px;
+    --main-navigation-width: 260px;
     --multi-column-gap: 0px;
   }
 
   // Columns overflow horizontally on narrower screens, and opening a page
   // scrolls to the last column. Keep the navigation in view meanwhile.
   ._comp_columns_area_styles_multi_column__navigationWrapper {
-    position: sticky;
-    inset-inline-start: 0;
-    z-index: 11; // Above sticky column headers (10)
+    box-sizing: border-box;
     background: var(--color-bg);
     border-inline-end: 1px solid var(--color-border);
   }

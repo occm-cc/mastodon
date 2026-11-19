@@ -126,15 +126,21 @@ describe('Bird UI inline composer', () => {
     expect(container.querySelectorAll('#composer-text')).toHaveLength(1);
   });
 
-  it('uses one bottom popup when popup is selected', () => {
-    const { container } = renderComposer('Existing draft', true, 'popup', true);
+  it('uses one modal popup when popup is selected and locks the background', () => {
+    const { container, store } = renderComposer(
+      'Existing draft',
+      true,
+      'popup',
+      true,
+    );
     expect(container.querySelector('form[data-inline]')).toBeNull();
     expect(screen.getByRole('dialog')).toBeTruthy();
     expect(container.querySelectorAll('#composer-text')).toHaveLength(1);
-    expect(screen.getByRole('textbox')).toHaveProperty(
-      'value',
-      'Existing draft',
-    );
+    expect(
+      screen.getByPlaceholderText('What would you like to say?'),
+    ).toHaveProperty('value', 'Existing draft');
+    expect(store.getState().scrollLockStack.stack).toHaveLength(1);
+    expect(screen.getByTestId('route-location').inert).toBe(true);
   });
 
   it('moves the sidebar composer above the timeline when the right sidebar cannot fit', () => {
@@ -156,17 +162,22 @@ describe('Bird UI inline composer', () => {
 
   it('uses the existing form and updates the existing compose draft', () => {
     const { container, store } = renderComposer();
-    const textarea = screen.getByRole('textbox');
+    const textarea = screen.getByPlaceholderText('What would you like to say?');
     fireEvent.change(textarea, { target: { value: 'An inline post' } });
     expect(store.getState().compose.get('text')).toBe('An inline post');
     expect(container.querySelectorAll('form[data-inline]')).toHaveLength(1);
     expect(container.querySelectorAll('textarea')).toHaveLength(1);
     expect(screen.queryByRole('dialog')).toBeNull();
+    expect(store.getState().scrollLockStack.stack).toHaveLength(0);
+    expect(screen.getByTestId('route-location').inert).not.toBe(true);
   });
 
   it('keeps the existing draft when Escape is pressed in the inline form', () => {
     const { store } = renderComposer('Keep this draft');
-    fireEvent.keyDown(screen.getByRole('textbox'), { key: 'Escape' });
+    fireEvent.keyDown(
+      screen.getByPlaceholderText('What would you like to say?'),
+      { key: 'Escape' },
+    );
     expect(store.getState().compose.get('text')).toBe('Keep this draft');
     expect(store.getState().modal.stack.size).toBe(0);
   });

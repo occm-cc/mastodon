@@ -1,6 +1,6 @@
-import { openNavigation } from '@/mastodon/actions/navigation';
 import type * as InitialStateModule from '@/mastodon/initial_state';
 import type { DmChatRoom } from '@/mastodon/reducers/dm';
+import { openMobileMenu } from '@/mastodon/reducers/slices/navigation';
 import type * as StoreModule from '@/mastodon/store';
 import { cleanup, fireEvent, render, screen } from '@/testing/rendering';
 
@@ -102,7 +102,7 @@ describe('DM shared page headers', () => {
     mocks.isMobile = true;
     render(<ChatRoomListHeader {...listHeaderProps} />);
     fireEvent.click(screen.getByRole('button', { name: 'Menu' }));
-    expect(mocks.dispatch).toHaveBeenCalledWith(openNavigation());
+    expect(mocks.dispatch).toHaveBeenCalledWith(openMobileMenu());
   });
 
   it('connects search and unread filtering to the conversation list', () => {
@@ -138,7 +138,7 @@ describe('DM shared page headers', () => {
     render(<ChatRoomHeader room={room} onBack={vi.fn()} />);
     expect(screen.getByRole('button', { name: 'Back' })).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Menu' }));
-    expect(mocks.dispatch).toHaveBeenCalledWith(openNavigation());
+    expect(mocks.dispatch).toHaveBeenCalledWith(openMobileMenu());
   });
 
   it('keeps navigation and back available while the conversation is loading', () => {
@@ -152,6 +152,6 @@ describe('DM shared page headers', () => {
     ).toBeDisabled();
     expect(screen.getByRole('button', { name: 'Back' })).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Menu' }));
-    expect(mocks.dispatch).toHaveBeenCalledWith(openNavigation());
+    expect(mocks.dispatch).toHaveBeenCalledWith(openMobileMenu());
   });
 });

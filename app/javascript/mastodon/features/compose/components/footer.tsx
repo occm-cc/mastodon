@@ -26,7 +26,6 @@ import classes from '../styles.module.scss';
 import { ComposeContentTypeButton } from './content_type';
 import {
   selectComposeAttachments,
-  selectComposeCanSubmit,
   selectComposeCharsCount,
   selectComposeHasAttachments,
   selectComposeType,
@@ -36,7 +35,6 @@ export const ComposeFooter: React.FC<{ onEmojiPick: OnEmojiPick }> = ({
   onEmojiPick,
 }) => {
   const type = useAppSelector(selectComposeType);
-  const canSubmit = useAppSelector(selectComposeCanSubmit);
   const { current, max } = useAppSelector(selectComposeCharsCount);
   const { hasPoll, quotedStatusId } = useAppSelector(
     selectComposeHasAttachments,
@@ -123,7 +121,6 @@ export const ComposeFooter: React.FC<{ onEmojiPick: OnEmojiPick }> = ({
           color='accent'
           type='submit'
           loading={isSubmitting}
-          disabled={!canSubmit}
         >
           {publishText}
         </Button>

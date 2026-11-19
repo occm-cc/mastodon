@@ -32,7 +32,7 @@ import { expandHomeTimeline } from '../../actions/timelines';
 import { initialState, forceSingleColumn, me, owner, singleUserMode, trendsEnabled, landingPage, localLiveFeedAccess, disableHoverCards, domain } from '../../initial_state';
 import { useBackgroundImage } from './hooks/useBackgroundImage';
 
-import { openNewComposer, toggleContentWarning } from '@/mastodon/reducers/slices/composer';
+import { openNewComposer } from '@/mastodon/reducers/slices/composer';
 
 import { BundleColumnError } from './components/bundle_column_error';
 import { UploadArea } from './components/upload_area';
@@ -507,11 +507,6 @@ class UI extends PureComponent {
     this.props.dispatch(openNewComposer({ force: true }));
   };
 
-  handleHotkeyToggleComposeSpoilers = e => {
-    e.preventDefault();
-    this.props.dispatch(toggleContentWarning());
-  };
-
   handleHotkeyFocusColumn = e => {
     focusColumn(e.key * 1);
   };
@@ -628,7 +623,6 @@ class UI extends PureComponent {
       search: this.handleHotkeySearch,
       forceNew: this.handleHotkeyForceNew,
       newMessage: this.handleHotkeyNewMessage,
-      toggleComposeSpoilers: this.handleHotkeyToggleComposeSpoilers,
       focusColumn: this.handleHotkeyFocusColumn,
       focusLoadMore: this.handleHotkeyLoadMore,
       moveDown: this.handleMoveDown,

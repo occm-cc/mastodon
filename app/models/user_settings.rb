@@ -17,7 +17,6 @@ class UserSettings
   setting :default_content_type, default: 'text/plain', in: HtmlAwareFormatter::STATUS_MIME_TYPES
   setting :default_privacy, default: nil, in: %w(public unlisted private)
   setting :default_quote_policy, default: 'public', in: %w(public followers nobody)
-  setting :default_spoiler_field, default: false
   setting :email_subscriptions, default: false
   setting :display_own_boosts, default: false
   setting :display_own_posts, default: true

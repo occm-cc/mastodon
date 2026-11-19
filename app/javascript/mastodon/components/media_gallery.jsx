@@ -8,7 +8,7 @@ import classNames from 'classnames';
 import { is } from 'immutable';
 import ImmutablePropTypes from 'react-immutable-proptypes';
 
-import { EyeIcon, EyeSlashIcon } from '@phosphor-icons/react';
+import { EyeSlashIcon } from '@phosphor-icons/react';
 import { debounce } from 'lodash';
 
 import { AltTextBadge } from 'mastodon/components/alt_text_badge';
@@ -330,7 +330,7 @@ class MediaGallery extends PureComponent {
         {showSpoilerButton && (
           <div className='media-gallery__actions'>
             <IconButton
-              icon={visible ? EyeSlashIcon : EyeIcon}
+              icon={EyeSlashIcon}
               size='xs'
               color='media'
               className='media-gallery__actions__pill'

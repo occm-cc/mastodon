@@ -211,8 +211,24 @@ describe('Navigation custom features', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Account' }));
 
     expect(
-      screen.getByRole('menuitem', { name: 'Private mentions' }),
+      screen.getByRole('link', { name: 'Private mentions' }),
     ).toHaveAttribute('href', '/conversations');
+  });
+
+  it('keeps DM badges, pending mentions, and account switching in collapsed navigation', async () => {
+    render(<NavigationPanel collapsed />);
+    expect(screen.getByRole('link', { name: 'DM 3' })).toHaveAttribute(
+      'href',
+      '/direct_message',
+    );
+    expect(
+      screen.getByRole('link', { name: 'Awaiting reply' }),
+    ).toHaveAttribute('href', '/pending-mentions');
+    fireEvent.click(screen.getByRole('button', { name: 'Account' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Switch accounts' }));
+    expect(
+      await screen.findByRole('dialog', { name: 'Account management' }),
+    ).toBeInTheDocument();
   });
 
   it('restores DM, private mentions, pending mentions, and switching on mobile', async () => {

@@ -99,7 +99,6 @@ const initialState = ImmutableMap({
   default_privacy: 'public',
   default_sensitive: false,
   default_content_type: 'text/plain',
-  default_spoiler_field: false,
   default_language: 'en',
   resetFileKey: Math.floor((Math.random() * 0x10000)),
   idempotencyKey: null,
@@ -146,7 +145,6 @@ function clearAll(state) {
     map.set('privacy', state.get('default_privacy'));
     map.set('sensitive', state.get('default_sensitive'));
     map.set('content_type', state.get('default_content_type') || 'text/plain');
-    map.set('spoiler', state.get('default_spoiler_field', false));
     map.set('language', state.get('default_language'));
     map.update('media_attachments', list => list.clear());
     map.set('progress', 0);
@@ -487,7 +485,8 @@ export const composeReducer = (state = initialState, action) => {
     });
   case COMPOSE_SPOILERNESS_CHANGE:
     return state.withMutations(map => {
-      map.set('spoiler', !state.get('spoiler'));
+      const spoiler = !state.get('spoiler');
+      map.set('spoiler', spoiler);
       map.set('idempotencyKey', uuid());
 
       // Adding a content warning blurs attached media by default, but the
@@ -497,10 +496,11 @@ export const composeReducer = (state = initialState, action) => {
       }
     });
   case COMPOSE_SPOILER_TEXT_CHANGE:
-    if (!state.get('spoiler')) return state;
-    return state
-      .set('spoiler_text', action.text)
-      .set('idempotencyKey', uuid());
+    return state.withMutations(map => {
+      map.set('spoiler', !!action.text);
+      map.set('spoiler_text', action.text);
+      map.set('idempotencyKey', uuid());
+    });
   case COMPOSE_CHANGE:
     return state
       .set('text', action.text)

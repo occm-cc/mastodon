@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef } from 'react';
 
 import { FormattedMessage } from 'react-intl';
 
+import type { Placement } from '@floating-ui/react-dom';
 import {
   BellIcon,
   ChatCircleDotsIcon,
@@ -9,21 +10,20 @@ import {
   MagnifyingGlassIcon,
 } from '@phosphor-icons/react';
 
-import { toggleInlineSearch } from '@/mastodon/actions/navigation';
 import { Avatar } from '@/mastodon/components/avatar';
 import { Menu, MenuList, MenuTrigger } from '@/mastodon/components/menu';
 import { Search } from '@/mastodon/components/search';
+import { AccountSwitcher } from '@/mastodon/features/ui/components/account_switcher';
 import { useAccount } from '@/mastodon/hooks/useAccount';
 import { useIdentity } from '@/mastodon/identity_context';
+import { toggleInlineSearch } from '@/mastodon/reducers/slices/navigation';
 import { useAppDispatch, useAppSelector } from '@/mastodon/store';
 
-import {
-  handleSearchLinkClick,
-  useNotificationsCount,
-  useDmUnreadCount,
-} from '.';
+import { handleSearchLinkClick } from '.';
 import { AccountMenuItems } from './account_menu_items';
+import { useDmUnreadCount, useNotificationsCount } from './hooks';
 import classes from './mini_nav.module.scss';
+import type { MiniNavigationLinkProps } from './navigation_link';
 import { MiniNavigationLink } from './navigation_link';
 
 /**
@@ -34,7 +34,9 @@ export const MiniNav: React.FC = () => {
   const shouldHandleFocusRef = useRef(false);
   const searchFieldRef = useRef<HTMLInputElement>(null);
   const searchButtonRef = useRef<HTMLButtonElement>(null);
-  const isSearchOpen = useAppSelector((state) => state.navigation.searchOpen);
+  const isSearchOpen = useAppSelector(
+    (state) => state.navigation.isInlineSearchOpen,
+  );
 
   const toggleSearch = useCallback(() => {
     dispatch(toggleInlineSearch());
@@ -55,9 +57,6 @@ export const MiniNav: React.FC = () => {
     }
   }, [isSearchOpen]);
 
-  const notificationsCount = useNotificationsCount();
-  const dmUnreadCount = useDmUnreadCount();
-
   return (
     <div className={classes.root}>
       {isSearchOpen ? (
@@ -69,58 +68,113 @@ export const MiniNav: React.FC = () => {
         />
       ) : (
         <ul className={classes.list}>
-          <MiniNavigationLink to='/home' icon={HouseIcon}>
-            <FormattedMessage id='tabs_bar.home' defaultMessage='Home' />
-          </MiniNavigationLink>
-          <MiniNavigationLink
-            as='button'
-            icon={MagnifyingGlassIcon}
-            onClick={toggleSearch}
-            ref={searchButtonRef}
-          >
-            <FormattedMessage id='tabs_bar.search' defaultMessage='Search' />
-          </MiniNavigationLink>
-          <MiniNavigationLink
-            to='/direct_message'
-            icon={ChatCircleDotsIcon}
-            badgeCount={dmUnreadCount}
-          >
-            <FormattedMessage id='navigation_bar.dm' defaultMessage='DM' />
-          </MiniNavigationLink>
-          <MiniNavigationLink
-            to='/notifications'
-            icon={BellIcon}
-            badgeCount={notificationsCount}
-          >
-            <FormattedMessage
-              id='tabs_bar.notifications'
-              defaultMessage='Notifications'
-            />
-          </MiniNavigationLink>
-          <Menu>
-            <MenuTrigger as={AccountButton} withMenuIndicator>
-              <FormattedMessage
-                id='tabs_bar.account'
-                defaultMessage='Account'
-              />
-            </MenuTrigger>
-            <MenuList placement='top-end' offset={8} minWidth={240}>
-              <AccountMenuItems />
-            </MenuList>
-          </Menu>
+          <li>
+            <MiniHomeLink />
+          </li>
+          <li>
+            <MiniNavigationLink
+              as='button'
+              icon={MagnifyingGlassIcon}
+              onClick={toggleSearch}
+              ref={searchButtonRef}
+            >
+              <FormattedMessage id='tabs_bar.search' defaultMessage='Search' />
+            </MiniNavigationLink>
+          </li>
+          <li>
+            <MiniMessagesLink />
+          </li>
+          <li>
+            <MiniNotificationsLink />
+          </li>
+          <li>
+            <MiniAccountLink />
+          </li>
         </ul>
       )}
     </div>
   );
 };
 
-interface AccountButton extends React.ComponentPropsWithRef<'button'> {
-  withMenuIndicator?: boolean;
-}
+export const MiniHomeLink: React.FC<
+  Pick<MiniNavigationLinkProps, 'tooltipPlacement'>
+> = ({ tooltipPlacement }) => (
+  <MiniNavigationLink
+    to='/home'
+    icon={HouseIcon}
+    tooltipPlacement={tooltipPlacement}
+  >
+    <FormattedMessage id='tabs_bar.home' defaultMessage='Home' />
+  </MiniNavigationLink>
+);
+
+export const MiniMessagesLink: React.FC<
+  Pick<MiniNavigationLinkProps, 'tooltipPlacement' | 'badgeType'>
+> = (props) => {
+  const dmUnreadCount = useDmUnreadCount();
+  return (
+    <MiniNavigationLink
+      to='/direct_message'
+      icon={ChatCircleDotsIcon}
+      badgeCount={dmUnreadCount}
+      {...props}
+    >
+      <FormattedMessage id='navigation_bar.dm' defaultMessage='DM' />
+    </MiniNavigationLink>
+  );
+};
+
+export const MiniNotificationsLink: React.FC<
+  Pick<MiniNavigationLinkProps, 'tooltipPlacement' | 'badgeType'>
+> = (props) => {
+  const notificationsCount = useNotificationsCount();
+  return (
+    <MiniNavigationLink
+      to='/notifications'
+      icon={BellIcon}
+      badgeCount={notificationsCount}
+      {...props}
+    >
+      <FormattedMessage
+        id='tabs_bar.notifications'
+        defaultMessage='Notifications'
+      />
+    </MiniNavigationLink>
+  );
+};
+
+export const MiniAccountLink: React.FC<
+  Pick<MiniNavigationLinkProps, 'tooltipPlacement'> & {
+    menuPlacement?: Placement;
+  }
+> = ({ tooltipPlacement, menuPlacement = 'top-end' }) => {
+  const renderAccountMenu = useCallback(
+    ({ openManage }: { openManage: () => void }) => (
+      <Menu type='navigation'>
+        <MenuTrigger
+          as={AccountButton}
+          withMenuIndicator
+          tooltipPlacement={tooltipPlacement}
+        >
+          <FormattedMessage id='tabs_bar.account' defaultMessage='Account' />
+        </MenuTrigger>
+        <MenuList placement={menuPlacement} offset={8} minWidth={240}>
+          <AccountMenuItems onSwitchAccounts={openManage} />
+        </MenuList>
+      </Menu>
+    ),
+    [tooltipPlacement, menuPlacement],
+  );
+  return <AccountSwitcher renderTrigger={renderAccountMenu} />;
+};
+
+interface AccountButton
+  extends
+    Pick<MiniNavigationLinkProps, 'tooltipPlacement' | 'withMenuIndicator'>,
+    React.ComponentPropsWithRef<'button'> {}
 
 export const AccountButton: React.FC<AccountButton> = ({
   children,
-  withMenuIndicator,
   ...otherProps
 }) => {
   const { accountId } = useIdentity();
@@ -128,7 +182,6 @@ export const AccountButton: React.FC<AccountButton> = ({
   return (
     <MiniNavigationLink
       as='button'
-      withMenuIndicator={withMenuIndicator}
       icon={{
         customIcon: (
           <Avatar size={20} account={account} className={classes.avatar} />

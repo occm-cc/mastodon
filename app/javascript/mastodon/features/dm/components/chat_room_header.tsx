@@ -5,12 +5,12 @@ import { defineMessages, FormattedMessage, useIntl } from 'react-intl';
 
 import { GearIcon, ListIcon } from '@phosphor-icons/react';
 
-import { openNavigation } from '@/mastodon/actions/navigation';
 import {
   ColumnHeader,
   ColumnHeaderButton,
 } from '@/mastodon/components/column_header';
 import { useBreakpoint } from '@/mastodon/features/ui/hooks/useBreakpoint';
+import { openMobileMenu } from '@/mastodon/reducers/slices/navigation';
 import { useAppDispatch } from '@/mastodon/store';
 import { me } from 'mastodon/initial_state';
 import type { DmChatRoom } from 'mastodon/reducers/dm';
@@ -52,7 +52,7 @@ export const ChatRoomHeader: React.FC<ChatRoomHeaderProps> = ({
   const dispatch = useAppDispatch();
   const isMobile = useBreakpoint('openable');
   const handleOpenNavigation = useCallback(() => {
-    dispatch(openNavigation());
+    dispatch(openMobileMenu());
   }, [dispatch]);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const otherParticipant = room?.participants.find((p) => p.id !== me);
