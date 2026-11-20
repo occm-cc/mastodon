@@ -66,7 +66,8 @@
     width: 18px;
   }
 
-  // Hide the original icon from behind
+  // Hide the original icon only where a theme replacement is provided.
+  // Profile buttons and their nested menus use native Phosphor icons.
   .ui__navigation-bar__item[href='/home'] svg path,
   .ui__navigation-bar__item[href='/notifications'] svg path,
   .ui__navigation-bar__item[href='/explore'] svg path,
@@ -76,7 +77,6 @@
   .notification-group--favourite > .notification-group__icon > .icon path,
   .notification-group--favourite .notification__message > .icon path,
   .notification-favourite .notification__message > .icon path,
-  [class*='_comp_account_header__buttons'] .icon path,
   .notification__filter-bar .icon path,
   .column-link .icon path,
   .load-more path,
@@ -95,10 +95,7 @@
   .icon.icon-users path,
   .icon.icon-swap-horiz path,
   .icon.icon-chat_bubble path,
-  [class*='_comp_account_header__buttons'] .optional path,
-  [class*='_comp_account_header__buttons'] .icon.icon-user-plus path,
   .notification__filter-bar .icon.icon-user-plus path,
-  [class*='_comp_account_header__buttons'] .icon.icon-tasks path,
   .notification__filter-bar .icon.icon-tasks path,
   .icon.icon-wrapstodon-planet path,
   .navigation-panel__legal .column-link[href='/about'] path {
