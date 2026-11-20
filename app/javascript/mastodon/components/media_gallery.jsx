@@ -333,6 +333,7 @@ class MediaGallery extends PureComponent {
               icon={EyeSlashIcon}
               size='xs'
               color='media'
+              expandHitArea={3}
               className='media-gallery__actions__pill'
               onClick={this.handleOpen}
             >

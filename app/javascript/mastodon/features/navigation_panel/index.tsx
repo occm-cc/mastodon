@@ -331,8 +331,10 @@ const ExpandedNavigationPanel: React.FC<NavigationPanelProps> = ({
             <ExploreLink birdUi={birdUi} />
             {!birdUi && publicFeeds}
           </ul>
-          <footer className={classes.footer}>
+          <div className={classes.loggedOutContent}>
             {disabledAccountId ? <DisabledAccountBanner /> : <LoggedOutInfo />}
+          </div>
+          <footer className={classes.footer}>
             <FooterLinks multiColumn={multiColumn} />
           </footer>
         </>

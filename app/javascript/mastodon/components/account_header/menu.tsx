@@ -29,6 +29,7 @@ import {
 import { openModal } from '@/mastodon/actions/modal';
 import { initMuteModal } from '@/mastodon/actions/mutes';
 import { initReport } from '@/mastodon/actions/reports';
+import type { ButtonProps } from '@/mastodon/components/button';
 import { IconButton } from '@/mastodon/components/button';
 import {
   Menu,
@@ -53,7 +54,9 @@ import {
 import type { AppDispatch } from '@/mastodon/store';
 import { useAppDispatch, useAppSelector } from '@/mastodon/store';
 
-export const AccountMenu: FC<{ accountId: string }> = ({ accountId }) => {
+export const AccountMenu: FC<
+  { accountId: string } & Pick<ButtonProps, 'size'>
+> = ({ accountId, size = 'sm' }) => {
   const intl = useIntl();
   const { signedIn, permissions } = useIdentity();
 
@@ -97,7 +100,7 @@ export const AccountMenu: FC<{ accountId: string }> = ({ accountId }) => {
     <Menu>
       <MenuTrigger
         as={IconButton}
-        size='sm'
+        size={size}
         icon={DotsThreeIcon}
         disabled={menuItems.length === 0}
       >
@@ -306,7 +309,7 @@ function getMenuItems({
   }
 
   // Add to list
-  if (relationship?.following) {
+  if (relationship?.following || relationship?.requested) {
     items.push({
       text: intl.formatMessage(messages.addToCustomFeed),
       action: () => {

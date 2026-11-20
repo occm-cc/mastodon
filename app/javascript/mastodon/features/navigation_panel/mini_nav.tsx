@@ -2,6 +2,8 @@ import { useCallback, useEffect, useRef } from 'react';
 
 import { FormattedMessage } from 'react-intl';
 
+import { useLocation } from 'react-router';
+
 import type { Placement } from '@floating-ui/react-dom';
 import {
   BellIcon,
@@ -16,7 +18,10 @@ import { Search } from '@/mastodon/components/search';
 import { AccountSwitcher } from '@/mastodon/features/ui/components/account_switcher';
 import { useAccount } from '@/mastodon/hooks/useAccount';
 import { useIdentity } from '@/mastodon/identity_context';
-import { toggleInlineSearch } from '@/mastodon/reducers/slices/navigation';
+import {
+  closeInlineSearch,
+  openInlineSearch,
+} from '@/mastodon/reducers/slices/navigation';
 import { useAppDispatch, useAppSelector } from '@/mastodon/store';
 
 import { handleSearchLinkClick } from '.';
@@ -38,14 +43,19 @@ export const MiniNav: React.FC = () => {
     (state) => state.navigation.isInlineSearchOpen,
   );
 
-  const toggleSearch = useCallback(() => {
-    dispatch(toggleInlineSearch());
+  const openSearch = useCallback(() => {
+    dispatch(openInlineSearch());
     shouldHandleFocusRef.current = true;
+    handleSearchLinkClick();
+  }, [dispatch]);
 
-    if (!isSearchOpen) {
-      handleSearchLinkClick();
-    }
-  }, [dispatch, isSearchOpen]);
+  const closeSearch = useCallback(
+    (shouldHandleFocus: boolean) => {
+      dispatch(closeInlineSearch());
+      shouldHandleFocusRef.current = shouldHandleFocus;
+    },
+    [dispatch],
+  );
 
   useEffect(() => {
     if (shouldHandleFocusRef.current) {
@@ -57,6 +67,13 @@ export const MiniNav: React.FC = () => {
     }
   }, [isSearchOpen]);
 
+  // Close after navigation change
+  const { pathname, search } = useLocation();
+  const pathWithSearch = `${pathname}${search}`;
+  useEffect(() => {
+    dispatch(closeInlineSearch());
+  }, [pathWithSearch, dispatch]);
+
   return (
     <div className={classes.root}>
       {isSearchOpen ? (
@@ -64,7 +81,7 @@ export const MiniNav: React.FC = () => {
           singleColumn
           context='sidebar'
           ref={searchFieldRef}
-          onClose={toggleSearch}
+          onClose={closeSearch}
         />
       ) : (
         <ul className={classes.list}>
@@ -75,7 +92,7 @@ export const MiniNav: React.FC = () => {
             <MiniNavigationLink
               as='button'
               icon={MagnifyingGlassIcon}
-              onClick={toggleSearch}
+              onClick={openSearch}
               ref={searchButtonRef}
             >
               <FormattedMessage id='tabs_bar.search' defaultMessage='Search' />
@@ -158,7 +175,7 @@ export const MiniAccountLink: React.FC<
         >
           <FormattedMessage id='tabs_bar.account' defaultMessage='Account' />
         </MenuTrigger>
-        <MenuList placement={menuPlacement} offset={8} minWidth={240}>
+        <MenuList placement={menuPlacement} offset={8} maxWidth={240}>
           <AccountMenuItems onSwitchAccounts={openManage} />
         </MenuList>
       </Menu>

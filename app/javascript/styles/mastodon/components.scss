@@ -350,35 +350,6 @@ body > [data-popover-placement] {
   }
 }
 
-.sign-in-banner {
-  padding: 10px;
-
-  p {
-    font-size: 15px;
-    line-height: 22px;
-    color: var(--color-text-primary);
-    margin-bottom: 20px;
-
-    strong {
-      font-weight: 700;
-    }
-
-    a {
-      color: var(--color-text-primary);
-      text-decoration: none;
-      unicode-bidi: isolate;
-
-      &:hover {
-        text-decoration: underline;
-      }
-    }
-  }
-
-  .button {
-    margin-bottom: 10px;
-  }
-}
-
 .emojione {
   font-size: inherit;
   vertical-align: middle;
@@ -2425,7 +2396,7 @@ a.status-card {
 .status-card__content {
   flex: 1 1 auto;
   overflow: hidden;
-  padding: 15px;
+  padding: var(--space-3);
   box-sizing: border-box;
   max-width: 100%;
 }
